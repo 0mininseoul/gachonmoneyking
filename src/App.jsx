@@ -594,6 +594,26 @@ function DashboardView({
   handleFileUpload,
   rankings
 }) {
+  const currentBalance = userRecord ? Number(userRecord.balance) : 0;
+  const otherHigherRanked = rankings.filter(
+    r => r.user_id !== user.id && Number(r.balance) > currentBalance
+  );
+  const userRank = otherHigherRanked.length + 1;
+
+  const nickname = userRecord?.nickname || '';
+
+  const titleText = userRecord
+    ? t('celebration_title')
+        .replace('{nickname}', nickname)
+        .replace('{rank}', userRank)
+    : '';
+
+  const subtitleText = userRecord
+    ? t('celebration_subtitle')
+        .replace('{nickname}', nickname)
+        .replace('{balance}', Number(userRecord.balance).toLocaleString())
+    : '';
+
   return (
     <>
       <div className="hero-section">
@@ -638,9 +658,9 @@ function DashboardView({
           <div className="rank-celebration-card linear-card" onClick={(e) => e.stopPropagation()}>
             <button className="close-overlay" onClick={() => setShowRankCard(false)}>×</button>
             <div className="medal-icon">🏆</div>
-            <h2>{t('verification_complete')}</h2>
+            <h2>{titleText}</h2>
             <p className="celebration-text">
-              {t('balance_registered_prefix')}<strong>{Number(userRecord.balance).toLocaleString()} KRW</strong>{t('balance_registered_suffix')}
+              {subtitleText}
             </p>
              <button onClick={() => setShowRankCard(false)} className="btn-primary">
               {t('view_leaderboard_btn')}
