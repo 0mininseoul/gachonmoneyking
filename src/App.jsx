@@ -86,6 +86,12 @@ function App() {
           fetchUserLeaderboardRecord(user.id);
         }
       })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, (payload) => {
+        if (user && payload.new && payload.new.id === user.id) {
+          checkUserProfile(user);
+        }
+        fetchLeaderboard();
+      })
       .subscribe();
 
     return () => {
@@ -113,6 +119,19 @@ function App() {
         setHasProfile(true);
         hasProf = true;
         fetchUserLeaderboardRecord(currentUser.id);
+
+        // Auto-sync email & avatar_url from Kakao user metadata if missing or updated
+        const meta = currentUser.user_metadata || {};
+        const emailVal = currentUser.email || meta.email || '';
+        const avatarVal = meta.avatar_url || meta.picture || '';
+        if (emailVal || avatarVal) {
+          if (data.email !== emailVal || data.avatar_url !== avatarVal) {
+            await supabase
+              .from('profiles')
+              .update({ email: emailVal, avatar_url: avatarVal })
+              .eq('id', currentUser.id);
+          }
+        }
       } else {
         setHasProfile(false);
       }
@@ -241,6 +260,8 @@ function App() {
       const realName = meta.name || meta.full_name || 'Kakao User';
       const phoneNumber = meta.phone_number || '';
       const gender = meta.gender || 'unknown';
+      const emailVal = user.email || meta.email || '';
+      const avatarVal = meta.avatar_url || meta.picture || '';
 
       const { error } = await supabase
         .from('profiles')
@@ -251,7 +272,9 @@ function App() {
           real_name: realName,
           phone_number: phoneNumber,
           gender: gender,
-          marketing_consent: marketingConsent
+          marketing_consent: marketingConsent,
+          email: emailVal,
+          avatar_url: avatarVal
         });
 
       if (!error) {
