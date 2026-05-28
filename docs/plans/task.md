@@ -19,8 +19,13 @@
 | **Task 17: Update footer layout in App.jsx to include business info** | [x] | Restructure the footer HTML markup in `App.jsx` to match the design with company metadata. |
 | **Task 18: Add CSS styles for new footer structure in index.css** | [x] | Replace old footer styling in `index.css` with the newer responsive, multi-line footer layout. |
 | **Task 19: Build and run test verification, commit and push** | [x] | Re-build locally, verify, commit and push main branch changes. |
-| **Task 20: Remove 'Representative' line from footer in App.jsx** | [/] | Open `App.jsx` and delete the representative element and its trailing dot divider. |
-| **Task 21: Add new key-value translation strings to translations.js** | [ ] | Expand translation maps for all 6 locales with missing labels (marketing consent, verification popup, leaderboard columns, etc.). |
-| **Task 22: Update App.jsx and Leaderboard.jsx to use translations** | [ ] | Apply `t()` dynamic functions on App.jsx and Leaderboard.jsx hardcoded strings. |
-| **Task 23: Optimize index.css for mobile-first/responsive screens** | [ ] | Write media queries for navigation bar, leaderboard grid, and card spacing. |
-| **Task 24: Re-build, run test and push to origin main** | [ ] | Run production build, execute Playwright, commit and push to main. |
+| **Task 20: Remove 'Representative' line from footer in App.jsx** | [x] | Open `App.jsx` and delete the representative element and its trailing dot divider. |
+| **Task 21: Add new key-value translation strings to translations.js** | [x] | Expand translation maps for all 6 locales with missing labels (marketing consent, verification popup, leaderboard columns, etc.). |
+| **Task 22: Update App.jsx and Leaderboard.jsx to use translations** | [x] | Apply `t()` dynamic functions on App.jsx and Leaderboard.jsx hardcoded strings. |
+| **Task 23: Optimize index.css for mobile-first/responsive screens** | [x] | Write media queries for navigation bar, leaderboard grid, and card spacing. |
+| **Task 24: Re-build, run test and push to origin main** | [x] | Run production build, execute Playwright, commit and push to main. |
+| **Task 25: Add footer translation keys to translations.js** | [/] | Add `footer_desc`, `terms_link`, `privacy_link`, and `signup_link` keys for 6 locales in translations.js. |
+| **Task 26: Update App.jsx with translated footer and change lang select dropdown order** | [ ] | Apply `t()` to footer links and description. Re-order dropdown select options to match the requested language list. |
+| **Task 27: Rewrite PrivacyView.jsx with conditional Ko/En layout** | [ ] | Update `PrivacyView.jsx` to select English statement unless user locale is Korean ('ko'). |
+| **Task 28: Rewrite TermsView.jsx with conditional Ko/En layout** | [ ] | Update `TermsView.jsx` to select English statement unless user locale is Korean ('ko'). |
+| **Task 29: Build, test, commit and push to origin main** | [ ] | Build verification, confirm routing and language toggle, then commit and push to main branch. |

@@ -382,12 +382,12 @@ function App() {
               onChange={(e) => setLocale(e.target.value)}
               className="lang-select"
             >
-              <option value="ko">🇰🇷 한국어</option>
-              <option value="en">🌐 English</option>
               <option value="vi">🇻🇳 Tiếng Việt</option>
               <option value="zh">🇨🇳 中文</option>
               <option value="mn">🇲🇳 Монгол</option>
               <option value="uz">🇺🇿 O'zbek</option>
+              <option value="en">🌐 English</option>
+              <option value="ko">🇰🇷 한국어</option>
             </select>
 
             {user ? (
@@ -408,14 +408,14 @@ function App() {
           <div className="footer-top">
             <div className="footer-info">
               <h4 className="footer-brand">Gachon Money King</h4>
-              <p className="footer-desc">가천대학교 외국인 유학생 통장 잔고 인증 및 자산 리더보드 서비스</p>
+              <p className="footer-desc">{t('footer_desc')}</p>
             </div>
             <div className="footer-links">
-              <span onClick={() => navigate('/terms')}>서비스 이용약관</span>
+              <span onClick={() => navigate('/terms')}>{t('terms_link')}</span>
               <span className="divider">|</span>
-              <span onClick={() => navigate('/privacy')}>개인정보처리방침</span>
+              <span onClick={() => navigate('/privacy')}>{t('privacy_link')}</span>
               <span className="divider">|</span>
-              <span onClick={() => navigate('/signup')}>회원가입</span>
+              <span onClick={() => navigate('/signup')}>{t('signup_link')}</span>
             </div>
           </div>
           <div className="footer-separator"></div>
