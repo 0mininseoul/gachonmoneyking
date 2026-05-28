@@ -872,3 +872,87 @@ h1 {
   color: var(--color-ink-tertiary);
   margin-top: var(--spacing-xxs);
 }
+
+/* Mobile Responsive Optimization (Mobile First / Small Screens) */
+@media (max-width: 480px) {
+  .top-nav {
+    padding: 0 var(--spacing-sm);
+    gap: var(--spacing-xs);
+    height: auto;
+    min-height: 56px;
+    padding-top: var(--spacing-xxs);
+    padding-bottom: var(--spacing-xxs);
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .brand {
+    font-size: 0.95rem;
+    width: 100%;
+    justify-content: center;
+    margin-bottom: var(--spacing-xxs);
+  }
+  .nav-controls {
+    gap: var(--spacing-xs);
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .lang-select, .btn-sm {
+    padding: 4px var(--spacing-xs);
+    font-size: 0.75rem;
+  }
+  .content-area {
+    padding: var(--spacing-md) var(--spacing-sm);
+  }
+  .linear-card {
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+  }
+  .profile-card {
+    margin: var(--spacing-md) auto;
+  }
+  h1 {
+    font-size: 1.6rem;
+  }
+  .subtitle {
+    font-size: 0.9rem;
+  }
+  .table-header, .table-row {
+    grid-template-columns: 50px 1.2fr 50px 1.3fr;
+    padding: var(--spacing-sm) var(--spacing-sm);
+    font-size: 0.8rem;
+  }
+  .country-name {
+    display: none; /* Hide country name text on small mobiles */
+  }
+  .flag-icon {
+    font-size: 1.4rem;
+  }
+  .col-balance {
+    font-size: 0.85rem;
+  }
+  .main-footer {
+    padding: var(--spacing-lg) var(--spacing-sm);
+  }
+  .footer-top {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--spacing-sm);
+  }
+  .footer-info {
+    align-items: center;
+    text-align: center;
+  }
+  .footer-links {
+    justify-content: center;
+  }
+  .footer-bottom {
+    align-items: center;
+    text-align: center;
+  }
+  .company-details {
+    justify-content: center;
+    text-align: center;
+  }
+}

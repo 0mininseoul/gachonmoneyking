@@ -16,6 +16,11 @@
 | **Task 14: Modify PrivacyView.jsx to remove name & update email** | [x] | Remove '박영민' name and replace contact email with contact@ascentum.co.kr in `PrivacyView.jsx`. |
 | **Task 15: Fix back-navigation loop on /profile-setup** | [x] | Adjust `PublicRoute` guard in `App.jsx` to allow non-onboarded logged-in users to visit landing page. |
 | **Task 16: Verify changes, commit and push** | [x] | Verify with npm run build and push to origin main branch. |
-| **Task 17: Update footer layout in App.jsx to include business info** | [/] | Restructure the footer HTML markup in `App.jsx` to match the design with company metadata. |
-| **Task 18: Add CSS styles for new footer structure in index.css** | [ ] | Replace old footer styling in `index.css` with the newer responsive, multi-line footer layout. |
-| **Task 19: Build and run test verification, commit and push** | [ ] | Re-build locally, verify, commit and push main branch changes. |
+| **Task 17: Update footer layout in App.jsx to include business info** | [x] | Restructure the footer HTML markup in `App.jsx` to match the design with company metadata. |
+| **Task 18: Add CSS styles for new footer structure in index.css** | [x] | Replace old footer styling in `index.css` with the newer responsive, multi-line footer layout. |
+| **Task 19: Build and run test verification, commit and push** | [x] | Re-build locally, verify, commit and push main branch changes. |
+| **Task 20: Remove 'Representative' line from footer in App.jsx** | [/] | Open `App.jsx` and delete the representative element and its trailing dot divider. |
+| **Task 21: Add new key-value translation strings to translations.js** | [ ] | Expand translation maps for all 6 locales with missing labels (marketing consent, verification popup, leaderboard columns, etc.). |
+| **Task 22: Update App.jsx and Leaderboard.jsx to use translations** | [ ] | Apply `t()` dynamic functions on App.jsx and Leaderboard.jsx hardcoded strings. |
+| **Task 23: Optimize index.css for mobile-first/responsive screens** | [ ] | Write media queries for navigation bar, leaderboard grid, and card spacing. |
+| **Task 24: Re-build, run test and push to origin main** | [ ] | Run production build, execute Playwright, commit and push to main. |

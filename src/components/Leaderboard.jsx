@@ -1,7 +1,10 @@
 import React from 'react';
 import { nationalities } from '../i18n/translations';
+import { useLanguage } from '../i18n/LanguageContext';
 
 export function Leaderboard({ list, isAuthenticated }) {
+  const { t } = useLanguage();
+
   const getFlag = (nationalityCode) => {
     const nat = nationalities.find(n => n.code === nationalityCode);
     return nat ? nat.flag : '🌐';
@@ -15,15 +18,15 @@ export function Leaderboard({ list, isAuthenticated }) {
   return (
     <div className="leaderboard-table-card">
       <div className="table-header">
-        <div className="col-rank">Rank</div>
-        <div className="col-user">User</div>
-        <div className="col-nationality">Nationality</div>
-        <div className="col-balance">Asset Balance</div>
+        <div className="col-rank">{t('ranking')}</div>
+        <div className="col-user">{t('nickname')}</div>
+        <div className="col-nationality">{t('nationality')}</div>
+        <div className="col-balance">{t('balance')}</div>
       </div>
       
       <div className="table-body">
         {list.length === 0 ? (
-          <div className="no-data">No verified rankings yet. Be the first to upload!</div>
+          <div className="no-data">{t('no_rankings_yet')}</div>
         ) : (
           list.map((item, index) => (
             <div key={item.id} className="table-row">

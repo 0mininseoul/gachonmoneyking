@@ -427,8 +427,6 @@ function App() {
               <span className="divider">•</span>
               <span>Address: 206, 51 Samjeon-ro 13-gil, Songpa-gu, Seoul, Republic of Korea</span>
               <span className="divider">•</span>
-              <span>Representative: Youngmin Park</span>
-              <span className="divider">•</span>
               <span>Email: contact@ascentum.co.kr</span>
             </div>
             <p className="footer-copyright">© 2026 Gachon Money King. All rights reserved.</p>
@@ -500,7 +498,7 @@ function App() {
                   onChange={(e) => setMarketingConsent(e.target.checked)}
                 />
                 <span className="checkmark"></span>
-                <span className="consent-label">Agree to marketing SMS (Marketing Consent)</span>
+                <span className="consent-label">{t('marketing_consent_label')}</span>
               </label>
               <p className="nudge-text">{t('nudge')}</p>
             </div>
@@ -529,10 +527,10 @@ function App() {
           {userRecord && userRecord.status ? (
             <div className="user-record-status">
               <p className="verified-status-info">
-                Status: <strong className={`status-${userRecord.status}`}>{userRecord.status.toUpperCase()}</strong>
+                {t('status_label')}<strong className={`status-${userRecord.status}`}>{userRecord.status.toUpperCase()}</strong>
               </p>
               <p className="balance-info-text">
-                Your registered balance: <strong>{Number(userRecord.balance).toLocaleString()} KRW</strong>
+                {t('registered_balance_label')}<strong>{Number(userRecord.balance).toLocaleString()} KRW</strong>
               </p>
             </div>
           ) : null}
@@ -559,12 +557,12 @@ function App() {
             <div className="rank-celebration-card linear-card" onClick={(e) => e.stopPropagation()}>
               <button className="close-overlay" onClick={() => setShowRankCard(false)}>×</button>
               <div className="medal-icon">🏆</div>
-              <h2>Verification Complete!</h2>
+              <h2>{t('verification_complete')}</h2>
               <p className="celebration-text">
-                Your balance of <strong>{Number(userRecord.balance).toLocaleString()} KRW</strong> has been registered!
+                {t('balance_registered_prefix')}<strong>{Number(userRecord.balance).toLocaleString()} KRW</strong>{t('balance_registered_suffix')}
               </p>
                <button onClick={() => setShowRankCard(false)} className="btn-primary">
-                View Leaderboard
+                {t('view_leaderboard_btn')}
               </button>
             </div>
           </div>

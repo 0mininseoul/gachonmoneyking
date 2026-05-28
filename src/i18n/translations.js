@@ -19,7 +19,15 @@ export const translations = {
     enter_nickname: "닉네임을 입력하세요",
     select_nationality: "국적을 선택하세요",
     submit_profile: "저장 및 계속하기",
-    non_logged_in_notice: "🔒 카카오 로그인 시 금액 모자이크가 해제되고 순위를 등록할 수 있습니다."
+    non_logged_in_notice: "🔒 카카오 로그인 시 금액 모자이크가 해제되고 순위를 등록할 수 있습니다.",
+    marketing_consent_label: "마케팅 SMS 수신 동의 (선택)",
+    verification_complete: "인증 완료!",
+    balance_registered_prefix: "님의 잔고 ",
+    balance_registered_suffix: "이(가) 성공적으로 등록되었습니다!",
+    view_leaderboard_btn: "리더보드 보기",
+    status_label: "상태: ",
+    registered_balance_label: "등록된 잔고액: ",
+    no_rankings_yet: "아직 등록된 순위가 없습니다. 첫 번째로 잔고를 인증해 보세요!"
   },
   en: {
     title: "Gachon Int'l Student Bank Balance Leaderboard",
@@ -41,7 +49,15 @@ export const translations = {
     enter_nickname: "Enter your nickname",
     select_nationality: "Select your nationality",
     submit_profile: "Save & Continue",
-    non_logged_in_notice: "🔒 Login with Kakao to reveal balances and register your ranking."
+    non_logged_in_notice: "🔒 Login with Kakao to reveal balances and register your ranking.",
+    marketing_consent_label: "Agree to marketing SMS (Marketing Consent)",
+    verification_complete: "Verification Complete!",
+    balance_registered_prefix: "Your balance of ",
+    balance_registered_suffix: " has been registered!",
+    view_leaderboard_btn: "View Leaderboard",
+    status_label: "Status: ",
+    registered_balance_label: "Your registered balance: ",
+    no_rankings_yet: "No verified rankings yet. Be the first to upload!"
   },
   vi: {
     title: "Bảng Xếp Hạng Số Dư Tài Khoản Du Học Sinh ĐH Gachon",
@@ -63,7 +79,15 @@ export const translations = {
     enter_nickname: "Nhập biệt danh của bạn",
     select_nationality: "Chọn quốc tịch của bạn",
     submit_profile: "Lưu & Tiếp tục",
-    non_logged_in_notice: "🔒 Đăng nhập Kakao để mở khóa số dư và đăng ký thứ hạng của bạn."
+    non_logged_in_notice: "🔒 Đăng nhập Kakao để mở khóa số dư và đăng ký thứ hạng của bạn.",
+    marketing_consent_label: "Đồng ý nhận tin nhắn SMS tiếp thị (Tùy chọn)",
+    verification_complete: "Xác minh hoàn tất!",
+    balance_registered_prefix: "Số dư ",
+    balance_registered_suffix: " của bạn đã được đăng ký thành công!",
+    view_leaderboard_btn: "Xem bảng xếp hạng",
+    status_label: "Trạng thái: ",
+    registered_balance_label: "Số dư đã đăng ký: ",
+    no_rankings_yet: "Chưa có thứ hạng nào được xác minh. Hãy là người đầu tiên tải lên!"
   },
   zh: {
     title: "嘉泉大学留学生银行存款排行榜",
@@ -85,7 +109,15 @@ export const translations = {
     enter_nickname: "请输入您的昵称",
     select_nationality: "请选择您的国籍",
     submit_profile: "保存并继续",
-    non_logged_in_notice: "🔒 卡考登录后即可解除余额模糊，并登记您的排名。"
+    non_logged_in_notice: "🔒 卡考登录后即可解除余额模糊，并登记您的排名。",
+    marketing_consent_label: "同意接收营销短信 (可选)",
+    verification_complete: "认证完成！",
+    balance_registered_prefix: "您的余额 ",
+    balance_registered_suffix: " 已成功登记！",
+    view_leaderboard_btn: "查看排行榜",
+    status_label: "状态: ",
+    registered_balance_label: "已登记的余额: ",
+    no_rankings_yet: "尚无认证排名。成为第一个上传的人吧！"
   },
   mn: {
     title: "Гачон Их Сургуулийн Гадаад Оюутнуудын Дансны Үлдэгдлийн Жагсаалт",
@@ -107,7 +139,15 @@ export const translations = {
     enter_nickname: "Хэрэглэгчийн нэрээ оруулна уу",
     select_nationality: "Иргэншлээ сонгоно уу",
     submit_profile: "Хадгалаад үргэлжлүүлэх",
-    non_logged_in_notice: "🔒 Kakao-гоор нэвтэрснээр үлдэгдэл ил болж, өөрийн зэрэглэлийг оруулах боломжтой болно."
+    non_logged_in_notice: "🔒 Kakao-гоор нэвтэрснээр үлдэгдэл ил болж, өөрийн зэрэглэлийг оруулах боломжтой болно.",
+    marketing_consent_label: "Маркетингийн SMS хүлээн зөвшөөрөх (Сонголттой)",
+    verification_complete: "Баталгаажуулалт дууслаа!",
+    balance_registered_prefix: "Таны дансны үлдэгдэл ",
+    balance_registered_suffix: " амжилттай бүртгэгдлээ!",
+    view_leaderboard_btn: "Жагсаалт харах",
+    status_label: "Төлөв: ",
+    registered_balance_label: "Бүртгэгдсэн дансны үлдэгдэл: ",
+    no_rankings_yet: "Баталгаажсан зэрэглэл хараахан байхгүй байна. Эхнийх нь болж байршуулаарай!"
   },
   uz: {
     title: "Gachon Universiteti Xalqaro Talabalari Bank Balansi Peshqadamlar Jadvali",
@@ -129,7 +169,15 @@ export const translations = {
     enter_nickname: "Taxallusingizni kiriting",
     select_nationality: "Millatingizni tanlang",
     submit_profile: "Saqlash va davom etish",
-    non_logged_in_notice: "🔒 Kakao orqali tizimga kirib, balanslarni oching va reytingingizni ro'yxatdan o'tkazing."
+    non_logged_in_notice: "🔒 Kakao orqali tizimga kirib, balanslarni oching va reytingingizni ro'yxatdan o'tkazing.",
+    marketing_consent_label: "Marketing SMS-larini olishga rozilik (Ixtiyoriy)",
+    verification_complete: "Tasdiqlash yakunlandi!",
+    balance_registered_prefix: "Sizning ",
+    balance_registered_suffix: " miqdoridagi balansingiz muvaffaqiyatli ro'yxatga olindi!",
+    view_leaderboard_btn: "Reytingni ko'rish",
+    status_label: "Holati: ",
+    registered_balance_label: "Ro'yxatdan o'tgan balans: ",
+    no_rankings_yet: "Hali tasdiqlangan reytinglar yo'q. Birinchi bo'lib yuklang!"
   }
 };
 
