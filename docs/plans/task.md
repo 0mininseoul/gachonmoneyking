@@ -29,7 +29,8 @@
 | **Task 27: Rewrite PrivacyView.jsx with conditional Ko/En layout** | [x] | Update `PrivacyView.jsx` to select English statement unless user locale is Korean ('ko'). |
 | **Task 28: Rewrite TermsView.jsx with conditional Ko/En layout** | [x] | Update `TermsView.jsx` to select English statement unless user locale is Korean ('ko'). |
 | **Task 29: Build, test, commit and push to origin main** | [x] | Build verification, confirm routing and language toggle, then commit and push to main branch. |
-| **Task 32: Move Route Guards outside App to fix persistent unmounting** | [x] | Extract PublicRoute, ProtectedRoute, OnboardingRoute, and AdminRoute, verify. |
+| **Task 33: Create screenshots storage bucket and RLS policies** | [x] | Execute DB queries via linked Supabase CLI to create screenshots bucket and public/insert RLS policies. |
+
 
 
 

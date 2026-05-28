@@ -43,3 +43,31 @@ create policy "Allow authenticated users to insert/update their profiles" on pub
 
 create policy "Allow authenticated users to insert/update their leaderboard record" on public.leaderboard
     for all using (auth.uid() = user_id);
+
+-- Storage bucket creation for screenshots
+insert into storage.buckets (id, name, public)
+values ('screenshots', 'screenshots', true)
+on conflict (id) do nothing;
+
+-- Storage RLS policies for screenshots
+create policy "Public Access to screenshots"
+on storage.objects for select
+to public
+using ( bucket_id = 'screenshots' );
+
+create policy "Authenticated User Uploads"
+on storage.objects for insert
+to authenticated
+with check (
+  bucket_id = 'screenshots' and
+  (storage.foldername(name))[1] = auth.uid()::text
+);
+
+create policy "Authenticated User Updates"
+on storage.objects for update
+to authenticated
+using (
+  bucket_id = 'screenshots' and
+  (storage.foldername(name))[1] = auth.uid()::text
+);
+
