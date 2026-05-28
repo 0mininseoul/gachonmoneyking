@@ -534,6 +534,7 @@ h1.headline-uz, h1.headline-mn {
   text-transform: uppercase;
   color: var(--color-ink-subtle);
   letter-spacing: 0.5px;
+  text-align: center;
 }
 
 .table-row {

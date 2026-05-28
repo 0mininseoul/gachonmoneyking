@@ -31,7 +31,7 @@ export function Leaderboard({ list, isAuthenticated, currentUserId }) {
   const userDisplayRank = activeTab === 'all' ? userOverallRank : userNationRank;
 
   // Tabs selection logic
-  const tabs = ['all', 'vi', 'ja', 'zh', 'mn', 'uz'];
+  const tabs = ['all', 'vi', 'zh', 'mn', 'uz', 'ja'];
 
   // Filter rankings based on nationality tab
   const filteredList = activeTab === 'all'
