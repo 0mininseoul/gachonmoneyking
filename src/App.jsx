@@ -454,19 +454,22 @@ function MainLayout({ isAdmin, locale, setLocale, user, handleLogout, handleLogi
             </button>
           )}
 
-          <select 
-            value={locale} 
-            onChange={(e) => setLocale(e.target.value)}
-            className="lang-select"
-          >
-            <option value="vi">🇻🇳 Tiếng Việt</option>
-            <option value="zh">🇨🇳 中文</option>
-            <option value="mn">🇲🇳 Монгол</option>
-            <option value="uz">🇺🇿 O'zbek</option>
-            <option value="ja">🇯🇵 日本語</option>
-            <option value="en">🌐 English</option>
-            <option value="ko">🇰🇷 한국어</option>
-          </select>
+          <div className="lang-selector">
+            <span className="lang-globe">🌐</span>
+            <select 
+              value={locale} 
+              onChange={(e) => setLocale(e.target.value)}
+              className="lang-select"
+            >
+              <option value="vi">Tiếng Việt</option>
+              <option value="zh">中文</option>
+              <option value="mn">Монгол</option>
+              <option value="uz">O'zbek</option>
+              <option value="ja">日本語</option>
+              <option value="en">English</option>
+              <option value="ko">한국어</option>
+            </select>
+          </div>
 
           {user ? (
             <button onClick={handleLogout} className="btn-secondary btn-sm">
@@ -474,7 +477,7 @@ function MainLayout({ isAdmin, locale, setLocale, user, handleLogout, handleLogi
              </button>
           ) : (
             <button onClick={handleLogin} className="btn-primary btn-sm">
-              {t('login_btn')}
+              {t('start_btn')}
             </button>
           )}
         </div>

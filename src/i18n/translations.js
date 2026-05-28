@@ -2,7 +2,8 @@ export const translations = {
   ko: {
     title: "나는 가천대에서 자산 순위 몇 등일까?",
     subtitle: "가천대 외국인 유학생들의 실시간 자산 순위표",
-    login_btn: "카카오 로그인하고 순위 확인하기",
+    login_btn: "지금 내 순위 확인하기",
+    start_btn: "시작하기",
     logout_btn: "로그아웃",
     upload_title: "내 통장 잔고 인증하기",
     upload_desc: "모바일 뱅킹 앱(토스, 카카오뱅크 등)의 잔고 화면 캡처 이미지를 업로드하세요.",
@@ -51,7 +52,8 @@ export const translations = {
   en: {
     title: "What is my asset rank at Gachon?",
     subtitle: "Real-time bank balance rankings of Gachon University international students",
-    login_btn: "Login with Kakao & Check Ranking",
+    login_btn: "Check My Ranking Now",
+    start_btn: "Start",
     logout_btn: "Logout",
     upload_title: "Verify My Bank Balance",
     upload_desc: "Upload a screenshot of your mobile banking app balance (Toss, KakaoBank, etc.).",
@@ -100,7 +102,8 @@ export const translations = {
   vi: {
     title: "Tôi xếp thứ mấy về tài sản ở ĐH Gachon?",
     subtitle: "Bảng xếp hạng tài sản thực tế của du học sinh quốc tế tại ĐH Gachon",
-    login_btn: "Đăng nhập Kakao & Xem thứ hạng",
+    login_btn: "Xem thứ hạng của tôi ngay",
+    start_btn: "Bắt đầu",
     logout_btn: "Đăng xuất",
     upload_title: "Xác minh số dư tài khoản của tôi",
     upload_desc: "Tải lên ảnh chụp màn hình số dư ứng dụng ngân hàng di động (Toss, KakaoBank, v.v.).",
@@ -149,7 +152,8 @@ export const translations = {
   zh: {
     title: "我在嘉泉大学的资产排名第几？",
     subtitle: "嘉泉大学外国留学生实时资产排行榜",
-    login_btn: "卡考登录并查看排名",
+    login_btn: "立即查看我的排名",
+    start_btn: "开始",
     logout_btn: "退出登录",
     upload_title: "认证我的银行余额",
     upload_desc: "请上传手机银行应用（Toss, KakaoBank等）的余额截图。",
@@ -198,7 +202,8 @@ export const translations = {
   mn: {
     title: "Би Гачонд хөрөнгийн зэрэглэлээрээ хэддүгээрт орох вэ?",
     subtitle: "Гачон Их Сургуулийн гадаад оюутнуудын бодит цагийн хөрөнгийн зэрэглэл",
-    login_btn: "Kakao-гоор нэвтэрч, зэрэглэлээ шалгах",
+    login_btn: "Зэрэглэлээ одоо шалгах",
+    start_btn: "Эхлэх",
     logout_btn: "Гарах",
     upload_title: "Өөрийн дансны үлдэгдлийг баталгаажуулах",
     upload_desc: "Мобайл банкны аппликейшны (Toss, KakaoBank г.м.) үлдэгдлийн дэлгэцийн зургийг байршуулна уу.",
@@ -247,7 +252,8 @@ export const translations = {
   uz: {
     title: "Gachonda aktivlarim bo'yicha nechanchi o'rindaman?",
     subtitle: "Gachon Universiteti xalqaro talabalarining real vaqtdagi bank balansi reytingi",
-    login_btn: "Kakao orqali kirish va reytingni tekshirish",
+    login_btn: "Reytingimni hozir tekshirish",
+    start_btn: "Boshlash",
     logout_btn: "Chiqish",
     upload_title: "Bank balansimni tasdiqlash",
     upload_desc: "Mobil banking ilovangiz (Toss, KakaoBank va hk) balans ekranining skrinshotini yuklang.",
@@ -296,7 +302,8 @@ export const translations = {
   ja: {
     title: "私は嘉泉大学で資産順位何位だろう？",
     subtitle: "嘉泉大学外国人留学生のリアルタイム資産ランキング",
-    login_btn: "Kakaoでログインして順位を確認する",
+    login_btn: "今すぐ順位を確認する",
+    start_btn: "始める",
     logout_btn: "ログアウト",
     upload_title: "口座残高を認証する",
     upload_desc: "モバイルバンキングアプリ（Toss、KakaoBankなど）の残高画面のスクリーンショットをアップロードしてください。",
