@@ -781,3 +781,43 @@ h1 {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-8px); }
 }
+
+/* Footer Styles */
+.main-footer {
+  padding: var(--spacing-xl) var(--spacing-lg);
+  border-top: 1px solid var(--color-hairline);
+  text-align: center;
+  background-color: var(--color-canvas);
+  margin-top: auto;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.footer-links span {
+  color: var(--color-ink-subtle);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.footer-links span:hover:not(.divider) {
+  color: var(--color-primary-hover);
+}
+
+.footer-links .divider {
+  color: var(--color-hairline-strong);
+  cursor: default;
+  user-select: none;
+}
+
+.footer-copyright {
+  font-size: 0.8rem;
+  color: var(--color-ink-tertiary);
+}

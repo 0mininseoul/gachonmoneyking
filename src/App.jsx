@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from 'react';
+import { Routes, Route, Navigate, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from './lib/supabaseClient';
 import { useLanguage } from './i18n/LanguageContext';
 import { nationalities } from './i18n/translations';
 import { Leaderboard } from './components/Leaderboard';
+import { SignupView } from './components/SignupView';
+import { PrivacyView } from './components/PrivacyView';
+import { TermsView } from './components/TermsView';
 
 function App() {
   const { locale, setLocale, t } = useLanguage();
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   
@@ -28,7 +35,6 @@ function App() {
 
   // Admin access state
   const [isAdmin, setIsAdmin] = useState(false);
-  const [showAdminTab, setShowAdminTab] = useState(false);
   
   // Admin details
   const [adminQueue, setAdminQueue] = useState([]);
@@ -58,7 +64,6 @@ function App() {
         setHasProfile(false);
         setUserRecord(null);
         setIsAdmin(false);
-        setShowAdminTab(false);
         setLoading(false);
       }
     });
@@ -88,6 +93,13 @@ function App() {
     };
   }, [user]);
 
+  // Fetch admin queue when navigating to /admin
+  useEffect(() => {
+    if (location.pathname === '/admin' && isAdmin) {
+      fetchAdminQueue();
+    }
+  }, [location.pathname, isAdmin]);
+
   const checkUserProfile = async (currentUser) => {
     try {
       const { data, error } = await supabase
@@ -110,7 +122,6 @@ function App() {
   };
 
   const checkAdminRole = async (currentUser) => {
-    // Check if the user is in our admin whitelist or holds role in metadata
     const userEmail = currentUser.email || '';
     if (userEmail.endsWith('@archy.ai') || userEmail === '0mininseoul@gmail.com') {
       setIsAdmin(true);
@@ -204,6 +215,7 @@ function App() {
     setUser(null);
     setHasProfile(false);
     setUserRecord(null);
+    navigate('/');
   };
 
   const handleSaveProfile = async (e) => {
@@ -231,7 +243,8 @@ function App() {
 
       if (!error) {
         setHasProfile(true);
-        checkUserProfile(user);
+        await checkUserProfile(user);
+        navigate('/dashboard');
       } else {
         console.error("Error saving profile:", error);
       }
@@ -255,14 +268,12 @@ function App() {
       const fileName = `${user.id}-${Math.random().toString(36).substring(2)}.${fileExt}`;
       const filePath = `${user.id}/${fileName}`;
 
-      // 1. Upload to Supabase Storage screenshots bucket
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('screenshots')
         .upload(filePath, file, { upsert: true });
 
       if (uploadError) throw new Error(uploadError.message);
 
-      // 2. Invoke verify-balance Edge Function for AI OCR extraction
       const { data: edgeData, error: edgeError } = await supabase.functions.invoke('verify-balance', {
         body: { filePath: uploadData.path, userId: user.id }
       });
@@ -316,25 +327,119 @@ function App() {
     document.body.removeChild(link);
   };
 
-  // Switch tabs in admin mode
-  const toggleAdminTab = () => {
-    const nextState = !showAdminTab;
-    setShowAdminTab(nextState);
-    if (nextState) {
-      fetchAdminQueue();
+  // Route Guard Definitions
+  function PublicRoute({ children }) {
+    if (loading) return <div className="spinner"></div>;
+    if (user) {
+      if (!hasProfile) return <Navigate to="/profile-setup" replace />;
+      return <Navigate to="/dashboard" replace />;
     }
-  };
+    return children;
+  }
 
-  if (loading) {
+  function ProtectedRoute({ children }) {
+    if (loading) return <div className="spinner"></div>;
+    if (!user) return <Navigate to="/" replace />;
+    if (!hasProfile) return <Navigate to="/profile-setup" replace />;
+    return children;
+  }
+
+  function OnboardingRoute({ children }) {
+    if (loading) return <div className="spinner"></div>;
+    if (!user) return <Navigate to="/" replace />;
+    if (hasProfile) return <Navigate to="/dashboard" replace />;
+    return children;
+  }
+
+  function AdminRoute({ children }) {
+    if (loading) return <div className="spinner"></div>;
+    if (!user) return <Navigate to="/" replace />;
+    if (!hasProfile) return <Navigate to="/profile-setup" replace />;
+    if (!isAdmin) return <Navigate to="/dashboard" replace />;
+    return children;
+  }
+
+  // Layout View Components
+  function MainLayout() {
     return (
-      <div className="app-container loading-container">
-        <div className="spinner"></div>
+      <div className="main-layout">
+        <header className="top-nav">
+          <div className="brand" style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
+            <img src="/logo.png" className="brand-logo" alt="logo" />
+            <span>Gachon Money King</span>
+          </div>
+          <div className="nav-controls">
+            {isAdmin && (
+              <button 
+                onClick={() => navigate(location.pathname === '/admin' ? '/dashboard' : '/admin')} 
+                className="btn-secondary btn-sm admin-btn"
+              >
+                {location.pathname === '/admin' ? 'Go to Leaderboard' : 'Admin Console'}
+              </button>
+            )}
+
+            <select 
+              value={locale} 
+              onChange={(e) => setLocale(e.target.value)}
+              className="lang-select"
+            >
+              <option value="ko">🇰🇷 한국어</option>
+              <option value="en">🌐 English</option>
+              <option value="vi">🇻🇳 Tiếng Việt</option>
+              <option value="zh">🇨🇳 中文</option>
+              <option value="mn">🇲🇳 Монгол</option>
+              <option value="uz">🇺🇿 O'zbek</option>
+            </select>
+
+            {user ? (
+              <button onClick={handleLogout} className="btn-secondary btn-sm">
+                {t('logout_btn')}
+               </button>
+            ) : (
+              <button onClick={handleLogin} className="btn-primary btn-sm">
+                {t('login_btn')}
+              </button>
+            )}
+          </div>
+        </header>
+        <main className="content-area">
+          <Outlet />
+        </main>
+        <footer className="main-footer">
+          <div className="footer-links">
+            <span onClick={() => navigate('/terms')}>서비스 이용약관</span>
+            <span className="divider">|</span>
+            <span onClick={() => navigate('/privacy')}>개인정보처리방침</span>
+            <span className="divider">|</span>
+            <span onClick={() => navigate('/signup')}>회원가입</span>
+          </div>
+          <p className="footer-copyright">© 2026 Gachon Money King. All rights reserved.</p>
+        </footer>
       </div>
     );
   }
 
-  // 1. Profile Setup Form (Kakao user first entry onboarding)
-  if (user && !hasProfile) {
+  function LandingView() {
+    return (
+      <>
+        <div className="hero-section">
+          <h1>{t('title')}</h1>
+          <p className="subtitle">{t('subtitle')}</p>
+        </div>
+        <div className="auth-nudge-banner linear-card">
+          <p className="banner-notice">{t('non_logged_in_notice')}</p>
+          <button onClick={handleLogin} className="btn-primary btn-lg banner-login-btn">
+            {t('login_btn')}
+          </button>
+        </div>
+        <div className="leaderboard-wrapper">
+          <Leaderboard list={rankings} isAuthenticated={false} />
+        </div>
+      </>
+    );
+  }
+
+  function ProfileSetupView() {
     return (
       <div className="app-container">
         <div className="linear-card profile-card">
@@ -390,7 +495,151 @@ function App() {
     );
   }
 
-  // 2. Full screen AI loading overlay (DO NOT mention Gemini!)
+  function DashboardView() {
+    return (
+      <>
+        <div className="hero-section">
+          <h1>{t('title')}</h1>
+          <p className="subtitle">{t('subtitle')}</p>
+        </div>
+
+        <div className="user-dashboard-card linear-card">
+          <h3>{t('upload_title')}</h3>
+          <p className="desc">{t('upload_desc')}</p>
+          
+          {userRecord && userRecord.status ? (
+            <div className="user-record-status">
+              <p className="verified-status-info">
+                Status: <strong className={`status-${userRecord.status}`}>{userRecord.status.toUpperCase()}</strong>
+              </p>
+              <p className="balance-info-text">
+                Your registered balance: <strong>{Number(userRecord.balance).toLocaleString()} KRW</strong>
+              </p>
+            </div>
+          ) : null}
+
+          <div className="upload-input-container">
+            <input
+              type="file"
+              id="screenshot-file-upload"
+              accept="image/*"
+              onChange={handleFileUpload}
+              className="file-hidden-input"
+            />
+            <label htmlFor="screenshot-file-upload" className="btn-primary upload-label-btn">
+              {t('upload_btn')}
+            </label>
+          </div>
+          
+          {uploadError && <p className="error-message">❌ {uploadError}</p>}
+          {uploadSuccess && <p className="success-message">✅ {t('success')}</p>}
+        </div>
+
+        {showRankCard && userRecord && (
+          <div className="overlay-celebration" onClick={() => setShowRankCard(false)}>
+            <div className="rank-celebration-card linear-card" onClick={(e) => e.stopPropagation()}>
+              <button className="close-overlay" onClick={() => setShowRankCard(false)}>×</button>
+              <div className="medal-icon">🏆</div>
+              <h2>Verification Complete!</h2>
+              <p className="celebration-text">
+                Your balance of <strong>{Number(userRecord.balance).toLocaleString()} KRW</strong> has been registered!
+              </p>
+               <button onClick={() => setShowRankCard(false)} className="btn-primary">
+                View Leaderboard
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className="leaderboard-wrapper">
+          <Leaderboard list={rankings} isAuthenticated={true} />
+        </div>
+      </>
+    );
+  }
+
+  function AdminConsoleView() {
+    return (
+      <div className="admin-console">
+        <div className="admin-header">
+          <h2>Admin Verification Console</h2>
+          <button onClick={exportCSV} className="btn-primary btn-sm">Export CSV Data</button>
+        </div>
+        {loadingAdminQueue ? (
+          <p>Loading queue data...</p>
+        ) : (
+          <div className="admin-table-card">
+            <div className="admin-grid-header">
+              <div>User (Nickname / Name)</div>
+              <div>Phone / Gender / Nation</div>
+              <div>Screenshot Image</div>
+              <div>AI Extracted Balance</div>
+              <div>Status / Actions</div>
+            </div>
+            <div className="admin-grid-body">
+              {adminQueue.length === 0 ? (
+                <p className="no-data">No uploads in verification queue</p>
+              ) : (
+                adminQueue.map((row) => (
+                  <div key={row.id} className="admin-row">
+                    <div className="admin-col-user">
+                      <strong>{row.nickname}</strong>
+                      <span className="sub-text">{row.profiles?.real_name || 'No Name'}</span>
+                    </div>
+                    <div className="admin-col-meta">
+                      <div>{row.profiles?.phone_number || 'No Phone'}</div>
+                      <div className="sub-text">{row.profiles?.gender} / {row.nationality}</div>
+                    </div>
+                    <div className="admin-col-img">
+                      <a href={row.screenshot_url} target="_blank" rel="noopener noreferrer">
+                        <img src={row.screenshot_url} alt="Bank Screen" className="admin-thumb" />
+                      </a>
+                    </div>
+                    <div className="admin-col-balance">
+                      <input 
+                        type="number" 
+                        defaultValue={row.balance} 
+                        onBlur={(e) => updateVerificationStatus(row.id, row.status, e.target.value)}
+                        className="balance-edit-input"
+                      />
+                    </div>
+                    <div className="admin-col-actions">
+                      <span className={`status-badge badge-${row.status}`}>{row.status}</span>
+                      <div className="action-buttons">
+                        <button 
+                          onClick={() => updateVerificationStatus(row.id, 'verified', row.balance)}
+                          className="btn-action approve-btn"
+                          disabled={row.status === 'verified'}
+                        >
+                          Approve
+                        </button>
+                        <button 
+                          onClick={() => updateVerificationStatus(row.id, 'rejected', 0)}
+                          className="btn-action reject-btn"
+                          disabled={row.status === 'rejected'}
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="app-container loading-container">
+        <div className="spinner"></div>
+      </div>
+    );
+  }
+
   if (uploading) {
     return (
       <div className="app-container loader-overlay">
@@ -406,196 +655,19 @@ function App() {
     );
   }
 
-  // 3. Main Dashboard & Leaderboard View
   return (
-    <div className="main-layout">
-      {/* Header / Navbar */}
-      <header className="top-nav">
-        <div className="brand">
-          <img src="/logo.png" className="brand-logo" alt="logo" />
-          <span>Gachon VIP</span>
-        </div>
-        <div className="nav-controls">
-          {isAdmin && (
-            <button onClick={toggleAdminTab} className="btn-secondary btn-sm admin-btn">
-              {showAdminTab ? 'Go to Leaderboard' : 'Admin Console'}
-            </button>
-          )}
-
-          <select 
-            value={locale} 
-            onChange={(e) => setLocale(e.target.value)}
-            className="lang-select"
-          >
-            <option value="ko">🇰🇷 한국어</option>
-            <option value="en">🌐 English</option>
-            <option value="vi">🇻🇳 Tiếng Việt</option>
-            <option value="zh">🇨🇳 中文</option>
-            <option value="mn">🇲🇳 Монгол</option>
-            <option value="uz">🇺🇿 O'zbek</option>
-          </select>
-
-          {user ? (
-            <button onClick={handleLogout} className="btn-secondary btn-sm">
-              {t('logout_btn')}
-            </button>
-          ) : (
-            <button onClick={handleLogin} className="btn-primary btn-sm">
-              {t('login_btn')}
-            </button>
-          )}
-        </div>
-      </header>
-
-      {/* Main Section */}
-      <main className="content-area">
-        {showAdminTab && isAdmin ? (
-          // Admin Queue Table view
-          <div className="admin-console">
-            <div className="admin-header">
-              <h2>Admin Verification Console</h2>
-              <button onClick={exportCSV} className="btn-primary btn-sm">Export CSV Data</button>
-            </div>
-            {loadingAdminQueue ? (
-              <p>Loading queue data...</p>
-            ) : (
-              <div className="admin-table-card">
-                <div className="admin-grid-header">
-                  <div>User (Nickname / Name)</div>
-                  <div>Phone / Gender / Nation</div>
-                  <div>Screenshot Image</div>
-                  <div>AI Extracted Balance</div>
-                  <div>Status / Actions</div>
-                </div>
-                <div className="admin-grid-body">
-                  {adminQueue.length === 0 ? (
-                    <p className="no-data">No uploads in verification queue</p>
-                  ) : (
-                    adminQueue.map((row) => (
-                      <div key={row.id} className="admin-row">
-                        <div className="admin-col-user">
-                          <strong>{row.nickname}</strong>
-                          <span className="sub-text">{row.profiles?.real_name || 'No Name'}</span>
-                        </div>
-                        <div className="admin-col-meta">
-                          <div>{row.profiles?.phone_number || 'No Phone'}</div>
-                          <div className="sub-text">{row.profiles?.gender} / {row.nationality}</div>
-                        </div>
-                        <div className="admin-col-img">
-                          <a href={row.screenshot_url} target="_blank" rel="noopener noreferrer">
-                            <img src={row.screenshot_url} alt="Bank Screen" className="admin-thumb" />
-                          </a>
-                        </div>
-                        <div className="admin-col-balance">
-                          <input 
-                            type="number" 
-                            defaultValue={row.balance} 
-                            onBlur={(e) => updateVerificationStatus(row.id, row.status, e.target.value)}
-                            className="balance-edit-input"
-                          />
-                        </div>
-                        <div className="admin-col-actions">
-                          <span className={`status-badge badge-${row.status}`}>{row.status}</span>
-                          <div className="action-buttons">
-                            <button 
-                              onClick={() => updateVerificationStatus(row.id, 'verified', row.balance)}
-                              className="btn-action approve-btn"
-                              disabled={row.status === 'verified'}
-                            >
-                              Approve
-                            </button>
-                            <button 
-                              onClick={() => updateVerificationStatus(row.id, 'rejected', 0)}
-                              className="btn-action reject-btn"
-                              disabled={row.status === 'rejected'}
-                            >
-                              Reject
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-        ) : (
-          // Public Leaderboard Dashboard view
-          <>
-            <div className="hero-section">
-              <h1>{t('title')}</h1>
-              <p className="subtitle">{t('subtitle')}</p>
-            </div>
-
-            {/* Auth nudge banner or User verification card */}
-            {!user ? (
-              <div className="auth-nudge-banner linear-card">
-                <p className="banner-notice">{t('non_logged_in_notice')}</p>
-                <button onClick={handleLogin} className="btn-primary btn-lg banner-login-btn">
-                  {t('login_btn')}
-                </button>
-              </div>
-            ) : (
-              <div className="user-dashboard-card linear-card">
-                <h3>{t('upload_title')}</h3>
-                <p className="desc">{t('upload_desc')}</p>
-                
-                {/* Result or Input upload area */}
-                {userRecord && userRecord.status ? (
-                  <div className="user-record-status">
-                    <p className="verified-status-info">
-                      Status: <strong className={`status-${userRecord.status}`}>{userRecord.status.toUpperCase()}</strong>
-                    </p>
-                    <p className="balance-info-text">
-                      Your registered balance: <strong>{Number(userRecord.balance).toLocaleString()} KRW</strong>
-                    </p>
-                  </div>
-                ) : null}
-
-                <div className="upload-input-container">
-                  <input
-                    type="file"
-                    id="screenshot-file-upload"
-                    accept="image/*"
-                    onChange={handleFileUpload}
-                    className="file-hidden-input"
-                  />
-                  <label htmlFor="screenshot-file-upload" className="btn-primary upload-label-btn">
-                    {t('upload_btn')}
-                  </label>
-                </div>
-                
-                {uploadError && <p className="error-message">❌ {uploadError}</p>}
-                {uploadSuccess && <p className="success-message">✅ {t('success')}</p>}
-              </div>
-            )}
-
-            {/* Rank Card Celebration overlay */}
-            {showRankCard && userRecord && (
-              <div className="overlay-celebration" onClick={() => setShowRankCard(false)}>
-                <div className="rank-celebration-card linear-card" onClick={(e) => e.stopPropagation()}>
-                  <button className="close-overlay" onClick={() => setShowRankCard(false)}>×</button>
-                  <div className="medal-icon">🏆</div>
-                  <h2>Verification Complete!</h2>
-                  <p className="celebration-text">
-                    Your balance of <strong>{Number(userRecord.balance).toLocaleString()} KRW</strong> has been registered!
-                  </p>
-                  <button onClick={() => setShowRankCard(false)} className="btn-primary">
-                    View Leaderboard
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Leaderboard list container */}
-            <div className="leaderboard-wrapper">
-              <Leaderboard list={rankings} isAuthenticated={!!user} />
-            </div>
-          </>
-        )}
-      </main>
-    </div>
+    <Routes>
+      <Route element={<MainLayout />}>
+        <Route path="/" element={<PublicRoute><LandingView /></PublicRoute>} />
+        <Route path="/dashboard" element={<ProtectedRoute><DashboardView /></ProtectedRoute>} />
+        <Route path="/admin" element={<AdminRoute><AdminConsoleView /></AdminRoute>} />
+        <Route path="/signup" element={<SignupView />} />
+        <Route path="/privacy" element={<PrivacyView />} />
+        <Route path="/terms" element={<TermsView />} />
+      </Route>
+      <Route path="/profile-setup" element={<OnboardingRoute><ProfileSetupView /></OnboardingRoute>} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
 
