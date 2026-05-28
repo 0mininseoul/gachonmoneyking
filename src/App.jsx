@@ -405,14 +405,34 @@ function App() {
           <Outlet />
         </main>
         <footer className="main-footer">
-          <div className="footer-links">
-            <span onClick={() => navigate('/terms')}>서비스 이용약관</span>
-            <span className="divider">|</span>
-            <span onClick={() => navigate('/privacy')}>개인정보처리방침</span>
-            <span className="divider">|</span>
-            <span onClick={() => navigate('/signup')}>회원가입</span>
+          <div className="footer-top">
+            <div className="footer-info">
+              <h4 className="footer-brand">Gachon Money King</h4>
+              <p className="footer-desc">가천대학교 외국인 유학생 통장 잔고 인증 및 자산 리더보드 서비스</p>
+            </div>
+            <div className="footer-links">
+              <span onClick={() => navigate('/terms')}>서비스 이용약관</span>
+              <span className="divider">|</span>
+              <span onClick={() => navigate('/privacy')}>개인정보처리방침</span>
+              <span className="divider">|</span>
+              <span onClick={() => navigate('/signup')}>회원가입</span>
+            </div>
           </div>
-          <p className="footer-copyright">© 2026 Gachon Money King. All rights reserved.</p>
+          <div className="footer-separator"></div>
+          <div className="footer-bottom">
+            <div className="company-details">
+              <span>Company: Ascentum</span>
+              <span className="divider">•</span>
+              <span>BRN: 478-59-01063</span>
+              <span className="divider">•</span>
+              <span>Address: 206, 51 Samjeon-ro 13-gil, Songpa-gu, Seoul, Republic of Korea</span>
+              <span className="divider">•</span>
+              <span>Representative: Youngmin Park</span>
+              <span className="divider">•</span>
+              <span>Email: contact@ascentum.co.kr</span>
+            </div>
+            <p className="footer-copyright">© 2026 Gachon Money King. All rights reserved.</p>
+          </div>
         </footer>
       </div>
     );

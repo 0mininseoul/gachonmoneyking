@@ -13,6 +13,9 @@
 | **Task 11: Refactor App.jsx with React Router** | [x] | Update `App.jsx` to define routes, layouts, navigation footer, and auth guards. |
 | **Task 12: Add footer styling to index.css** | [x] | Apply custom styling classes for footer links in `index.css`. |
 | **Task 13: Run build verification and route testing** | [x] | Run `npm run build` and route tests to verify build output and guard routing. |
-| **Task 14: Modify PrivacyView.jsx to remove name & update email** | [/] | Remove '박영민' name and replace contact email with contact@ascentum.co.kr in `PrivacyView.jsx`. |
-| **Task 15: Fix back-navigation loop on /profile-setup** | [ ] | Adjust `PublicRoute` guard in `App.jsx` to allow non-onboarded logged-in users to visit landing page. |
-| **Task 16: Verify changes, commit and push** | [ ] | Verify with npm run build and push to origin main branch. |
+| **Task 14: Modify PrivacyView.jsx to remove name & update email** | [x] | Remove '박영민' name and replace contact email with contact@ascentum.co.kr in `PrivacyView.jsx`. |
+| **Task 15: Fix back-navigation loop on /profile-setup** | [x] | Adjust `PublicRoute` guard in `App.jsx` to allow non-onboarded logged-in users to visit landing page. |
+| **Task 16: Verify changes, commit and push** | [x] | Verify with npm run build and push to origin main branch. |
+| **Task 17: Update footer layout in App.jsx to include business info** | [/] | Restructure the footer HTML markup in `App.jsx` to match the design with company metadata. |
+| **Task 18: Add CSS styles for new footer structure in index.css** | [ ] | Replace old footer styling in `index.css` with the newer responsive, multi-line footer layout. |
+| **Task 19: Build and run test verification, commit and push** | [ ] | Re-build locally, verify, commit and push main branch changes. |
