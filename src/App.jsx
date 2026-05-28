@@ -515,10 +515,11 @@ function MainLayout({ isAdmin, locale, setLocale, user, handleLogout, handleLogi
 }
 
 function LandingView({ user, rankings, handleLogin, t, navigate }) {
+  const { locale } = useLanguage();
   return (
     <>
       <div className="hero-section">
-        <h1>{t('title')}</h1>
+        <h1 className={`headline-${locale}`}>{t('title')}</h1>
         <p className="subtitle">{t('subtitle')}</p>
       </div>
       {user ? (
@@ -642,11 +643,12 @@ function DashboardView({
     : '';
 
   const isVerified = userRecord && userRecord.status === 'verified';
+  const { locale } = useLanguage();
 
   return (
     <>
       <div className="hero-section">
-        <h1>{t('title')}</h1>
+        <h1 className={`headline-${locale}`}>{t('title')}</h1>
         <p className="subtitle">{t('subtitle')}</p>
       </div>
 
