@@ -482,6 +482,9 @@ function MainLayout({ isAdmin, locale, setLocale, user, handleLogout, handleLogi
           )}
         </div>
       </header>
+      <div className="announcement-banner">
+        <span>{t('banner_promo')}</span>
+      </div>
       <main className="content-area">
         <Outlet />
       </main>

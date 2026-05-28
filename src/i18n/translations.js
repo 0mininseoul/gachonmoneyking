@@ -47,7 +47,8 @@ export const translations = {
     tab_mn: "몽골",
     tab_uz: "우즈베키스탄",
     tab_ja: "일본",
-    me_label: "나"
+    me_label: "나",
+    banner_promo: "📢 본 서비스는 6/5(금)까지만 운영되며, 당일 최종 시상이 진행됩니다! (참여자 중 추첨을 통해 20명에게 편의점 상품권 증정)"
   },
   en: {
     title: "What is my asset rank at Gachon?",
@@ -97,7 +98,8 @@ export const translations = {
     tab_mn: "Mongolia",
     tab_uz: "Uzbekistan",
     tab_ja: "Japan",
-    me_label: "Me"
+    me_label: "Me",
+    banner_promo: "📢 This service runs until 6/5 (Fri) for the final awards! (20 convenience store vouchers drawn from participants)"
   },
   vi: {
     title: "Tôi xếp thứ mấy về tài sản ở ĐH Gachon?",
@@ -147,7 +149,8 @@ export const translations = {
     tab_mn: "Mông Cổ",
     tab_uz: "Uzbekistan",
     tab_ja: "Nhật Bản",
-    me_label: "Tôi"
+    me_label: "Tôi",
+    banner_promo: "📢 Dịch vụ hoạt động đến hết 6/5 (Thứ Sáu) và trao giải vào cùng ngày! (Rút thăm tặng thẻ quà tặng tiện lợi cho 20 người)"
   },
   zh: {
     title: "我在嘉泉大学的资产排名第几？",
@@ -197,7 +200,8 @@ export const translations = {
     tab_mn: "蒙古",
     tab_uz: "乌兹别克斯坦",
     tab_ja: "日本",
-    me_label: "我"
+    me_label: "我",
+    banner_promo: "📢 本服务将运行至 6/5 (周五) 并在当日进行最终颁奖！ (参与者中抽选20名赠送便利店商品券)"
   },
   mn: {
     title: "Би Гачонд хөрөнгийн зэрэглэлээрээ хэддүгээрт орох вэ?",
@@ -247,7 +251,8 @@ export const translations = {
     tab_mn: "Монгол",
     tab_uz: "Узбек",
     tab_ja: "Япон",
-    me_label: "Би"
+    me_label: "Би",
+    banner_promo: "📢 Энэхүү үйлчилгээ нь 6/5 (Баасан) хүртэл ажиллах бөгөөд тухайн өдөр эцсийн шагнал гардуулах болно! (Оролцогчдоос 20 хүнд дэлгүүрийн ваучер бэлэглэнэ)"
   },
   uz: {
     title: "Gachonda aktivlarim bo'yicha nechanchi o'rindaman?",
@@ -297,7 +302,8 @@ export const translations = {
     tab_mn: "Mongoliya",
     tab_uz: "O'zbekiston",
     tab_ja: "Yaponiya",
-    me_label: "Men"
+    me_label: "Men",
+    banner_promo: "📢 Ushbu xizmat 6/5 (Juma)gacha amal qiladi va shu kuni yakuniy taqdirlash o'tkaziladi! (Ishtirokchilar orasidan 20 kishiga do'kon vaucheri tarqatiladi)"
   },
   ja: {
     title: "私は嘉泉大学で資産順位何位だろう？",
@@ -347,8 +353,9 @@ export const translations = {
     tab_mn: "モンゴル",
     tab_uz: "ウズベキスタン",
     tab_ja: "日本",
-    me_label: "自分"
-  }
+    me_label: "自分",
+    banner_promo: "📢 本サービスは 6/5(金)まで運営され、当日に最終表彰が行われます！ (参加者の中から抽選で20名様にコンビニ商品券をプレゼント)"
+  },
 };
 
 export const nationalities = [

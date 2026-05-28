@@ -1199,3 +1199,29 @@ h1.headline-uz, h1.headline-mn {
     display: none;
   }
 }
+
+/* Announcement Banner */
+.announcement-banner {
+  background: linear-gradient(90deg, rgba(94, 106, 210, 0.15) 0%, rgba(94, 106, 210, 0.05) 100%);
+  border-bottom: 1px solid rgba(94, 106, 210, 0.25);
+  padding: 10px var(--spacing-lg);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #e0e7ff;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  line-height: 1.4;
+  z-index: 99;
+}
+
+@media (max-width: 480px) {
+  .announcement-banner {
+    padding: 8px var(--spacing-sm);
+    font-size: 0.72rem;
+    text-align: left;
+  }
+}
+
