@@ -331,8 +331,7 @@ function App() {
   function PublicRoute({ children }) {
     if (loading) return <div className="spinner"></div>;
     if (user) {
-      if (!hasProfile) return <Navigate to="/profile-setup" replace />;
-      return <Navigate to="/dashboard" replace />;
+      if (hasProfile) return <Navigate to="/dashboard" replace />;
     }
     return children;
   }

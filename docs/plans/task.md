@@ -13,3 +13,6 @@
 | **Task 11: Refactor App.jsx with React Router** | [x] | Update `App.jsx` to define routes, layouts, navigation footer, and auth guards. |
 | **Task 12: Add footer styling to index.css** | [x] | Apply custom styling classes for footer links in `index.css`. |
 | **Task 13: Run build verification and route testing** | [x] | Run `npm run build` and route tests to verify build output and guard routing. |
+| **Task 14: Modify PrivacyView.jsx to remove name & update email** | [/] | Remove '박영민' name and replace contact email with contact@ascentum.co.kr in `PrivacyView.jsx`. |
+| **Task 15: Fix back-navigation loop on /profile-setup** | [ ] | Adjust `PublicRoute` guard in `App.jsx` to allow non-onboarded logged-in users to visit landing page. |
+| **Task 16: Verify changes, commit and push** | [ ] | Verify with npm run build and push to origin main branch. |

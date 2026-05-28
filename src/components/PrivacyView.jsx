@@ -84,8 +84,8 @@ export function PrivacyView() {
           개인정보 처리에 관한 문의사항, 불만 처리, 피해 구제 등에 관한 사항은 아래의 개인정보 보호책임자 및 담당 부서로 연락해 주시기 바랍니다.
         </p>
         <ul style={{ paddingLeft: '20px', marginBottom: '16px', listStyle: 'none' }}>
-          <li><strong>개인정보 보호책임자:</strong> 박영민 (0mininseoul@gmail.com)</li>
-          <li><strong>문의 메일:</strong> 0mininseoul@gmail.com</li>
+          <li><strong>개인정보 보호책임 부서:</strong> 운영 사무국</li>
+          <li><strong>문의 메일:</strong> contact@ascentum.co.kr</li>
         </ul>
 
         <p style={{ marginTop: '32px', fontSize: '0.85rem', color: 'var(--color-ink-subtle)', textAlign: 'right' }}>
