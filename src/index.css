@@ -592,13 +592,13 @@ h1 {
 
 .col-balance {
   text-align: right;
-  font-family: monospace;
-  font-size: 1.05rem;
-  font-weight: 500;
 }
 
 .balance-amount {
   color: var(--color-ink);
+  font-family: monospace;
+  font-size: 1.05rem;
+  font-weight: 500;
 }
 
 .balance-amount.blurred {
@@ -1102,7 +1102,14 @@ h1 {
   .flag-icon {
     font-size: 1.4rem;
   }
-  .col-balance {
+  .table-header .col-nationality {
+    font-size: 0;
+  }
+  .table-header .col-nationality::before {
+    content: "🌐";
+    font-size: 1rem;
+  }
+  .balance-amount {
     font-size: 0.85rem;
   }
   .main-footer {
