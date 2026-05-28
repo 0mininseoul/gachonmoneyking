@@ -588,12 +588,32 @@ h1 {
   animation: orbit-three 1s linear infinite;
   border-top: 3px solid var(--color-ink);
 }
+.loader-content-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  max-width: 90vw;
+  width: 100%;
+}
 
 .loader-text {
-  font-size: 1.1rem;
+  font-size: clamp(0.9rem, 4vw, 1.15rem);
   color: var(--color-ink-muted);
   font-weight: 500;
+  white-space: nowrap;
+}
+
+.loader-caution {
+  font-size: clamp(0.7rem, 3.2vw, 0.8rem);
+  color: #ff6b6b;
   max-width: 320px;
+  line-height: 1.5;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background-color: rgba(255, 107, 107, 0.08);
+  border: 1px solid rgba(255, 107, 107, 0.2);
+  border-radius: var(--rounded-md);
+  text-align: center;
 }
 
 /* Celebration Overlay Modal */
@@ -640,6 +660,8 @@ h1 {
 .celebration-text {
   color: var(--color-ink-muted);
   margin: var(--spacing-md) 0 var(--spacing-lg) 0;
+  font-size: clamp(0.75rem, 3.2vw, 0.95rem);
+  white-space: nowrap;
 }
 
 .celebration-text strong {
