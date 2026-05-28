@@ -358,6 +358,7 @@ function App() {
             <div className="orbit"></div>
           </div>
           <p className="loader-text">{t('loading')}</p>
+          <p className="loader-caution">{t('loading_caution')}</p>
         </div>
       </div>
     );
