@@ -108,11 +108,23 @@ function App() {
         .eq('id', currentUser.id)
         .single();
 
+      let hasProf = false;
       if (data) {
         setHasProfile(true);
+        hasProf = true;
         fetchUserLeaderboardRecord(currentUser.id);
       } else {
         setHasProfile(false);
+      }
+
+      // Check if this was a just-logged-in event
+      if (sessionStorage.getItem('just_logged_in') === 'true') {
+        sessionStorage.removeItem('just_logged_in');
+        if (hasProf) {
+          navigate('/dashboard');
+        } else {
+          navigate('/profile-setup');
+        }
       }
     } catch (err) {
       console.error("Error checking profile:", err);
@@ -201,6 +213,7 @@ function App() {
   };
 
   const handleLogin = async () => {
+    sessionStorage.setItem('just_logged_in', 'true');
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'kakao',
       options: {
@@ -443,14 +456,23 @@ function App() {
           <h1>{t('title')}</h1>
           <p className="subtitle">{t('subtitle')}</p>
         </div>
-        <div className="auth-nudge-banner linear-card">
-          <p className="banner-notice">{t('non_logged_in_notice')}</p>
-          <button onClick={handleLogin} className="btn-primary btn-lg banner-login-btn">
-            {t('login_btn')}
-          </button>
-        </div>
+        {user ? (
+          <div className="auth-nudge-banner linear-card animate-fade-in">
+            <p className="banner-notice">{t('logged_in_no_profile_notice')}</p>
+            <button onClick={() => navigate('/profile-setup')} className="btn-primary btn-lg banner-login-btn">
+              {t('setup_profile_btn')}
+            </button>
+          </div>
+        ) : (
+          <div className="auth-nudge-banner linear-card">
+            <p className="banner-notice">{t('non_logged_in_notice')}</p>
+            <button onClick={handleLogin} className="btn-primary btn-lg banner-login-btn">
+              {t('login_btn')}
+            </button>
+          </div>
+        )}
         <div className="leaderboard-wrapper">
-          <Leaderboard list={rankings} isAuthenticated={false} />
+          <Leaderboard list={rankings} isAuthenticated={!!user} />
         </div>
       </>
     );

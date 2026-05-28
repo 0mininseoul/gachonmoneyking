@@ -24,8 +24,11 @@
 | **Task 22: Update App.jsx and Leaderboard.jsx to use translations** | [x] | Apply `t()` dynamic functions on App.jsx and Leaderboard.jsx hardcoded strings. |
 | **Task 23: Optimize index.css for mobile-first/responsive screens** | [x] | Write media queries for navigation bar, leaderboard grid, and card spacing. |
 | **Task 24: Re-build, run test and push to origin main** | [x] | Run production build, execute Playwright, commit and push to main. |
-| **Task 25: Add footer translation keys to translations.js** | [/] | Add `footer_desc`, `terms_link`, `privacy_link`, and `signup_link` keys for 6 locales in translations.js. |
-| **Task 26: Update App.jsx with translated footer and change lang select dropdown order** | [ ] | Apply `t()` to footer links and description. Re-order dropdown select options to match the requested language list. |
-| **Task 27: Rewrite PrivacyView.jsx with conditional Ko/En layout** | [ ] | Update `PrivacyView.jsx` to select English statement unless user locale is Korean ('ko'). |
-| **Task 28: Rewrite TermsView.jsx with conditional Ko/En layout** | [ ] | Update `TermsView.jsx` to select English statement unless user locale is Korean ('ko'). |
-| **Task 29: Build, test, commit and push to origin main** | [ ] | Build verification, confirm routing and language toggle, then commit and push to main branch. |
+| **Task 25: Add footer translation keys to translations.js** | [x] | Add `footer_desc`, `terms_link`, `privacy_link`, and `signup_link` keys for 6 locales in translations.js. |
+| **Task 26: Update App.jsx with translated footer and change lang select dropdown order** | [x] | Apply `t()` to footer links and description. Re-order dropdown select options to match the requested language list. |
+| **Task 27: Rewrite PrivacyView.jsx with conditional Ko/En layout** | [x] | Update `PrivacyView.jsx` to select English statement unless user locale is Korean ('ko'). |
+| **Task 28: Rewrite TermsView.jsx with conditional Ko/En layout** | [x] | Update `TermsView.jsx` to select English statement unless user locale is Korean ('ko'). |
+| **Task 29: Build, test, commit and push to origin main** | [x] | Build verification, confirm routing and language toggle, then commit and push to main branch. |
+| **Task 30: Fix Landing page logged-in user UX and login redirect** | [x] | Enhance Landing page for logged-in users, add session flag redirect, update translations, verify. |
+
+

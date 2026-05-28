@@ -31,7 +31,9 @@ export const translations = {
     footer_desc: "가천대학교 외국인 유학생 통장 잔고 인증 및 자산 리더보드 서비스",
     terms_link: "서비스 이용약관",
     privacy_link: "개인정보처리방침",
-    signup_link: "회원가입"
+    signup_link: "회원가입",
+    logged_in_no_profile_notice: "✅ 카카오 로그인이 완료되었습니다! 순위를 등록하려면 프로필 설정을 완료해 주세요.",
+    setup_profile_btn: "프로필 설정하러 가기"
   },
   en: {
     title: "Gachon Int'l Student Bank Balance Leaderboard",
@@ -65,7 +67,9 @@ export const translations = {
     footer_desc: "Gachon University International Student Bank Balance Leaderboard Service",
     terms_link: "Terms of Service",
     privacy_link: "Privacy Policy",
-    signup_link: "Sign Up"
+    signup_link: "Sign Up",
+    logged_in_no_profile_notice: "✅ Kakao login complete! Please complete your profile setup to register your ranking.",
+    setup_profile_btn: "Go to Profile Setup"
   },
   vi: {
     title: "Bảng Xếp Hạng Số Dư Tài Khoản Du Học Sinh ĐH Gachon",
@@ -99,7 +103,9 @@ export const translations = {
     footer_desc: "Dịch vụ Bảng xếp hạng số dư tài khoản của du học sinh quốc tế ĐH Gachon",
     terms_link: "Điều khoản dịch vụ",
     privacy_link: "Chính sách bảo mật",
-    signup_link: "Đăng ký"
+    signup_link: "Đăng ký",
+    logged_in_no_profile_notice: "✅ Đăng nhập Kakao thành công! Vui lòng hoàn tất thiết lập hồ sơ để đăng ký thứ hạng.",
+    setup_profile_btn: "Đi đến Thiết lập hồ sơ"
   },
   zh: {
     title: "嘉泉大学留学生银行存款排行榜",
@@ -133,7 +139,9 @@ export const translations = {
     footer_desc: "嘉泉大学外国留学生银行余额排行榜服务",
     terms_link: "服务条款",
     privacy_link: "隐私政策",
-    signup_link: "注册"
+    signup_link: "注册",
+    logged_in_no_profile_notice: "✅ 卡考登录已完成！请完成个人资料设置以登记您的排名。",
+    setup_profile_btn: "去设置个人资料"
   },
   mn: {
     title: "Гачон Их Сургуулийн Гадаад Оюутнуудын Дансны Үлдэгдлийн Жагсаалт",
@@ -167,7 +175,9 @@ export const translations = {
     footer_desc: "Гачон Их Сургуулийн гадаад оюутнуудын дансны үлдэгдлийн жагсаалтын үйлчилгээ",
     terms_link: "Үйлчилгээний нөхцөл",
     privacy_link: "Нууцлалын бодлого",
-    signup_link: "Бүртгүүлэх"
+    signup_link: "Бүртгүүлэх",
+    logged_in_no_profile_notice: "✅ Kakao нэвтрэлт амжилттай! Зэрэглэлээ бүртгүүлэхийн тулд профайл тохиргоогоо дуусгана уу.",
+    setup_profile_btn: "Профайл тохируулах руу шилжих"
   },
   uz: {
     title: "Gachon Universiteti Xalqaro Talabalari Bank Balansi Peshqadamlar Jadvali",
@@ -201,7 +211,9 @@ export const translations = {
     footer_desc: "Gachon Universiteti xalqaro talabalari bank balansi pesqadamlar jadvali xizmati",
     terms_link: "Foydalanish shartlari",
     privacy_link: "Maxfiylik siyosati",
-    signup_link: "Ro'yxatdan o'tish"
+    signup_link: "Ro'yxatdan o'tish",
+    logged_in_no_profile_notice: "✅ Kakao tizimiga kirish yakunlandi! Reytingingizni ro'yxatdan o'tkazish uchun profilingizni sozlang.",
+    setup_profile_btn: "Profilni sozlashga o'tish"
   }
 };
 
