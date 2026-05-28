@@ -617,6 +617,8 @@ function DashboardView({
         .replace('{balance}', Number(userRecord.balance).toLocaleString())
     : '';
 
+  const isVerified = userRecord && userRecord.status === 'verified';
+
   return (
     <>
       <div className="hero-section">
@@ -625,8 +627,8 @@ function DashboardView({
       </div>
 
       <div className="user-dashboard-card linear-card">
-        <h3>{t('upload_title')}</h3>
-        <p className="desc">{t('upload_desc')}</p>
+        <h3>{isVerified ? t('upload_title_verified') : t('upload_title')}</h3>
+        <p className="desc">{isVerified ? t('upload_desc_verified') : t('upload_desc')}</p>
         
         {userRecord && userRecord.status ? (
           <div className="user-record-status">
@@ -647,8 +649,8 @@ function DashboardView({
             onChange={handleFileUpload}
             className="file-hidden-input"
           />
-          <label htmlFor="screenshot-file-upload" className="btn-primary upload-label-btn">
-            {t('upload_btn')}
+          <label htmlFor="screenshot-file-upload" className={`${isVerified ? 'btn-secondary' : 'btn-primary'} upload-label-btn`}>
+            {isVerified ? t('update_balance_btn') : t('upload_btn')}
           </label>
         </div>
         
