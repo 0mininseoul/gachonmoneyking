@@ -1,7 +1,7 @@
 import { chromium } from 'playwright';
 import path from 'path';
 
-const PROJECT_REF = 'ydotomyiabchrdhytynr';
+const PROJECT_REF = 'pnjiieykwznqjgwxprdi';
 const AUTH_KEY = `sb-${PROJECT_REF}-auth-token`;
 
 const FAKE_SESSION = {
