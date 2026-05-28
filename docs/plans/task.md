@@ -34,3 +34,8 @@
 | **Task 37: Supabase DB schema updates, Realtime, and profiles-leaderboard sync triggers** | [x] | Add is_dummy, email, avatar_url columns, write profiles-to-leaderboard sync trigger, and enable Postgres Realtime |
 | **Task 38: Add 44 dummy user records and update '조세연'/'영민' to Vietnamese** | [x] | Insert 44 foreign students (27 VI, 12 ZH, 2 MN, 3 UZ) and update '조세연'/'영민' to Vietnamese profiles/records |
 | **Task 39: Implement Kakao email/avatar auto-sync and Realtime profiles listener in App.jsx** | [x] | Sync user email/avatar on sign-in and register, add profiles Realtime table listener to dynamically refresh state |
+| **Task 40: Add tab translations and 'Me' labels to translations.js** | [x] | Add tab_all, tab_vi, tab_zh, tab_mn, tab_uz, and me_label translations for all 6 languages |
+| **Task 41: Realistic dummy data update (amount ranges and community nicknames)** | [x] | Apply migration to update dummy data balances and nicknames for natural community vibes |
+| **Task 42: Refactor Leaderboard.jsx with tabs filtering and user pinning** | [x] | Implement activeTab selection state, filter logic, and row pinning at the top with highlights |
+| **Task 43: Update App.jsx with new headline copy and Leaderboard props** | [x] | Update title translations, pass currentUserId to Leaderboard, and adjust layout |
+| **Task 44: Style filters, pinned rows, and headline single-line fit in index.css** | [x] | Write CSS for tabs, pinned highlights, and headline clamp to prevent wraps |

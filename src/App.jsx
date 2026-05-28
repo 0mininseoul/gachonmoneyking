@@ -536,7 +536,7 @@ function LandingView({ user, rankings, handleLogin, t, navigate }) {
         </div>
       )}
       <div className="leaderboard-wrapper">
-        <Leaderboard list={rankings} isAuthenticated={!!user} />
+        <Leaderboard list={rankings} isAuthenticated={!!user} currentUserId={user?.id} />
       </div>
     </>
   );
@@ -698,7 +698,7 @@ function DashboardView({
       )}
 
       <div className="leaderboard-wrapper">
-        <Leaderboard list={rankings} isAuthenticated={true} />
+        <Leaderboard list={rankings} isAuthenticated={true} currentUserId={user?.id} />
       </div>
     </>
   );
