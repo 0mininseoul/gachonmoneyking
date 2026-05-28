@@ -483,7 +483,17 @@ function MainLayout({ isAdmin, locale, setLocale, user, handleLogout, handleLogi
         </div>
       </header>
       <div className="announcement-banner">
-        <span>{t('banner_promo')}</span>
+        {(() => {
+          const text = t('banner_promo');
+          const idx = text.lastIndexOf('(');
+          if (idx === -1) return <span>{text}</span>;
+          return (
+            <>
+              <span>{text.slice(0, idx).trimEnd()}</span>
+              <span className="banner-paren">{text.slice(idx)}</span>
+            </>
+          );
+        })()}
       </div>
       <main className="content-area">
         <Outlet />
