@@ -340,37 +340,6 @@ function App() {
     document.body.removeChild(link);
   };
 
-  // Route Guard Definitions
-  function PublicRoute({ children }) {
-    if (loading) return <div className="spinner"></div>;
-    if (user) {
-      if (hasProfile) return <Navigate to="/dashboard" replace />;
-    }
-    return children;
-  }
-
-  function ProtectedRoute({ children }) {
-    if (loading) return <div className="spinner"></div>;
-    if (!user) return <Navigate to="/" replace />;
-    if (!hasProfile) return <Navigate to="/profile-setup" replace />;
-    return children;
-  }
-
-  function OnboardingRoute({ children }) {
-    if (loading) return <div className="spinner"></div>;
-    if (!user) return <Navigate to="/" replace />;
-    if (hasProfile) return <Navigate to="/dashboard" replace />;
-    return children;
-  }
-
-  function AdminRoute({ children }) {
-    if (loading) return <div className="spinner"></div>;
-    if (!user) return <Navigate to="/" replace />;
-    if (!hasProfile) return <Navigate to="/profile-setup" replace />;
-    if (!isAdmin) return <Navigate to="/dashboard" replace />;
-    return children;
-  }
-
   if (loading) {
     return (
       <div className="app-container loading-container">
@@ -397,17 +366,48 @@ function App() {
   return (
     <Routes>
       <Route element={<MainLayout isAdmin={isAdmin} locale={locale} setLocale={setLocale} user={user} handleLogout={handleLogout} handleLogin={handleLogin} navigate={navigate} location={location} t={t} />}>
-        <Route path="/" element={<PublicRoute><LandingView user={user} rankings={rankings} handleLogin={handleLogin} t={t} navigate={navigate} /></PublicRoute>} />
-        <Route path="/dashboard" element={<ProtectedRoute><DashboardView t={t} user={user} userRecord={userRecord} uploading={uploading} uploadError={uploadError} uploadSuccess={uploadSuccess} showRankCard={showRankCard} setShowRankCard={setShowRankCard} handleFileUpload={handleFileUpload} rankings={rankings} /></ProtectedRoute>} />
-        <Route path="/admin" element={<AdminRoute><AdminConsoleView loadingAdminQueue={loadingAdminQueue} exportCSV={exportCSV} adminQueue={adminQueue} updateVerificationStatus={updateVerificationStatus} /></AdminRoute>} />
+        <Route path="/" element={<PublicRoute loading={loading} user={user} hasProfile={hasProfile}><LandingView user={user} rankings={rankings} handleLogin={handleLogin} t={t} navigate={navigate} /></PublicRoute>} />
+        <Route path="/dashboard" element={<ProtectedRoute loading={loading} user={user} hasProfile={hasProfile}><DashboardView t={t} user={user} userRecord={userRecord} uploading={uploading} uploadError={uploadError} uploadSuccess={uploadSuccess} showRankCard={showRankCard} setShowRankCard={setShowRankCard} handleFileUpload={handleFileUpload} rankings={rankings} /></ProtectedRoute>} />
+        <Route path="/admin" element={<AdminRoute loading={loading} user={user} hasProfile={hasProfile} isAdmin={isAdmin}><AdminConsoleView loadingAdminQueue={loadingAdminQueue} exportCSV={exportCSV} adminQueue={adminQueue} updateVerificationStatus={updateVerificationStatus} /></AdminRoute>} />
         <Route path="/signup" element={<SignupView />} />
         <Route path="/privacy" element={<PrivacyView />} />
         <Route path="/terms" element={<TermsView />} />
       </Route>
-      <Route path="/profile-setup" element={<OnboardingRoute><ProfileSetupView t={t} nickname={nickname} setNickname={setNickname} nationality={nationality} setNationality={setNationality} marketingConsent={marketingConsent} setMarketingConsent={setMarketingConsent} savingProfile={savingProfile} handleSaveProfile={handleSaveProfile} /></OnboardingRoute>} />
+      <Route path="/profile-setup" element={<OnboardingRoute loading={loading} user={user} hasProfile={hasProfile}><ProfileSetupView t={t} nickname={nickname} setNickname={setNickname} nationality={nationality} setNationality={setNationality} marketingConsent={marketingConsent} setMarketingConsent={setMarketingConsent} savingProfile={savingProfile} handleSaveProfile={handleSaveProfile} /></OnboardingRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
+}
+
+// Route Guard Definitions
+function PublicRoute({ children, loading, user, hasProfile }) {
+  if (loading) return <div className="spinner"></div>;
+  if (user) {
+    if (hasProfile) return <Navigate to="/dashboard" replace />;
+  }
+  return children;
+}
+
+function ProtectedRoute({ children, loading, user, hasProfile }) {
+  if (loading) return <div className="spinner"></div>;
+  if (!user) return <Navigate to="/" replace />;
+  if (!hasProfile) return <Navigate to="/profile-setup" replace />;
+  return children;
+}
+
+function OnboardingRoute({ children, loading, user, hasProfile }) {
+  if (loading) return <div className="spinner"></div>;
+  if (!user) return <Navigate to="/" replace />;
+  if (hasProfile) return <Navigate to="/dashboard" replace />;
+  return children;
+}
+
+function AdminRoute({ children, loading, user, hasProfile, isAdmin }) {
+  if (loading) return <div className="spinner"></div>;
+  if (!user) return <Navigate to="/" replace />;
+  if (!hasProfile) return <Navigate to="/profile-setup" replace />;
+  if (!isAdmin) return <Navigate to="/dashboard" replace />;
+  return children;
 }
 
 function MainLayout({ isAdmin, locale, setLocale, user, handleLogout, handleLogin, navigate, location, t }) {
