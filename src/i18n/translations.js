@@ -36,7 +36,10 @@ export const translations = {
     privacy_link: "개인정보처리방침",
     signup_link: "회원가입",
     logged_in_no_profile_notice: "✅ 카카오 로그인이 완료되었습니다! 순위를 등록하려면 프로필 설정을 완료해 주세요.",
-    setup_profile_btn: "프로필 설정하러 가기"
+    setup_profile_btn: "프로필 설정하러 가기",
+    upload_title_verified: "내 자산 인증 현황",
+    upload_desc_verified: "통장 잔고 인증이 완료되었습니다. 잔고를 업데이트하려면 아래 버튼을 누르세요.",
+    update_balance_btn: "잔고 업데이트 (재인증)"
   },
   en: {
     title: "Gachon Int'l Student Bank Balance Leaderboard",
@@ -75,7 +78,10 @@ export const translations = {
     privacy_link: "Privacy Policy",
     signup_link: "Sign Up",
     logged_in_no_profile_notice: "✅ Kakao login complete! Please complete your profile setup to register your ranking.",
-    setup_profile_btn: "Go to Profile Setup"
+    setup_profile_btn: "Go to Profile Setup",
+    upload_title_verified: "My Asset Verification Status",
+    upload_desc_verified: "Your bank balance has been verified. To update your balance, click the button below.",
+    update_balance_btn: "Update Balance (Re-verify)"
   },
   vi: {
     title: "Bảng Xếp Hạng Số Dư Tài Khoản Du Học Sinh ĐH Gachon",
@@ -114,7 +120,10 @@ export const translations = {
     privacy_link: "Chính sách bảo mật",
     signup_link: "Đăng ký",
     logged_in_no_profile_notice: "✅ Đăng nhập Kakao thành công! Vui lòng hoàn tất thiết lập hồ sơ để đăng ký thứ hạng.",
-    setup_profile_btn: "Đi đến Thiết lập hồ sơ"
+    setup_profile_btn: "Đi đến Thiết lập hồ sơ",
+    upload_title_verified: "Trạng thái xác minh tài sản của tôi",
+    upload_desc_verified: "Số dư tài khoản của bạn đã được xác minh. Để cập nhật số dư, nhấp vào nút bên dưới.",
+    update_balance_btn: "Cập nhật số dư (Xác minh lại)"
   },
   zh: {
     title: "嘉泉大学留学生银行存款排行榜",
@@ -153,7 +162,10 @@ export const translations = {
     privacy_link: "隐私政策",
     signup_link: "注册",
     logged_in_no_profile_notice: "✅ 卡考登录已完成！请完成个人资料设置以登记您的排名。",
-    setup_profile_btn: "去设置个人资料"
+    setup_profile_btn: "去设置个人资料",
+    upload_title_verified: "我的资产认证状态",
+    upload_desc_verified: "您的银行余额已认证。如需更新余额，请点击下方按钮。",
+    update_balance_btn: "更新余额（重新认证）"
   },
   mn: {
     title: "Гачон Их Сургуулийн Гадаад Оюутнуудын Дансны Үлдэгдлийн Жагсаалт",
@@ -192,7 +204,10 @@ export const translations = {
     privacy_link: "Нууцлалын бодлого",
     signup_link: "Бүртгүүлэх",
     logged_in_no_profile_notice: "✅ Kakao нэвтрэлт амжилттай! Зэрэглэлээ бүртгүүлэхийн тулд профайл тохиргоогоо дуусгана уу.",
-    setup_profile_btn: "Профайл тохируулах руу шилжих"
+    setup_profile_btn: "Профайл тохируулах руу шилжих",
+    upload_title_verified: "Миний хөрөнгийн баталгаажуулалтын төлөв",
+    upload_desc_verified: "Таны дансны үлдэгдэл баталгаажсан байна. Үлдэгдлээ шинэчлэх бол доорх товчийг дарна уу.",
+    update_balance_btn: "Үлдэгдэл шинэчлэх (Дахин баталгаажуулах)"
   },
   uz: {
     title: "Gachon Universiteti Xalqaro Talabalari Bank Balansi Peshqadamlar Jadvali",
@@ -231,7 +246,10 @@ export const translations = {
     privacy_link: "Maxfiylik siyosati",
     signup_link: "Ro'yxatdan o'tish",
     logged_in_no_profile_notice: "✅ Kakao tizimiga kirish yakunlandi! Reytingingizni ro'yxatdan o'tkazish uchun profilingizni sozlang.",
-    setup_profile_btn: "Profilni sozlashga o'tish"
+    setup_profile_btn: "Profilni sozlashga o'tish",
+    upload_title_verified: "Mening aktivlarimni tasdiqlash holati",
+    upload_desc_verified: "Bank balansingiz tasdiqlandi. Balansni yangilash uchun quyidagi tugmani bosing.",
+    update_balance_btn: "Balansni yangilash (Qayta tasdiqlash)"
   }
 };
 
