@@ -45,6 +45,7 @@ export const translations = {
     tab_zh: "중국",
     tab_mn: "몽골",
     tab_uz: "우즈베키스탄",
+    tab_ja: "일본",
     me_label: "나"
   },
   en: {
@@ -93,6 +94,7 @@ export const translations = {
     tab_zh: "China",
     tab_mn: "Mongolia",
     tab_uz: "Uzbekistan",
+    tab_ja: "Japan",
     me_label: "Me"
   },
   vi: {
@@ -141,6 +143,7 @@ export const translations = {
     tab_zh: "Trung Quốc",
     tab_mn: "Mông Cổ",
     tab_uz: "Uzbekistan",
+    tab_ja: "Nhật Bản",
     me_label: "Tôi"
   },
   zh: {
@@ -189,6 +192,7 @@ export const translations = {
     tab_zh: "中国",
     tab_mn: "蒙古",
     tab_uz: "乌兹别克斯坦",
+    tab_ja: "日本",
     me_label: "我"
   },
   mn: {
@@ -237,6 +241,7 @@ export const translations = {
     tab_zh: "Хятад",
     tab_mn: "Монгол",
     tab_uz: "Узбек",
+    tab_ja: "Япон",
     me_label: "Би"
   },
   uz: {
@@ -285,12 +290,63 @@ export const translations = {
     tab_zh: "Xitoy",
     tab_mn: "Mongoliya",
     tab_uz: "O'zbekiston",
+    tab_ja: "Yaponiya",
     me_label: "Men"
+  },
+  ja: {
+    title: "私は嘉泉大学で資産順位何位だろう？",
+    subtitle: "嘉泉大学外国人留学生のリアルタイム資産ランキング",
+    login_btn: "Kakaoでログインして順位を確認する",
+    logout_btn: "ログアウト",
+    upload_title: "口座残高を認証する",
+    upload_desc: "モバイルバンキングアプリ（Toss、KakaoBankなど）の残高画面のスクリーンショットをアップロードしてください。",
+    upload_btn: "口座残高スクリーンショットをアップロード",
+    nudge: "⚠️ 同意されない場合、イベント当選の案内やリーダーボード受賞の案内を受け取れない場合があります。",
+    loading: "AI分析システムが口座残高を確認しています..",
+    loading_caution: "本人名義の口座ではない画像や、AIによって加工された画像の場合、サービスの利用が制限されることがあります。",
+    success: "資産の認証が完了しました！順位がリーダーボードに登録されました。",
+    error_invalid: "無効な口座残高画面です。もう一度お試しください。",
+    ranking: "順位",
+    nickname: "ニックネーム",
+    nationality: "国籍",
+    balance: "残高",
+    setup_profile: "プロフィール設定",
+    enter_nickname: "ニックネームを入力してください",
+    select_nationality: "国籍を選択してください",
+    submit_profile: "保存して続行",
+    non_logged_in_notice: "🔒 Kakaoでログインすると金額のモザイクが解除され、順位を登録できます。",
+    marketing_consent_label: "マーケティング情報受信同意",
+    verification_complete: "認証完了！",
+    balance_registered_prefix: "様の残高 ",
+    balance_registered_suffix: "が正常に登録されました！",
+    celebration_title: "{nickname}様の資産は嘉泉大学で{rank}位です！",
+    celebration_subtitle: "{nickname}様の残高 ₩{balance}が正常に登録されました。",
+    view_leaderboard_btn: "リーダーボードを見る",
+    status_label: "ステータス: ",
+    registered_balance_label: "登録された残高: ",
+    no_rankings_yet: "まだ登録された順位がありません。最初の残高を認証してみましょう！",
+    footer_desc: "嘉泉大学外国人留学生口座残高認証および資産リーダーボードサービス",
+    terms_link: "サービス利用規約",
+    privacy_link: "個人情報処理方針",
+    signup_link: "会員登録",
+    logged_in_no_profile_notice: "✅ Kakaoログインが完了しました！順位を登録するにはプロフィール設定を完了してください。",
+    setup_profile_btn: "プロフィール設定へ進む",
+    upload_title_verified: "私の資産認証状況",
+    upload_desc_verified: "口座残高の認証が完了しました。残高を更新するには下のボタンを押してください。",
+    update_balance_btn: "残高更新 (再認証)",
+    tab_all: "全体",
+    tab_vi: "ベトナム",
+    tab_zh: "中国",
+    tab_mn: "モンゴル",
+    tab_uz: "ウズベキスタン",
+    tab_ja: "日本",
+    me_label: "自分"
   }
 };
 
 export const nationalities = [
   { code: "vi", name: "Vietnam", flag: "🇻🇳" },
+  { code: "ja", name: "Japan", flag: "🇯🇵" },
   { code: "zh", name: "China", flag: "🇨🇳" },
   { code: "mn", name: "Mongolia", flag: "🇲🇳" },
   { code: "uz", name: "Uzbekistan", flag: "🇺🇿" },
