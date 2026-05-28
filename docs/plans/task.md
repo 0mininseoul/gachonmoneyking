@@ -31,4 +31,6 @@
 | **Task 29: Build, test, commit and push to origin main** | [x] | Build verification, confirm routing and language toggle, then commit and push to main branch. |
 | **Task 35: Redesign header layout for mobile screens/iOS Safari** | [x] | Redesign .top-nav layout to prevent dual-line wrapping and fix vertical alignments, verify. |
 | **Task 36: Refine celebration card overlay copy and layout** | [x] | Implement dynamic main/sub copy with rank calculation, support all 6 languages, and styled single-line layouts |
-
+| **Task 37: Supabase DB schema updates, Realtime, and profiles-leaderboard sync triggers** | [x] | Add is_dummy, email, avatar_url columns, write profiles-to-leaderboard sync trigger, and enable Postgres Realtime |
+| **Task 38: Add 44 dummy user records and update '조세연'/'영민' to Vietnamese** | [x] | Insert 44 foreign students (27 VI, 12 ZH, 2 MN, 3 UZ) and update '조세연'/'영민' to Vietnamese profiles/records |
+| **Task 39: Implement Kakao email/avatar auto-sync and Realtime profiles listener in App.jsx** | [x] | Sync user email/avatar on sign-in and register, add profiles Realtime table listener to dynamically refresh state |
