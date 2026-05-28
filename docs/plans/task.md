@@ -29,7 +29,8 @@
 | **Task 27: Rewrite PrivacyView.jsx with conditional Ko/En layout** | [x] | Update `PrivacyView.jsx` to select English statement unless user locale is Korean ('ko'). |
 | **Task 28: Rewrite TermsView.jsx with conditional Ko/En layout** | [x] | Update `TermsView.jsx` to select English statement unless user locale is Korean ('ko'). |
 | **Task 29: Build, test, commit and push to origin main** | [x] | Build verification, confirm routing and language toggle, then commit and push to main branch. |
-| **Task 33: Create screenshots storage bucket and RLS policies** | [x] | Execute DB queries via linked Supabase CLI to create screenshots bucket and public/insert RLS policies. |
+| **Task 34: Deploy verify-balance Edge Function and set remote secrets** | [x] | Configure GEMINI_API_KEY secret and deploy verify-balance function on remote Supabase project. |
+
 
 
 
