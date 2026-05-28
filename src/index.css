@@ -1169,6 +1169,38 @@ h1.headline-uz, h1.headline-mn {
   .balance-amount {
     font-size: 0.85rem;
   }
+
+  /* i18n mobile: table header cell overflow prevention */
+  .table-header > div {
+    min-width: 0;
+    overflow: hidden;
+  }
+  /* Replace long translated rank text with compact "#" symbol */
+  .table-header .col-rank {
+    font-size: 0;
+  }
+  .table-header .col-rank::before {
+    content: "#";
+    font-size: 0.75rem;
+    color: var(--color-ink-subtle);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  /* Truncate nickname/balance headers if too long for their column */
+  .table-header .col-user,
+  .table-header .col-balance {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  /* i18n mobile: celebration modal text must wrap (Mongolian/Uzbek can overflow with nowrap) */
+  .celebration-text {
+    white-space: normal;
+  }
+  /* i18n mobile: reduce auth nudge card padding so long notices wrap in 2 lines not 3 */
+  .auth-nudge-banner {
+    padding: var(--spacing-md) var(--spacing-sm);
+  }
+
   .main-footer {
     padding: var(--spacing-lg) var(--spacing-sm);
   }
