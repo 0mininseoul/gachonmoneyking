@@ -21,6 +21,15 @@ export function Leaderboard({ list, isAuthenticated, currentUserId }) {
   const userItem = userIndex !== -1 ? list[userIndex] : null;
   const userOverallRank = userIndex !== -1 ? userIndex + 1 : null;
 
+  // Calculate user's rank within their own nationality
+  const userNationRank = userItem
+    ? list.filter(item => item.nationality === userItem.nationality).findIndex(item => item.user_id === currentUserId) + 1
+    : null;
+
+  // Pinned user visibility condition and rank determination
+  const shouldShowPinned = userItem && (activeTab === 'all' || activeTab === userItem.nationality);
+  const userDisplayRank = activeTab === 'all' ? userOverallRank : userNationRank;
+
   // Tabs selection logic
   const tabs = ['all', 'vi', 'ja', 'zh', 'mn', 'uz'];
 
@@ -29,16 +38,24 @@ export function Leaderboard({ list, isAuthenticated, currentUserId }) {
     ? list
     : list.filter(item => item.nationality === activeTab);
 
-  // Map each item to include its overall rank
-  const listWithRank = filteredList.map(item => {
-    const overallIndex = list.findIndex(x => x.id === item.id);
-    return { ...item, overallRank: overallIndex + 1 };
+  // Map each item to include its active rank in the current tab view
+  const listWithRank = filteredList.map((item, index) => {
+    return { ...item, activeRank: index + 1 };
   });
 
   // Exclude current user from the main scrollable list to avoid duplication
   const displayList = currentUserId
     ? listWithRank.filter(item => item.user_id !== currentUserId)
     : listWithRank;
+
+  // Get flag icon and label for each tab button
+  const getTabLabel = (tab) => {
+    if (tab === 'all') {
+      return `🌐 ${t('tab_all')}`;
+    }
+    const flag = getFlag(tab);
+    return `${flag} ${t(`tab_${tab}`)}`;
+  };
 
   return (
     <div className="leaderboard-container">
@@ -49,7 +66,7 @@ export function Leaderboard({ list, isAuthenticated, currentUserId }) {
             className={`tab-btn ${activeTab === tab ? 'active' : ''}`}
             onClick={() => setActiveTab(tab)}
           >
-            {t(`tab_${tab}`)}
+            {getTabLabel(tab)}
           </button>
         ))}
       </div>
@@ -64,11 +81,11 @@ export function Leaderboard({ list, isAuthenticated, currentUserId }) {
         
         <div className="table-body">
           {/* Pinned logged-in user row */}
-          {userItem && (
+          {shouldShowPinned && (
             <div className="table-row pinned-user-row">
               <div className="col-rank">
-                <span className={`rank-badge rank-${userOverallRank} pinned-rank`}>
-                  {userOverallRank}
+                <span className={`rank-badge rank-${userDisplayRank} pinned-rank`}>
+                  {userDisplayRank}
                 </span>
               </div>
               <div className="col-user">
@@ -89,14 +106,14 @@ export function Leaderboard({ list, isAuthenticated, currentUserId }) {
             </div>
           )}
 
-          {displayList.length === 0 && !userItem ? (
+          {displayList.length === 0 && !shouldShowPinned ? (
             <div className="no-data">{t('no_rankings_yet')}</div>
           ) : (
             displayList.map((item) => (
               <div key={item.id} className="table-row">
                 <div className="col-rank">
-                  <span className={`rank-badge rank-${item.overallRank}`}>
-                    {item.overallRank}
+                  <span className={`rank-badge rank-${item.activeRank}`}>
+                    {item.activeRank}
                   </span>
                 </div>
                 <div className="col-user">
