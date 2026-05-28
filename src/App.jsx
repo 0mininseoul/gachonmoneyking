@@ -63,6 +63,12 @@ function App() {
       }
     });
 
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
     // 3. Fetch public leaderboard rankings
     fetchLeaderboard();
 
@@ -78,7 +84,6 @@ function App() {
       .subscribe();
 
     return () => {
-      subscription.unsubscribe();
       supabase.removeChannel(channel);
     };
   }, [user]);
@@ -406,7 +411,10 @@ function App() {
     <div className="main-layout">
       {/* Header / Navbar */}
       <header className="top-nav">
-        <div className="brand">🪙 Gachon VIP</div>
+        <div className="brand">
+          <img src="/logo.png" className="brand-logo" alt="logo" />
+          <span>Gachon VIP</span>
+        </div>
         <div className="nav-controls">
           {isAdmin && (
             <button onClick={toggleAdminTab} className="btn-secondary btn-sm admin-btn">
@@ -534,7 +542,7 @@ function App() {
                 <p className="desc">{t('upload_desc')}</p>
                 
                 {/* Result or Input upload area */}
-                {userRecord ? (
+                {userRecord && userRecord.status ? (
                   <div className="user-record-status">
                     <p className="verified-status-info">
                       Status: <strong className={`status-${userRecord.status}`}>{userRecord.status.toUpperCase()}</strong>

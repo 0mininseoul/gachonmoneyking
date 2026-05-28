@@ -68,10 +68,19 @@ body {
 }
 
 .brand {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
   font-weight: 600;
   font-size: 1.1rem;
   letter-spacing: -0.5px;
   color: var(--color-ink);
+}
+
+.brand-logo {
+  height: 24px;
+  width: 24px;
+  object-fit: contain;
 }
 
 .nav-controls {
