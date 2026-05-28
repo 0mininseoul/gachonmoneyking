@@ -1,6 +1,6 @@
 export const translations = {
   ko: {
-    title: "가천대 유학생 통장 잔고 리더보드",
+    title: "나는 가천대에서 자산 순위 몇 등일까?",
     subtitle: "가천대 외국인 유학생들의 실시간 자산 순위표",
     login_btn: "카카오 로그인하고 순위 확인하기",
     logout_btn: "로그아웃",
@@ -39,10 +39,16 @@ export const translations = {
     setup_profile_btn: "프로필 설정하러 가기",
     upload_title_verified: "내 자산 인증 현황",
     upload_desc_verified: "통장 잔고 인증이 완료되었습니다. 잔고를 업데이트하려면 아래 버튼을 누르세요.",
-    update_balance_btn: "잔고 업데이트 (재인증)"
+    update_balance_btn: "잔고 업데이트 (재인증)",
+    tab_all: "전체",
+    tab_vi: "베트남",
+    tab_zh: "중국",
+    tab_mn: "몽골",
+    tab_uz: "우즈베키스탄",
+    me_label: "나"
   },
   en: {
-    title: "Gachon Int'l Student Bank Balance Leaderboard",
+    title: "What is my asset rank at Gachon?",
     subtitle: "Real-time bank balance rankings of Gachon University international students",
     login_btn: "Login with Kakao & Check Ranking",
     logout_btn: "Logout",
@@ -81,10 +87,16 @@ export const translations = {
     setup_profile_btn: "Go to Profile Setup",
     upload_title_verified: "My Asset Verification Status",
     upload_desc_verified: "Your bank balance has been verified. To update your balance, click the button below.",
-    update_balance_btn: "Update Balance (Re-verify)"
+    update_balance_btn: "Update Balance (Re-verify)",
+    tab_all: "All",
+    tab_vi: "Vietnam",
+    tab_zh: "China",
+    tab_mn: "Mongolia",
+    tab_uz: "Uzbekistan",
+    me_label: "Me"
   },
   vi: {
-    title: "Bảng Xếp Hạng Số Dư Tài Khoản Du Học Sinh ĐH Gachon",
+    title: "Tôi xếp thứ mấy về tài sản ở ĐH Gachon?",
     subtitle: "Bảng xếp hạng tài sản thực tế của du học sinh quốc tế tại ĐH Gachon",
     login_btn: "Đăng nhập Kakao & Xem thứ hạng",
     logout_btn: "Đăng xuất",
@@ -123,10 +135,16 @@ export const translations = {
     setup_profile_btn: "Đi đến Thiết lập hồ sơ",
     upload_title_verified: "Trạng thái xác minh tài sản của tôi",
     upload_desc_verified: "Số dư tài khoản của bạn đã được xác minh. Để cập nhật số dư, nhấp vào nút bên dưới.",
-    update_balance_btn: "Cập nhật số dư (Xác minh lại)"
+    update_balance_btn: "Cập nhật số dư (Xác minh lại)",
+    tab_all: "Tất cả",
+    tab_vi: "Việt Nam",
+    tab_zh: "Trung Quốc",
+    tab_mn: "Mông Cổ",
+    tab_uz: "Uzbekistan",
+    me_label: "Tôi"
   },
   zh: {
-    title: "嘉泉大学留学生银行存款排行榜",
+    title: "我在嘉泉大学的资产排名第几？",
     subtitle: "嘉泉大学外国留学生实时资产排行榜",
     login_btn: "卡考登录并查看排名",
     logout_btn: "退出登录",
@@ -165,10 +183,16 @@ export const translations = {
     setup_profile_btn: "去设置个人资料",
     upload_title_verified: "我的资产认证状态",
     upload_desc_verified: "您的银行余额已认证。如需更新余额，请点击下方按钮。",
-    update_balance_btn: "更新余额（重新认证）"
+    update_balance_btn: "更新余额（重新认证）",
+    tab_all: "全部",
+    tab_vi: "越南",
+    tab_zh: "中国",
+    tab_mn: "蒙古",
+    tab_uz: "乌兹别克斯坦",
+    me_label: "我"
   },
   mn: {
-    title: "Гачон Их Сургуулийн Гадаад Оюутнуудын Дансны Үлдэгдлийн Жагсаалт",
+    title: "Би Гачонд хөрөнгийн зэрэглэлээрээ хэддүгээрт орох вэ?",
     subtitle: "Гачон Их Сургуулийн гадаад оюутнуудын бодит цагийн хөрөнгийн зэрэглэл",
     login_btn: "Kakao-гоор нэвтэрч, зэрэглэлээ шалгах",
     logout_btn: "Гарах",
@@ -207,10 +231,16 @@ export const translations = {
     setup_profile_btn: "Профайл тохируулах руу шилжих",
     upload_title_verified: "Миний хөрөнгийн баталгаажуулалтын төлөв",
     upload_desc_verified: "Таны дансны үлдэгдэл баталгаажсан байна. Үлдэгдлээ шинэчлэх бол доорх товчийг дарна уу.",
-    update_balance_btn: "Үлдэгдэл шинэчлэх (Дахин баталгаажуулах)"
+    update_balance_btn: "Үлдэгдэл шинэчлэх (Дахин баталгаажуулах)",
+    tab_all: "Бүх",
+    tab_vi: "Вьетнам",
+    tab_zh: "Хятад",
+    tab_mn: "Монгол",
+    tab_uz: "Узбек",
+    me_label: "Би"
   },
   uz: {
-    title: "Gachon Universiteti Xalqaro Talabalari Bank Balansi Peshqadamlar Jadvali",
+    title: "Gachonda aktivlarim bo'yicha nechanchi o'rindaman?",
     subtitle: "Gachon Universiteti xalqaro talabalarining real vaqtdagi bank balansi reytingi",
     login_btn: "Kakao orqali kirish va reytingni tekshirish",
     logout_btn: "Chiqish",
@@ -249,7 +279,13 @@ export const translations = {
     setup_profile_btn: "Profilni sozlashga o'tish",
     upload_title_verified: "Mening aktivlarimni tasdiqlash holati",
     upload_desc_verified: "Bank balansingiz tasdiqlandi. Balansni yangilash uchun quyidagi tugmani bosing.",
-    update_balance_btn: "Balansni yangilash (Qayta tasdiqlash)"
+    update_balance_btn: "Balansni yangilash (Qayta tasdiqlash)",
+    tab_all: "Barchasi",
+    tab_vi: "Vyetnam",
+    tab_zh: "Xitoy",
+    tab_mn: "Mongoliya",
+    tab_uz: "O'zbekiston",
+    me_label: "Men"
   }
 };
 
