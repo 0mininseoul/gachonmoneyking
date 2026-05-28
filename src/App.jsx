@@ -371,306 +371,6 @@ function App() {
     return children;
   }
 
-  // Layout View Components
-  function MainLayout() {
-    return (
-      <div className="main-layout">
-        <header className="top-nav">
-          <div className="brand" style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
-            <img src="/logo.png" className="brand-logo" alt="logo" />
-            <span>Gachon Money King</span>
-          </div>
-          <div className="nav-controls">
-            {isAdmin && (
-              <button 
-                onClick={() => navigate(location.pathname === '/admin' ? '/dashboard' : '/admin')} 
-                className="btn-secondary btn-sm admin-btn"
-              >
-                {location.pathname === '/admin' ? 'Go to Leaderboard' : 'Admin Console'}
-              </button>
-            )}
-
-            <select 
-              value={locale} 
-              onChange={(e) => setLocale(e.target.value)}
-              className="lang-select"
-            >
-              <option value="vi">🇻🇳 Tiếng Việt</option>
-              <option value="zh">🇨🇳 中文</option>
-              <option value="mn">🇲🇳 Монгол</option>
-              <option value="uz">🇺🇿 O'zbek</option>
-              <option value="en">🌐 English</option>
-              <option value="ko">🇰🇷 한국어</option>
-            </select>
-
-            {user ? (
-              <button onClick={handleLogout} className="btn-secondary btn-sm">
-                {t('logout_btn')}
-               </button>
-            ) : (
-              <button onClick={handleLogin} className="btn-primary btn-sm">
-                {t('login_btn')}
-              </button>
-            )}
-          </div>
-        </header>
-        <main className="content-area">
-          <Outlet />
-        </main>
-        <footer className="main-footer">
-          <div className="footer-top">
-            <div className="footer-info">
-              <h4 className="footer-brand">Gachon Money King</h4>
-              <p className="footer-desc">{t('footer_desc')}</p>
-            </div>
-            <div className="footer-links">
-              <span onClick={() => navigate('/terms')}>{t('terms_link')}</span>
-              <span className="divider">|</span>
-              <span onClick={() => navigate('/privacy')}>{t('privacy_link')}</span>
-              <span className="divider">|</span>
-              <span onClick={() => navigate('/signup')}>{t('signup_link')}</span>
-            </div>
-          </div>
-          <div className="footer-separator"></div>
-          <div className="footer-bottom">
-            <div className="company-details">
-              <span>Company: Ascentum</span>
-              <span className="divider">•</span>
-              <span>BRN: 478-59-01063</span>
-              <span className="divider">•</span>
-              <span>Address: 206, 51 Samjeon-ro 13-gil, Songpa-gu, Seoul, Republic of Korea</span>
-              <span className="divider">•</span>
-              <span>Email: contact@ascentum.co.kr</span>
-            </div>
-            <p className="footer-copyright">© 2026 Gachon Money King. All rights reserved.</p>
-          </div>
-        </footer>
-      </div>
-    );
-  }
-
-  function LandingView() {
-    return (
-      <>
-        <div className="hero-section">
-          <h1>{t('title')}</h1>
-          <p className="subtitle">{t('subtitle')}</p>
-        </div>
-        {user ? (
-          <div className="auth-nudge-banner linear-card animate-fade-in">
-            <p className="banner-notice">{t('logged_in_no_profile_notice')}</p>
-            <button onClick={() => navigate('/profile-setup')} className="btn-primary btn-lg banner-login-btn">
-              {t('setup_profile_btn')}
-            </button>
-          </div>
-        ) : (
-          <div className="auth-nudge-banner linear-card">
-            <p className="banner-notice">{t('non_logged_in_notice')}</p>
-            <button onClick={handleLogin} className="btn-primary btn-lg banner-login-btn">
-              {t('login_btn')}
-            </button>
-          </div>
-        )}
-        <div className="leaderboard-wrapper">
-          <Leaderboard list={rankings} isAuthenticated={!!user} />
-        </div>
-      </>
-    );
-  }
-
-  function ProfileSetupView() {
-    return (
-      <div className="app-container">
-        <div className="linear-card profile-card">
-          <h2>{t('setup_profile')}</h2>
-          <form onSubmit={handleSaveProfile}>
-            <div className="form-group">
-              <label>{t('nickname')}</label>
-              <input
-                type="text"
-                placeholder={t('enter_nickname')}
-                value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
-                maxLength={20}
-                required
-              />
-            </div>
-            
-            <div className="form-group">
-              <label>{t('nationality')}</label>
-              <select
-                value={nationality}
-                onChange={(e) => setNationality(e.target.value)}
-                required
-              >
-                <option value="">-- {t('select_nationality')} --</option>
-                {nationalities.map(nat => (
-                  <option key={nat.code} value={nat.code}>
-                    {nat.flag} {nat.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="consent-box">
-              <label className="checkbox-container">
-                <input
-                  type="checkbox"
-                  checked={marketingConsent}
-                  onChange={(e) => setMarketingConsent(e.target.checked)}
-                />
-                <span className="checkmark"></span>
-                <span className="consent-label">{t('marketing_consent_label')}</span>
-              </label>
-              <p className="nudge-text">{t('nudge')}</p>
-            </div>
-
-            <button type="submit" disabled={savingProfile} className="btn-primary">
-              {savingProfile ? 'Saving...' : t('submit_profile')}
-            </button>
-          </form>
-        </div>
-      </div>
-    );
-  }
-
-  function DashboardView() {
-    return (
-      <>
-        <div className="hero-section">
-          <h1>{t('title')}</h1>
-          <p className="subtitle">{t('subtitle')}</p>
-        </div>
-
-        <div className="user-dashboard-card linear-card">
-          <h3>{t('upload_title')}</h3>
-          <p className="desc">{t('upload_desc')}</p>
-          
-          {userRecord && userRecord.status ? (
-            <div className="user-record-status">
-              <p className="verified-status-info">
-                {t('status_label')}<strong className={`status-${userRecord.status}`}>{userRecord.status.toUpperCase()}</strong>
-              </p>
-              <p className="balance-info-text">
-                {t('registered_balance_label')}<strong>{Number(userRecord.balance).toLocaleString()} KRW</strong>
-              </p>
-            </div>
-          ) : null}
-
-          <div className="upload-input-container">
-            <input
-              type="file"
-              id="screenshot-file-upload"
-              accept="image/*"
-              onChange={handleFileUpload}
-              className="file-hidden-input"
-            />
-            <label htmlFor="screenshot-file-upload" className="btn-primary upload-label-btn">
-              {t('upload_btn')}
-            </label>
-          </div>
-          
-          {uploadError && <p className="error-message">❌ {uploadError}</p>}
-          {uploadSuccess && <p className="success-message">✅ {t('success')}</p>}
-        </div>
-
-        {showRankCard && userRecord && (
-          <div className="overlay-celebration" onClick={() => setShowRankCard(false)}>
-            <div className="rank-celebration-card linear-card" onClick={(e) => e.stopPropagation()}>
-              <button className="close-overlay" onClick={() => setShowRankCard(false)}>×</button>
-              <div className="medal-icon">🏆</div>
-              <h2>{t('verification_complete')}</h2>
-              <p className="celebration-text">
-                {t('balance_registered_prefix')}<strong>{Number(userRecord.balance).toLocaleString()} KRW</strong>{t('balance_registered_suffix')}
-              </p>
-               <button onClick={() => setShowRankCard(false)} className="btn-primary">
-                {t('view_leaderboard_btn')}
-              </button>
-            </div>
-          </div>
-        )}
-
-        <div className="leaderboard-wrapper">
-          <Leaderboard list={rankings} isAuthenticated={true} />
-        </div>
-      </>
-    );
-  }
-
-  function AdminConsoleView() {
-    return (
-      <div className="admin-console">
-        <div className="admin-header">
-          <h2>Admin Verification Console</h2>
-          <button onClick={exportCSV} className="btn-primary btn-sm">Export CSV Data</button>
-        </div>
-        {loadingAdminQueue ? (
-          <p>Loading queue data...</p>
-        ) : (
-          <div className="admin-table-card">
-            <div className="admin-grid-header">
-              <div>User (Nickname / Name)</div>
-              <div>Phone / Gender / Nation</div>
-              <div>Screenshot Image</div>
-              <div>AI Extracted Balance</div>
-              <div>Status / Actions</div>
-            </div>
-            <div className="admin-grid-body">
-              {adminQueue.length === 0 ? (
-                <p className="no-data">No uploads in verification queue</p>
-              ) : (
-                adminQueue.map((row) => (
-                  <div key={row.id} className="admin-row">
-                    <div className="admin-col-user">
-                      <strong>{row.nickname}</strong>
-                      <span className="sub-text">{row.profiles?.real_name || 'No Name'}</span>
-                    </div>
-                    <div className="admin-col-meta">
-                      <div>{row.profiles?.phone_number || 'No Phone'}</div>
-                      <div className="sub-text">{row.profiles?.gender} / {row.nationality}</div>
-                    </div>
-                    <div className="admin-col-img">
-                      <a href={row.screenshot_url} target="_blank" rel="noopener noreferrer">
-                        <img src={row.screenshot_url} alt="Bank Screen" className="admin-thumb" />
-                      </a>
-                    </div>
-                    <div className="admin-col-balance">
-                      <input 
-                        type="number" 
-                        defaultValue={row.balance} 
-                        onBlur={(e) => updateVerificationStatus(row.id, row.status, e.target.value)}
-                        className="balance-edit-input"
-                      />
-                    </div>
-                    <div className="admin-col-actions">
-                      <span className={`status-badge badge-${row.status}`}>{row.status}</span>
-                      <div className="action-buttons">
-                        <button 
-                          onClick={() => updateVerificationStatus(row.id, 'verified', row.balance)}
-                          className="btn-action approve-btn"
-                          disabled={row.status === 'verified'}
-                        >
-                          Approve
-                        </button>
-                        <button 
-                          onClick={() => updateVerificationStatus(row.id, 'rejected', 0)}
-                          className="btn-action reject-btn"
-                          disabled={row.status === 'rejected'}
-                        >
-                          Reject
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-
   if (loading) {
     return (
       <div className="app-container loading-container">
@@ -696,17 +396,342 @@ function App() {
 
   return (
     <Routes>
-      <Route element={<MainLayout />}>
-        <Route path="/" element={<PublicRoute><LandingView /></PublicRoute>} />
-        <Route path="/dashboard" element={<ProtectedRoute><DashboardView /></ProtectedRoute>} />
-        <Route path="/admin" element={<AdminRoute><AdminConsoleView /></AdminRoute>} />
+      <Route element={<MainLayout isAdmin={isAdmin} locale={locale} setLocale={setLocale} user={user} handleLogout={handleLogout} handleLogin={handleLogin} navigate={navigate} location={location} t={t} />}>
+        <Route path="/" element={<PublicRoute><LandingView user={user} rankings={rankings} handleLogin={handleLogin} t={t} navigate={navigate} /></PublicRoute>} />
+        <Route path="/dashboard" element={<ProtectedRoute><DashboardView t={t} user={user} userRecord={userRecord} uploading={uploading} uploadError={uploadError} uploadSuccess={uploadSuccess} showRankCard={showRankCard} setShowRankCard={setShowRankCard} handleFileUpload={handleFileUpload} rankings={rankings} /></ProtectedRoute>} />
+        <Route path="/admin" element={<AdminRoute><AdminConsoleView loadingAdminQueue={loadingAdminQueue} exportCSV={exportCSV} adminQueue={adminQueue} updateVerificationStatus={updateVerificationStatus} /></AdminRoute>} />
         <Route path="/signup" element={<SignupView />} />
         <Route path="/privacy" element={<PrivacyView />} />
         <Route path="/terms" element={<TermsView />} />
       </Route>
-      <Route path="/profile-setup" element={<OnboardingRoute><ProfileSetupView /></OnboardingRoute>} />
+      <Route path="/profile-setup" element={<OnboardingRoute><ProfileSetupView t={t} nickname={nickname} setNickname={setNickname} nationality={nationality} setNationality={setNationality} marketingConsent={marketingConsent} setMarketingConsent={setMarketingConsent} savingProfile={savingProfile} handleSaveProfile={handleSaveProfile} /></OnboardingRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+  );
+}
+
+function MainLayout({ isAdmin, locale, setLocale, user, handleLogout, handleLogin, navigate, location, t }) {
+  return (
+    <div className="main-layout">
+      <header className="top-nav">
+        <div className="brand" style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
+          <img src="/logo.png" className="brand-logo" alt="logo" />
+          <span>Gachon Money King</span>
+        </div>
+        <div className="nav-controls">
+          {isAdmin && (
+            <button 
+              onClick={() => navigate(location.pathname === '/admin' ? '/dashboard' : '/admin')} 
+              className="btn-secondary btn-sm admin-btn"
+            >
+              {location.pathname === '/admin' ? 'Go to Leaderboard' : 'Admin Console'}
+            </button>
+          )}
+
+          <select 
+            value={locale} 
+            onChange={(e) => setLocale(e.target.value)}
+            className="lang-select"
+          >
+            <option value="vi">🇻🇳 Tiếng Việt</option>
+            <option value="zh">🇨🇳 中文</option>
+            <option value="mn">🇲🇳 Монгол</option>
+            <option value="uz">🇺🇿 O'zbek</option>
+            <option value="en">🌐 English</option>
+            <option value="ko">🇰🇷 한국어</option>
+          </select>
+
+          {user ? (
+            <button onClick={handleLogout} className="btn-secondary btn-sm">
+              {t('logout_btn')}
+             </button>
+          ) : (
+            <button onClick={handleLogin} className="btn-primary btn-sm">
+              {t('login_btn')}
+            </button>
+          )}
+        </div>
+      </header>
+      <main className="content-area">
+        <Outlet />
+      </main>
+      <footer className="main-footer">
+        <div className="footer-top">
+          <div className="footer-info">
+            <h4 className="footer-brand">Gachon Money King</h4>
+            <p className="footer-desc">{t('footer_desc')}</p>
+          </div>
+          <div className="footer-links">
+            <span onClick={() => navigate('/terms')}>{t('terms_link')}</span>
+            <span className="divider">|</span>
+            <span onClick={() => navigate('/privacy')}>{t('privacy_link')}</span>
+            <span className="divider">|</span>
+            <span onClick={() => navigate('/signup')}>{t('signup_link')}</span>
+          </div>
+        </div>
+        <div className="footer-separator"></div>
+        <div className="footer-bottom">
+          <div className="company-details">
+            <span>Company: Ascentum</span>
+            <span className="divider">•</span>
+            <span>BRN: 478-59-01063</span>
+            <span className="divider">•</span>
+            <span>Address: 206, 51 Samjeon-ro 13-gil, Songpa-gu, Seoul, Republic of Korea</span>
+            <span className="divider">•</span>
+            <span>Email: contact@ascentum.co.kr</span>
+          </div>
+          <p className="footer-copyright">© 2026 Gachon Money King. All rights reserved.</p>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+function LandingView({ user, rankings, handleLogin, t, navigate }) {
+  return (
+    <>
+      <div className="hero-section">
+        <h1>{t('title')}</h1>
+        <p className="subtitle">{t('subtitle')}</p>
+      </div>
+      {user ? (
+        <div className="auth-nudge-banner linear-card animate-fade-in">
+          <p className="banner-notice">{t('logged_in_no_profile_notice')}</p>
+          <button onClick={() => navigate('/profile-setup')} className="btn-primary btn-lg banner-login-btn">
+            {t('setup_profile_btn')}
+          </button>
+        </div>
+      ) : (
+        <div className="auth-nudge-banner linear-card">
+          <p className="banner-notice">{t('non_logged_in_notice')}</p>
+          <button onClick={handleLogin} className="btn-primary btn-lg banner-login-btn">
+            {t('login_btn')}
+          </button>
+        </div>
+      )}
+      <div className="leaderboard-wrapper">
+        <Leaderboard list={rankings} isAuthenticated={!!user} />
+      </div>
+    </>
+  );
+}
+
+function ProfileSetupView({
+  t,
+  nickname,
+  setNickname,
+  nationality,
+  setNationality,
+  marketingConsent,
+  setMarketingConsent,
+  savingProfile,
+  handleSaveProfile
+}) {
+  return (
+    <div className="app-container">
+      <div className="linear-card profile-card">
+        <h2>{t('setup_profile')}</h2>
+        <form onSubmit={handleSaveProfile}>
+          <div className="form-group">
+            <label>{t('nickname')}</label>
+            <input
+              type="text"
+              placeholder={t('enter_nickname')}
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
+              maxLength={20}
+              required
+            />
+          </div>
+          
+          <div className="form-group">
+            <label>{t('nationality')}</label>
+            <select
+              value={nationality}
+              onChange={(e) => setNationality(e.target.value)}
+              required
+            >
+              <option value="">-- {t('select_nationality')} --</option>
+              {nationalities.map(nat => (
+                <option key={nat.code} value={nat.code}>
+                  {nat.flag} {nat.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="consent-box">
+            <label className="checkbox-container">
+              <input
+                type="checkbox"
+                checked={marketingConsent}
+                onChange={(e) => setMarketingConsent(e.target.checked)}
+              />
+              <span className="checkmark"></span>
+              <span className="consent-label">{t('marketing_consent_label')}</span>
+            </label>
+            <p className="nudge-text">{t('nudge')}</p>
+          </div>
+
+          <button type="submit" disabled={savingProfile} className="btn-primary">
+            {savingProfile ? 'Saving...' : t('submit_profile')}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function DashboardView({
+  t,
+  user,
+  userRecord,
+  uploading,
+  uploadError,
+  uploadSuccess,
+  showRankCard,
+  setShowRankCard,
+  handleFileUpload,
+  rankings
+}) {
+  return (
+    <>
+      <div className="hero-section">
+        <h1>{t('title')}</h1>
+        <p className="subtitle">{t('subtitle')}</p>
+      </div>
+
+      <div className="user-dashboard-card linear-card">
+        <h3>{t('upload_title')}</h3>
+        <p className="desc">{t('upload_desc')}</p>
+        
+        {userRecord && userRecord.status ? (
+          <div className="user-record-status">
+            <p className="verified-status-info">
+              {t('status_label')}<strong className={`status-${userRecord.status}`}>{userRecord.status.toUpperCase()}</strong>
+            </p>
+            <p className="balance-info-text">
+              {t('registered_balance_label')}<strong>{Number(userRecord.balance).toLocaleString()} KRW</strong>
+            </p>
+          </div>
+        ) : null}
+
+        <div className="upload-input-container">
+          <input
+            type="file"
+            id="screenshot-file-upload"
+            accept="image/*"
+            onChange={handleFileUpload}
+            className="file-hidden-input"
+          />
+          <label htmlFor="screenshot-file-upload" className="btn-primary upload-label-btn">
+            {t('upload_btn')}
+          </label>
+        </div>
+        
+        {uploadError && <p className="error-message">❌ {uploadError}</p>}
+        {uploadSuccess && <p className="success-message">✅ {t('success')}</p>}
+      </div>
+
+      {showRankCard && userRecord && (
+        <div className="overlay-celebration" onClick={() => setShowRankCard(false)}>
+          <div className="rank-celebration-card linear-card" onClick={(e) => e.stopPropagation()}>
+            <button className="close-overlay" onClick={() => setShowRankCard(false)}>×</button>
+            <div className="medal-icon">🏆</div>
+            <h2>{t('verification_complete')}</h2>
+            <p className="celebration-text">
+              {t('balance_registered_prefix')}<strong>{Number(userRecord.balance).toLocaleString()} KRW</strong>{t('balance_registered_suffix')}
+            </p>
+             <button onClick={() => setShowRankCard(false)} className="btn-primary">
+              {t('view_leaderboard_btn')}
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="leaderboard-wrapper">
+        <Leaderboard list={rankings} isAuthenticated={true} />
+      </div>
+    </>
+  );
+}
+
+function AdminConsoleView({
+  loadingAdminQueue,
+  exportCSV,
+  adminQueue,
+  updateVerificationStatus
+}) {
+  return (
+    <div className="admin-console">
+      <div className="admin-header">
+        <h2>Admin Verification Console</h2>
+        <button onClick={exportCSV} className="btn-primary btn-sm">Export CSV Data</button>
+      </div>
+      {loadingAdminQueue ? (
+        <p>Loading queue data...</p>
+      ) : (
+        <div className="admin-table-card">
+          <div className="admin-grid-header">
+            <div>User (Nickname / Name)</div>
+            <div>Phone / Gender / Nation</div>
+            <div>Screenshot Image</div>
+            <div>AI Extracted Balance</div>
+            <div>Status / Actions</div>
+          </div>
+          <div className="admin-grid-body">
+            {adminQueue.length === 0 ? (
+              <p className="no-data">No uploads in verification queue</p>
+            ) : (
+              adminQueue.map((row) => (
+                <div key={row.id} className="admin-row">
+                  <div className="admin-col-user">
+                    <strong>{row.nickname}</strong>
+                    <span className="sub-text">{row.profiles?.real_name || 'No Name'}</span>
+                  </div>
+                  <div className="admin-col-meta">
+                    <div>{row.profiles?.phone_number || 'No Phone'}</div>
+                    <div className="sub-text">{row.profiles?.gender} / {row.nationality}</div>
+                  </div>
+                  <div className="admin-col-img">
+                    <a href={row.screenshot_url} target="_blank" rel="noopener noreferrer">
+                      <img src={row.screenshot_url} alt="Bank Screen" className="admin-thumb" />
+                    </a>
+                  </div>
+                  <div className="admin-col-balance">
+                    <input 
+                      type="number" 
+                      defaultValue={row.balance} 
+                      onBlur={(e) => updateVerificationStatus(row.id, row.status, e.target.value)}
+                      className="balance-edit-input"
+                    />
+                  </div>
+                  <div className="admin-col-actions">
+                    <span className={`status-badge badge-${row.status}`}>{row.status}</span>
+                    <div className="action-buttons">
+                      <button 
+                        onClick={() => updateVerificationStatus(row.id, 'verified', row.balance)}
+                        className="btn-action approve-btn"
+                        disabled={row.status === 'verified'}
+                      >
+                        Approve
+                      </button>
+                      <button 
+                        onClick={() => updateVerificationStatus(row.id, 'rejected', 0)}
+                        className="btn-action reject-btn"
+                        disabled={row.status === 'rejected'}
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 

@@ -29,6 +29,7 @@
 | **Task 27: Rewrite PrivacyView.jsx with conditional Ko/En layout** | [x] | Update `PrivacyView.jsx` to select English statement unless user locale is Korean ('ko'). |
 | **Task 28: Rewrite TermsView.jsx with conditional Ko/En layout** | [x] | Update `TermsView.jsx` to select English statement unless user locale is Korean ('ko'). |
 | **Task 29: Build, test, commit and push to origin main** | [x] | Build verification, confirm routing and language toggle, then commit and push to main branch. |
-| **Task 30: Fix Landing page logged-in user UX and login redirect** | [x] | Enhance Landing page for logged-in users, add session flag redirect, update translations, verify. |
+| **Task 31: Fix input focus bug, marketing text, and checkbox layout** | [x] | Move React views outside App, update marketing translation labels, add custom checkmark CSS, verify. |
+
 
 
