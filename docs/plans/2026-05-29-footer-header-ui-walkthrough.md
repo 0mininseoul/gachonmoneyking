@@ -29,3 +29,17 @@ The build compiled successfully (`npm run build`). We ran a Playwright script in
 
 ### Mobile Full Page Screenshot
 ![Mobile Fullpage](/Users/youngminpark/.gemini/antigravity/brain/334789cb-1f90-4a39-a407-e250b67ed9e1/mobile_fullpage.png)
+
+### 3. Multilingual Mobile UI Optimizations
+To resolve text wrapping issues across multiple languages in mobile view, we made the following styling improvements:
+- Applied `text-wrap: balance` to `h1` and `.subtitle` to distribute text lines evenly, preventing single trailing words on a line.
+- Removed `-webkit-line-clamp: 2` and `-webkit-box` styling from the hero title to prevent truncation of translated headlines.
+- Adjusted mobile font sizes per language class:
+  - Vietnamese (`.headline-vi`): scaled to `1.3rem`.
+  - English (`.headline-en`): scaled to `1.35rem`.
+  - Uzbek/Mongolian (`.headline-uz`, `.headline-mn`): scaled to `1.15rem`.
+- Center-aligned the announcement banner text and its elements on mobile to improve symmetry and visuals.
+
+#### Verified Vietnamese Mobile Layout (V2)
+![Vietnamese Mobile v2](/Users/youngminpark/.gemini/antigravity/brain/334789cb-1f90-4a39-a407-e250b67ed9e1/lang_vi_v2.png)
+
