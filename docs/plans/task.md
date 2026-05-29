@@ -41,7 +41,7 @@
 | **Task 44: Style filters, pinned rows, and headline single-line fit in index.css** | [x] | Write CSS for tabs, pinned highlights, and headline clamp to prevent wraps |
 | **Task 45: Update brand logo text size for desktop and mobile views** | [x] | Adjust `.brand` font-size in desktop and mobile viewport in `src/index.css`. |
 | **Task 46: Reflow mobile footer business info layout** | [x] | Apply media query rules for footer details row-breaking, divider-hiding, address no-wrap, and font scaling. |
-| **Task 47: Optimize mobile hero title and subtitle wrapping across languages** | [/] | Update `h1` and `.subtitle` properties in `src/index.css` with `text-wrap: balance` and language-specific mobile font scaling. |
-| **Task 48: Center-align mobile announcement banner content** | [ ] | Center the alignment, text, and flex properties of `.announcement-banner` in mobile media query. |
+| **Task 47: Optimize mobile hero title and subtitle wrapping across languages** | [x] | Update `h1` and `.subtitle` properties in `src/index.css` with `text-wrap: balance` and language-specific mobile font scaling. |
+| **Task 48: Center-align mobile announcement banner content** | [x] | Center the alignment, text, and flex properties of `.announcement-banner` in mobile media query. |
 
 
