@@ -1337,13 +1337,41 @@ h1.headline-uz, h1.headline-mn {
     text-align: center;
   }
   .company-details {
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px 6px;
+    font-size: 0.68rem;
+    letter-spacing: -0.2px;
+    text-align: center;
+    line-height: 1.5;
+  }
+  /* Show Company, divider, and BRN inline on the first row */
+  .company-details > span:nth-child(1),
+  .company-details > span:nth-child(2),
+  .company-details > span:nth-child(3) {
+    display: inline-block;
+  }
+  /* Hide the divider between BRN and Address */
+  .company-details > span:nth-child(4) {
+    display: none;
+  }
+  /* Force Address to start on its own row, and stay on a single line */
+  .company-details > span:nth-child(5) {
+    display: block;
+    width: 100%;
+    white-space: nowrap;
     text-align: center;
   }
-  .company-details .divider {
+  /* Hide the divider between Address and Email */
+  .company-details > span:nth-child(6) {
     display: none;
+  }
+  /* Force Email to start on its own row */
+  .company-details > span:nth-child(7) {
+    display: block;
+    width: 100%;
+    text-align: center;
   }
 }
 
