@@ -215,6 +215,18 @@ function App() {
     }
   };
 
+  const clearCorrectionNote = async (recordId) => {
+    try {
+      const { error } = await supabase
+        .from('leaderboard')
+        .update({ correction_note: null })
+        .eq('id', recordId);
+      if (!error) fetchAdminQueue();
+    } catch (err) {
+      console.error("Error clearing correction note:", err);
+    }
+  };
+
   const updateVerificationStatus = async (recordId, status, balanceInput) => {
     try {
       const balanceVal = Number(balanceInput);
@@ -394,7 +406,7 @@ function App() {
       <Route element={<MainLayout isAdmin={isAdmin} locale={locale} setLocale={setLocale} user={user} handleLogout={handleLogout} handleLogin={handleLogin} navigate={navigate} location={location} t={t} />}>
         <Route path="/" element={<PublicRoute loading={loading} user={user} hasProfile={hasProfile}><LandingView user={user} rankings={rankings} handleLogin={handleLogin} t={t} navigate={navigate} /></PublicRoute>} />
         <Route path="/dashboard" element={<ProtectedRoute loading={loading} user={user} hasProfile={hasProfile}><DashboardView t={t} user={user} userRecord={userRecord} uploading={uploading} uploadError={uploadError} uploadSuccess={uploadSuccess} showRankCard={showRankCard} setShowRankCard={setShowRankCard} handleFileUpload={handleFileUpload} rankings={rankings} /></ProtectedRoute>} />
-        <Route path="/admin" element={<AdminRoute loading={loading} user={user} hasProfile={hasProfile} isAdmin={isAdmin}><AdminConsoleView loadingAdminQueue={loadingAdminQueue} exportCSV={exportCSV} adminQueue={adminQueue} updateVerificationStatus={updateVerificationStatus} /></AdminRoute>} />
+        <Route path="/admin" element={<AdminRoute loading={loading} user={user} hasProfile={hasProfile} isAdmin={isAdmin}><AdminConsoleView loadingAdminQueue={loadingAdminQueue} exportCSV={exportCSV} adminQueue={adminQueue} updateVerificationStatus={updateVerificationStatus} clearCorrectionNote={clearCorrectionNote} /></AdminRoute>} />
         <Route path="/signup" element={<SignupView />} />
         <Route path="/privacy" element={<PrivacyView />} />
         <Route path="/terms" element={<TermsView />} />
@@ -406,8 +418,12 @@ function App() {
 }
 
 // Route Guard Definitions
+function CenteredSpinner() {
+  return <div className="loading-container"><div className="spinner"></div></div>;
+}
+
 function PublicRoute({ children, loading, user, hasProfile }) {
-  if (loading) return <div className="spinner"></div>;
+  if (loading) return <CenteredSpinner />;
   if (user) {
     if (hasProfile) return <Navigate to="/dashboard" replace />;
   }
@@ -415,21 +431,21 @@ function PublicRoute({ children, loading, user, hasProfile }) {
 }
 
 function ProtectedRoute({ children, loading, user, hasProfile }) {
-  if (loading) return <div className="spinner"></div>;
+  if (loading) return <CenteredSpinner />;
   if (!user) return <Navigate to="/" replace />;
   if (!hasProfile) return <Navigate to="/profile-setup" replace />;
   return children;
 }
 
 function OnboardingRoute({ children, loading, user, hasProfile }) {
-  if (loading) return <div className="spinner"></div>;
+  if (loading) return <CenteredSpinner />;
   if (!user) return <Navigate to="/" replace />;
   if (hasProfile) return <Navigate to="/dashboard" replace />;
   return children;
 }
 
 function AdminRoute({ children, loading, user, hasProfile, isAdmin }) {
-  if (loading) return <div className="spinner"></div>;
+  if (loading) return <CenteredSpinner />;
   if (!user) return <Navigate to="/" replace />;
   if (!hasProfile) return <Navigate to="/profile-setup" replace />;
   if (!isAdmin) return <Navigate to="/dashboard" replace />;
@@ -586,6 +602,7 @@ function ProfileSetupView({
               maxLength={20}
               required
             />
+            <span className="field-hint">{t('nickname_hint')}</span>
           </div>
           
           <div className="form-group">
@@ -638,11 +655,24 @@ function DashboardView({
   handleFileUpload,
   rankings
 }) {
+  const [showCorrectionModal, setShowCorrectionModal] = React.useState(false);
+  const [correctionText, setCorrectionText] = React.useState('');
+  const [submittingCorrection, setSubmittingCorrection] = React.useState(false);
+  const [correctionSuccess, setCorrectionSuccess] = React.useState(false);
+
   const currentBalance = userRecord ? Number(userRecord.balance) : 0;
   const otherHigherRanked = rankings.filter(
     r => r.user_id !== user.id && Number(r.balance) > currentBalance
   );
   const userRank = otherHigherRanked.length + 1;
+  const total = rankings.length;
+
+  const topPct = total > 0 ? Math.ceil(userRank / total * 100) : 0;
+  const percentileLabel = total > 0
+    ? topPct <= 50
+      ? `${t('percentile_top')} ${topPct}%`
+      : `${t('percentile_bottom')} ${Math.ceil((total - userRank + 1) / total * 100)}%`
+    : '';
 
   const nickname = userRecord?.nickname || '';
 
@@ -650,6 +680,7 @@ function DashboardView({
     ? t('celebration_title')
         .replace('{nickname}', nickname)
         .replace('{rank}', userRank)
+        .replace('{percentile}', percentileLabel)
     : '';
 
   const subtitleText = userRecord
@@ -659,7 +690,33 @@ function DashboardView({
     : '';
 
   const isVerified = userRecord && userRecord.status === 'verified';
+  const hasPendingCorrection = isVerified && !!userRecord?.correction_note;
   const { locale } = useLanguage();
+
+  const handleCorrectionSubmit = async (e) => {
+    e.preventDefault();
+    if (!correctionText.trim()) return;
+    setSubmittingCorrection(true);
+    try {
+      const { error } = await supabase
+        .from('leaderboard')
+        .update({ correction_note: correctionText.trim() })
+        .eq('user_id', user.id);
+      if (!error) {
+        setCorrectionSuccess(true);
+      }
+    } catch (err) {
+      console.error('Error submitting correction:', err);
+    } finally {
+      setSubmittingCorrection(false);
+    }
+  };
+
+  const openCorrectionModal = () => {
+    setCorrectionText(userRecord?.correction_note || '');
+    setCorrectionSuccess(false);
+    setShowCorrectionModal(true);
+  };
 
   return (
     <>
@@ -671,7 +728,7 @@ function DashboardView({
       <div className="user-dashboard-card linear-card">
         <h3>{isVerified ? t('upload_title_verified') : t('upload_title')}</h3>
         <p className="desc">{isVerified ? t('upload_desc_verified') : t('upload_desc')}</p>
-        
+
         {userRecord && userRecord.status ? (
           <div className="user-record-status">
             <p className="verified-status-info">
@@ -684,21 +741,66 @@ function DashboardView({
         ) : null}
 
         <div className="upload-input-container">
-          <input
-            type="file"
-            id="screenshot-file-upload"
-            accept="image/*"
-            onChange={handleFileUpload}
-            className="file-hidden-input"
-          />
-          <label htmlFor="screenshot-file-upload" className={`${isVerified ? 'btn-secondary' : 'btn-primary'} upload-label-btn`}>
-            {isVerified ? t('update_balance_btn') : t('upload_btn')}
-          </label>
+          {isVerified ? (
+            <button onClick={openCorrectionModal} className="btn-secondary upload-label-btn">
+              {t('correction_btn')}
+            </button>
+          ) : (
+            <>
+              <input
+                type="file"
+                id="screenshot-file-upload"
+                accept="image/*"
+                onChange={handleFileUpload}
+                className="file-hidden-input"
+              />
+              <label htmlFor="screenshot-file-upload" className="btn-primary upload-label-btn">
+                {t('upload_btn')}
+              </label>
+            </>
+          )}
         </div>
-        
-        {uploadError && <p className="error-message">❌ {uploadError}</p>}
-        {uploadSuccess && <p className="success-message">✅ {t('success')}</p>}
+
+        {hasPendingCorrection && (
+          <p className="correction-pending-notice">{t('correction_pending_status')}</p>
+        )}
+        {!isVerified && uploadError && <p className="error-message">❌ {uploadError}</p>}
+        {!isVerified && uploadSuccess && <p className="success-message">✅ {t('success')}</p>}
       </div>
+
+      {/* Correction Request Modal */}
+      {showCorrectionModal && (
+        <div className="overlay-celebration" onClick={() => setShowCorrectionModal(false)}>
+          <div className="correction-modal linear-card" onClick={(e) => e.stopPropagation()}>
+            <button className="close-overlay" onClick={() => setShowCorrectionModal(false)}>×</button>
+            <h3>{t('correction_modal_title')}</h3>
+            <p>{t('correction_modal_desc')}</p>
+            {correctionSuccess ? (
+              <p className="success-message" style={{ textAlign: 'center', padding: '16px 0' }}>
+                ✅ {t('correction_success')}
+              </p>
+            ) : (
+              <form onSubmit={handleCorrectionSubmit}>
+                {userRecord?.correction_note && (
+                  <div className="correction-existing">
+                    <strong>{t('correction_existing')}</strong>
+                    {userRecord.correction_note}
+                  </div>
+                )}
+                <textarea
+                  value={correctionText}
+                  onChange={(e) => setCorrectionText(e.target.value)}
+                  placeholder={t('correction_placeholder')}
+                  required
+                />
+                <button type="submit" disabled={submittingCorrection} className="btn-primary">
+                  {submittingCorrection ? '...' : t('correction_submit')}
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
 
       {showRankCard && userRecord && (
         <div className="overlay-celebration" onClick={() => setShowRankCard(false)}>
@@ -706,10 +808,8 @@ function DashboardView({
             <button className="close-overlay" onClick={() => setShowRankCard(false)}>×</button>
             <div className="medal-icon">🏆</div>
             <h2>{titleText}</h2>
-            <p className="celebration-text">
-              {subtitleText}
-            </p>
-             <button onClick={() => setShowRankCard(false)} className="btn-primary">
+            <p className="celebration-text">{subtitleText}</p>
+            <button onClick={() => setShowRankCard(false)} className="btn-primary">
               {t('view_leaderboard_btn')}
             </button>
           </div>
@@ -727,7 +827,8 @@ function AdminConsoleView({
   loadingAdminQueue,
   exportCSV,
   adminQueue,
-  updateVerificationStatus
+  updateVerificationStatus,
+  clearCorrectionNote
 }) {
   return (
     <div className="admin-console">
@@ -751,47 +852,62 @@ function AdminConsoleView({
               <p className="no-data">No uploads in verification queue</p>
             ) : (
               adminQueue.map((row) => (
-                <div key={row.id} className="admin-row">
-                  <div className="admin-col-user">
-                    <strong>{row.nickname}</strong>
-                    <span className="sub-text">{row.profiles?.real_name || 'No Name'}</span>
-                  </div>
-                  <div className="admin-col-meta">
-                    <div>{row.profiles?.phone_number || 'No Phone'}</div>
-                    <div className="sub-text">{row.profiles?.gender} / {row.nationality}</div>
-                  </div>
-                  <div className="admin-col-img">
-                    <a href={row.screenshot_url} target="_blank" rel="noopener noreferrer">
-                      <img src={row.screenshot_url} alt="Bank Screen" className="admin-thumb" />
-                    </a>
-                  </div>
-                  <div className="admin-col-balance">
-                    <input 
-                      type="number" 
-                      defaultValue={row.balance} 
-                      onBlur={(e) => updateVerificationStatus(row.id, row.status, e.target.value)}
-                      className="balance-edit-input"
-                    />
-                  </div>
-                  <div className="admin-col-actions">
-                    <span className={`status-badge badge-${row.status}`}>{row.status}</span>
-                    <div className="action-buttons">
-                      <button 
-                        onClick={() => updateVerificationStatus(row.id, 'verified', row.balance)}
-                        className="btn-action approve-btn"
-                        disabled={row.status === 'verified'}
-                      >
-                        Approve
-                      </button>
-                      <button 
-                        onClick={() => updateVerificationStatus(row.id, 'rejected', 0)}
-                        className="btn-action reject-btn"
-                        disabled={row.status === 'rejected'}
-                      >
-                        Reject
-                      </button>
+                <div key={row.id}>
+                  <div className="admin-row">
+                    <div className="admin-col-user">
+                      <strong>{row.nickname}</strong>
+                      <span className="sub-text">{row.profiles?.real_name || 'No Name'}</span>
+                    </div>
+                    <div className="admin-col-meta">
+                      <div>{row.profiles?.phone_number || 'No Phone'}</div>
+                      <div className="sub-text">{row.profiles?.gender} / {row.nationality}</div>
+                    </div>
+                    <div className="admin-col-img">
+                      <a href={row.screenshot_url} target="_blank" rel="noopener noreferrer">
+                        <img src={row.screenshot_url} alt="Bank Screen" className="admin-thumb" />
+                      </a>
+                    </div>
+                    <div className="admin-col-balance">
+                      <input
+                        type="number"
+                        defaultValue={row.balance}
+                        onBlur={(e) => updateVerificationStatus(row.id, row.status, e.target.value)}
+                        className="balance-edit-input"
+                      />
+                    </div>
+                    <div className="admin-col-actions">
+                      <span className={`status-badge badge-${row.status}`}>{row.status}</span>
+                      <div className="action-buttons">
+                        <button
+                          onClick={() => updateVerificationStatus(row.id, 'verified', row.balance)}
+                          className="btn-action approve-btn"
+                          disabled={row.status === 'verified'}
+                        >
+                          Approve
+                        </button>
+                        <button
+                          onClick={() => updateVerificationStatus(row.id, 'rejected', 0)}
+                          className="btn-action reject-btn"
+                          disabled={row.status === 'rejected'}
+                        >
+                          Reject
+                        </button>
+                      </div>
                     </div>
                   </div>
+                  {row.correction_note && (
+                    <div className="admin-correction-row">
+                      <span className="admin-correction-label">🔄 수정 요청</span>
+                      <span className="admin-correction-text">{row.correction_note}</span>
+                      <button
+                        onClick={() => clearCorrectionNote(row.id)}
+                        className="btn-action"
+                        style={{ background: '#3e3e44', color: '#f7f8f8', marginLeft: 8 }}
+                      >
+                        확인 완료
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))
             )}

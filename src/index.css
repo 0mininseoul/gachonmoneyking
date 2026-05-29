@@ -658,6 +658,9 @@ h1.headline-uz, h1.headline-mn {
 /* Spinner / AI Verification Loading Overlay */
 .loading-container {
   min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .spinner {
@@ -771,6 +774,87 @@ h1.headline-uz, h1.headline-mn {
   border-color: var(--color-primary);
   box-shadow: 0 10px 30px rgba(94, 106, 210, 0.2);
   animation: scale-up 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.rank-celebration-card h2 {
+  font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Correction request modal */
+.correction-modal {
+  max-width: 440px;
+  width: 92%;
+  position: relative;
+  animation: scale-up 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.correction-modal h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: var(--spacing-xs);
+}
+
+.correction-modal p {
+  font-size: 0.85rem;
+  color: var(--color-ink-subtle);
+  margin-bottom: var(--spacing-md);
+  line-height: 1.5;
+}
+
+.correction-modal textarea {
+  width: 100%;
+  min-height: 100px;
+  background-color: var(--color-surface-2);
+  color: var(--color-ink);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--rounded-md);
+  padding: var(--spacing-sm);
+  font-size: 0.9rem;
+  font-family: inherit;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s ease;
+  margin-bottom: var(--spacing-md);
+}
+
+.correction-modal textarea:focus {
+  border-color: var(--color-primary);
+}
+
+.correction-existing {
+  background-color: var(--color-surface-2);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--rounded-md);
+  padding: var(--spacing-sm);
+  font-size: 0.8rem;
+  color: var(--color-ink-muted);
+  margin-bottom: var(--spacing-md);
+  text-align: left;
+  line-height: 1.5;
+}
+
+.correction-existing strong {
+  display: block;
+  color: var(--color-ink-subtle);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 4px;
+}
+
+.correction-pending-notice {
+  font-size: 0.8rem;
+  color: #f59e0b;
+  margin-bottom: var(--spacing-sm);
+  text-align: center;
+}
+
+.correction-modal .btn-primary {
+  width: 100%;
+  padding: 10px;
 }
 
 .close-overlay {
@@ -898,6 +982,37 @@ h1.headline-uz, h1.headline-mn {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xs);
+}
+
+.admin-correction-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-lg);
+  background-color: rgba(245, 158, 11, 0.08);
+  border-top: 1px dashed rgba(245, 158, 11, 0.3);
+  font-size: 0.8rem;
+}
+
+.admin-correction-label {
+  color: #f59e0b;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.admin-correction-text {
+  color: var(--color-ink-muted);
+  flex: 1;
+  line-height: 1.5;
+}
+
+/* Profile field hint text */
+.field-hint {
+  font-size: 0.75rem;
+  color: #f59e0b;
+  line-height: 1.4;
+  margin-top: 2px;
 }
 
 .status-badge {
