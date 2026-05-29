@@ -74,7 +74,7 @@ body {
   align-items: center;
   gap: var(--spacing-xs);
   font-weight: 600;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   letter-spacing: -0.5px;
   color: var(--color-ink);
   white-space: nowrap;
@@ -1205,7 +1205,7 @@ h1.headline-uz, h1.headline-mn {
     flex-wrap: nowrap;
   }
   .brand {
-    font-size: 0.8rem;
+    font-size: 0.95rem;
     width: auto;
     justify-content: flex-start;
     margin-bottom: 0;
