@@ -1341,36 +1341,27 @@ h1.headline-uz, h1.headline-mn {
     flex-wrap: wrap;
     justify-content: center;
     gap: 4px 6px;
-    font-size: 0.68rem;
+    font-size: 0.63rem;
     letter-spacing: -0.2px;
     text-align: center;
     line-height: 1.5;
   }
-  /* Show Company, divider, and BRN inline on the first row */
-  .company-details > span:nth-child(1),
-  .company-details > span:nth-child(2),
-  .company-details > span:nth-child(3) {
-    display: inline-block;
-  }
+  /* Reorder items so Company, BRN, and Email are on the first row */
+  .company-details > span:nth-child(1) { order: 1; display: inline-block; }
+  .company-details > span:nth-child(2) { order: 2; display: inline-block; }
+  .company-details > span:nth-child(3) { order: 3; display: inline-block; }
+  .company-details > span:nth-child(6) { order: 4; display: inline-block; }
+  .company-details > span:nth-child(7) { order: 5; display: inline-block; }
+
   /* Hide the divider between BRN and Address */
-  .company-details > span:nth-child(4) {
-    display: none;
-  }
+  .company-details > span:nth-child(4) { display: none; }
+
   /* Force Address to start on its own row, and stay on a single line */
   .company-details > span:nth-child(5) {
+    order: 6;
     display: block;
     width: 100%;
     white-space: nowrap;
-    text-align: center;
-  }
-  /* Hide the divider between Address and Email */
-  .company-details > span:nth-child(6) {
-    display: none;
-  }
-  /* Force Email to start on its own row */
-  .company-details > span:nth-child(7) {
-    display: block;
-    width: 100%;
     text-align: center;
   }
 }
