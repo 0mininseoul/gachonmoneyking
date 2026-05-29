@@ -39,3 +39,6 @@
 | **Task 42: Refactor Leaderboard.jsx with tabs filtering and user pinning** | [x] | Implement activeTab selection state, filter logic, and row pinning at the top with highlights |
 | **Task 43: Update App.jsx with new headline copy and Leaderboard props** | [x] | Update title translations, pass currentUserId to Leaderboard, and adjust layout |
 | **Task 44: Style filters, pinned rows, and headline single-line fit in index.css** | [x] | Write CSS for tabs, pinned highlights, and headline clamp to prevent wraps |
+| **Task 45: Update brand logo text size for desktop and mobile views** | [x] | Adjust `.brand` font-size in desktop and mobile viewport in `src/index.css`. |
+| **Task 46: Reflow mobile footer business info layout** | [x] | Apply media query rules for footer details row-breaking, divider-hiding, address no-wrap, and font scaling. |
+
