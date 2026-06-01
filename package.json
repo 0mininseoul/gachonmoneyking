@@ -8,9 +8,12 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "test": "node --test test/*.test.js",
+    "qr:generate": "node scripts/generate-qr-codes.mjs",
     "supabase:serve": "supabase functions serve verify-balance --env-file .env.local"
   },
   "dependencies": {
+    "@amplitude/analytics-browser": "^2.42.5",
     "@supabase/supabase-js": "^2.43.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -21,6 +24,7 @@
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.0",
     "playwright": "^1.60.0",
+    "qrcode": "^1.5.4",
     "vite": "^5.2.11"
   }
 }

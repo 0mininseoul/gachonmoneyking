@@ -1,23 +1,19 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { translations } from './translations';
+import { normalizeLocale } from '../lib/qrAttribution';
 
 const LanguageContext = createContext();
 
 export function LanguageProvider({ children }) {
-  const [locale, setLocale] = useState('en');
+  const [locale, setLocaleState] = useState(() => getInitialLocale());
 
   useEffect(() => {
-    // Detect browser language on first load
-    const browserLang = navigator.language || navigator.userLanguage || 'en';
-    const shortLang = browserLang.split('-')[0].toLowerCase();
-    
-    // Check if the shortLang is one of our supported locales
-    if (translations[shortLang]) {
-      setLocale(shortLang);
-    } else {
-      setLocale('en'); // fallback to English
-    }
+    setLocaleState(getInitialLocale());
   }, []);
+
+  const setLocale = (nextLocale) => {
+    setLocaleState(normalizeLocale(nextLocale, 'en'));
+  };
 
   const t = (key) => {
     const localeTranslations = translations[locale] || translations['en'];
@@ -29,6 +25,17 @@ export function LanguageProvider({ children }) {
       {children}
     </LanguageContext.Provider>
   );
+}
+
+function getInitialLocale() {
+  if (typeof window === 'undefined') return 'en';
+
+  const urlLocale = new URLSearchParams(window.location.search).get('lang');
+  if (urlLocale) return normalizeLocale(urlLocale, 'en');
+
+  const browserLang = navigator.language || navigator.userLanguage || 'en';
+  const browserLocale = normalizeLocale(browserLang, 'en');
+  return translations[browserLocale] ? browserLocale : 'en';
 }
 
 export function useLanguage() {

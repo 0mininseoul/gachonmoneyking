@@ -7,6 +7,7 @@ import { Leaderboard } from './components/Leaderboard';
 import { SignupView } from './components/SignupView';
 import { PrivacyView } from './components/PrivacyView';
 import { TermsView } from './components/TermsView';
+import { trackPosterQrOpen } from './lib/analytics';
 import {
   buildProfilePayload,
   isPhoneNumberComplete,
@@ -49,6 +50,10 @@ function App() {
   // Admin details
   const [adminQueue, setAdminQueue] = useState([]);
   const [loadingAdminQueue, setLoadingAdminQueue] = useState(false);
+
+  useEffect(() => {
+    trackPosterQrOpen({ locale, url: window.location.href });
+  }, [locale, location.pathname, location.search]);
 
   useEffect(() => {
     // 1. Get initial session

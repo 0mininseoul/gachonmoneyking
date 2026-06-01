@@ -1,0 +1,51 @@
+[
+  {
+    "locale": "ko",
+    "label": "Korean",
+    "url": "https://gachonmoneyking.vercel.app/?lang=ko&utm_source=poster&utm_medium=qr&utm_campaign=2026_spring&utm_content=ko_main",
+    "png": "output/qr/gachon-money-king-qr-ko.png",
+    "svg": "output/qr/gachon-money-king-qr-ko.svg"
+  },
+  {
+    "locale": "en",
+    "label": "English",
+    "url": "https://gachonmoneyking.vercel.app/?lang=en&utm_source=poster&utm_medium=qr&utm_campaign=2026_spring&utm_content=en_main",
+    "png": "output/qr/gachon-money-king-qr-en.png",
+    "svg": "output/qr/gachon-money-king-qr-en.svg"
+  },
+  {
+    "locale": "zh",
+    "label": "Chinese",
+    "url": "https://gachonmoneyking.vercel.app/?lang=zh&utm_source=poster&utm_medium=qr&utm_campaign=2026_spring&utm_content=zh_main",
+    "png": "output/qr/gachon-money-king-qr-zh.png",
+    "svg": "output/qr/gachon-money-king-qr-zh.svg"
+  },
+  {
+    "locale": "vi",
+    "label": "Vietnamese",
+    "url": "https://gachonmoneyking.vercel.app/?lang=vi&utm_source=poster&utm_medium=qr&utm_campaign=2026_spring&utm_content=vi_main",
+    "png": "output/qr/gachon-money-king-qr-vi.png",
+    "svg": "output/qr/gachon-money-king-qr-vi.svg"
+  },
+  {
+    "locale": "mn",
+    "label": "Mongolian",
+    "url": "https://gachonmoneyking.vercel.app/?lang=mn&utm_source=poster&utm_medium=qr&utm_campaign=2026_spring&utm_content=mn_main",
+    "png": "output/qr/gachon-money-king-qr-mn.png",
+    "svg": "output/qr/gachon-money-king-qr-mn.svg"
+  },
+  {
+    "locale": "uz",
+    "label": "Uzbek",
+    "url": "https://gachonmoneyking.vercel.app/?lang=uz&utm_source=poster&utm_medium=qr&utm_campaign=2026_spring&utm_content=uz_main",
+    "png": "output/qr/gachon-money-king-qr-uz.png",
+    "svg": "output/qr/gachon-money-king-qr-uz.svg"
+  },
+  {
+    "locale": "ja",
+    "label": "Japanese",
+    "url": "https://gachonmoneyking.vercel.app/?lang=ja&utm_source=poster&utm_medium=qr&utm_campaign=2026_spring&utm_content=ja_main",
+    "png": "output/qr/gachon-money-king-qr-ja.png",
+    "svg": "output/qr/gachon-money-king-qr-ja.svg"
+  }
+]
