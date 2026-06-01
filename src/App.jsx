@@ -558,6 +558,9 @@ function MainLayout({ isAdmin, locale, setLocale, user, handleLogout, handleLogi
           <div className="footer-info">
             <h4 className="footer-brand">Gachon Money King</h4>
             <p className="footer-desc">{t('footer_desc')}</p>
+            <a className="footer-contact-link" href="mailto:contact@ascentum.co.kr">
+              contact@ascentum.co.kr
+            </a>
           </div>
           <div className="footer-links">
             <span onClick={() => navigate('/terms')}>{t('terms_link')}</span>
@@ -569,15 +572,6 @@ function MainLayout({ isAdmin, locale, setLocale, user, handleLogout, handleLogi
         </div>
         <div className="footer-separator"></div>
         <div className="footer-bottom">
-          <div className="company-details">
-            <span>Company: Ascentum</span>
-            <span className="divider">•</span>
-            <span>BRN: 478-59-01063</span>
-            <span className="divider">•</span>
-            <span>Address: 206, 51 Samjeon-ro 13-gil, Songpa-gu, Seoul, Republic of Korea</span>
-            <span className="divider">•</span>
-            <span>Email: contact@ascentum.co.kr</span>
-          </div>
           <p className="footer-copyright">© 2026 Gachon Money King. All rights reserved.</p>
         </div>
       </footer>

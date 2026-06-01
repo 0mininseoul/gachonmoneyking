@@ -1295,6 +1295,18 @@ h1.headline-uz, h1.headline-mn {
   color: var(--color-ink-subtle);
 }
 
+.footer-contact-link {
+  width: fit-content;
+  color: var(--color-ink-muted);
+  font-size: 0.82rem;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer-contact-link:hover {
+  color: var(--color-primary-hover);
+}
+
 .footer-links {
   display: flex;
   align-items: center;
@@ -1332,23 +1344,9 @@ h1.headline-uz, h1.headline-mn {
   text-align: left;
 }
 
-.company-details {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-xs) var(--spacing-sm);
-  font-size: 0.8rem;
-  color: var(--color-ink-subtle);
-  line-height: 1.4;
-}
-
-.company-details .divider {
-  color: var(--color-hairline-strong);
-}
-
 .footer-copyright {
   font-size: 0.8rem;
   color: var(--color-ink-tertiary);
-  margin-top: var(--spacing-xxs);
 }
 
 /* Mobile Responsive Optimization (Mobile First / Small Screens) */
@@ -1514,39 +1512,14 @@ h1.headline-uz, h1.headline-mn {
     align-items: center;
     text-align: center;
   }
+  .footer-contact-link {
+    width: auto;
+  }
   .footer-links {
     justify-content: center;
   }
   .footer-bottom {
     align-items: center;
-    text-align: center;
-  }
-  .company-details {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 4px 6px;
-    font-size: 0.63rem;
-    letter-spacing: 0;
-    text-align: center;
-    line-height: 1.5;
-  }
-  /* Reorder items so Company, BRN, and Email are on the first row */
-  .company-details > span:nth-child(1) { order: 1; display: inline-block; }
-  .company-details > span:nth-child(2) { order: 2; display: inline-block; }
-  .company-details > span:nth-child(3) { order: 3; display: inline-block; }
-  .company-details > span:nth-child(6) { order: 4; display: inline-block; }
-  .company-details > span:nth-child(7) { order: 5; display: inline-block; }
-
-  /* Hide the divider between BRN and Address */
-  .company-details > span:nth-child(4) { display: none; }
-
-  /* Force Address to start on its own row, and stay on a single line */
-  .company-details > span:nth-child(5) {
-    order: 6;
-    display: block;
-    width: 100%;
-    white-space: nowrap;
     text-align: center;
   }
 }
