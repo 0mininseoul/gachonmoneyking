@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, Navigate, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { Link, Routes, Route, Navigate, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from './lib/supabaseClient';
 import { useLanguage } from './i18n/LanguageContext';
 import { nationalities } from './i18n/translations';
@@ -7,6 +7,7 @@ import { Leaderboard } from './components/Leaderboard';
 import { SignupView } from './components/SignupView';
 import { PrivacyView } from './components/PrivacyView';
 import { TermsView } from './components/TermsView';
+import { buildProfilePayload, isProfileFormComplete } from './lib/profilePayload';
 
 function App() {
   const { locale, setLocale, t } = useLanguage();
@@ -20,6 +21,9 @@ function App() {
   const [hasProfile, setHasProfile] = useState(false);
   const [nickname, setNickname] = useState('');
   const [nationality, setNationality] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [termsAgreed, setTermsAgreed] = useState(false);
+  const [privacyAgreed, setPrivacyAgreed] = useState(false);
   const [marketingConsent, setMarketingConsent] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
 
@@ -64,6 +68,12 @@ function App() {
         setHasProfile(false);
         setUserRecord(null);
         setIsAdmin(false);
+        setNickname('');
+        setNationality('');
+        setPhoneNumber('');
+        setTermsAgreed(false);
+        setPrivacyAgreed(false);
+        setMarketingConsent(false);
         setLoading(false);
       }
     });
@@ -116,9 +126,24 @@ function App() {
 
       let hasProf = false;
       if (data) {
-        setHasProfile(true);
-        hasProf = true;
-        fetchUserLeaderboardRecord(currentUser.id);
+        setNickname(data.nickname || '');
+        setNationality(data.nationality || '');
+        setPhoneNumber(data.phone_number || '');
+        setTermsAgreed(Boolean(data.terms_agreed));
+        setPrivacyAgreed(Boolean(data.privacy_agreed));
+        setMarketingConsent(Boolean(data.marketing_consent));
+
+        hasProf = isProfileFormComplete({
+          nickname: data.nickname,
+          nationality: data.nationality,
+          phoneNumber: data.phone_number,
+          termsAgreed: data.terms_agreed,
+          privacyAgreed: data.privacy_agreed,
+        });
+        setHasProfile(hasProf);
+        if (hasProf) {
+          fetchUserLeaderboardRecord(currentUser.id);
+        }
 
         // Auto-sync email & avatar_url from Kakao user metadata if missing or updated
         const meta = currentUser.user_metadata || {};
@@ -134,6 +159,12 @@ function App() {
         }
       } else {
         setHasProfile(false);
+        setNickname('');
+        setNationality('');
+        setPhoneNumber('');
+        setTermsAgreed(false);
+        setPrivacyAgreed(false);
+        setMarketingConsent(false);
       }
 
       // Check if this was a just-logged-in event
@@ -200,7 +231,6 @@ function App() {
           profiles:user_id (
             real_name,
             phone_number,
-            gender,
             marketing_consent
           )
         `)
@@ -259,35 +289,34 @@ function App() {
     setUser(null);
     setHasProfile(false);
     setUserRecord(null);
+    setNickname('');
+    setNationality('');
+    setPhoneNumber('');
+    setTermsAgreed(false);
+    setPrivacyAgreed(false);
+    setMarketingConsent(false);
     navigate('/');
   };
 
   const handleSaveProfile = async (e) => {
     e.preventDefault();
-    if (!nickname.trim() || !nationality) return;
+    if (!isProfileFormComplete({ nickname, nationality, phoneNumber, termsAgreed, privacyAgreed })) return;
 
     setSavingProfile(true);
     try {
-      const meta = user.user_metadata || {};
-      const realName = meta.name || meta.full_name || 'Kakao User';
-      const phoneNumber = meta.phone_number || '';
-      const gender = meta.gender || 'unknown';
-      const emailVal = user.email || meta.email || '';
-      const avatarVal = meta.avatar_url || meta.picture || '';
+      const profilePayload = buildProfilePayload({
+        user,
+        nickname,
+        nationality,
+        phoneNumber,
+        termsAgreed,
+        privacyAgreed,
+        marketingConsent,
+      });
 
       const { error } = await supabase
         .from('profiles')
-        .insert({
-          id: user.id,
-          nickname: nickname.trim(),
-          nationality: nationality,
-          real_name: realName,
-          phone_number: phoneNumber,
-          gender: gender,
-          marketing_consent: marketingConsent,
-          email: emailVal,
-          avatar_url: avatarVal
-        });
+        .upsert(profilePayload, { onConflict: 'id' });
 
       if (!error) {
         setHasProfile(true);
@@ -348,7 +377,7 @@ function App() {
 
   const exportCSV = () => {
     let csvContent = "data:text/csv;charset=utf-8,";
-    csvContent += "Nickname,Real Name,Phone Number,Gender,Nationality,Balance,Status,Marketing Consent,Uploaded At\n";
+    csvContent += "Nickname,Real Name,Phone Number,Nationality,Balance,Status,Marketing Consent,Uploaded At\n";
     
     adminQueue.forEach((row) => {
       const profile = row.profiles || {};
@@ -356,7 +385,6 @@ function App() {
         row.nickname,
         profile.real_name || '',
         profile.phone_number || '',
-        profile.gender || '',
         row.nationality,
         row.balance,
         row.status,
@@ -411,7 +439,7 @@ function App() {
         <Route path="/privacy" element={<PrivacyView />} />
         <Route path="/terms" element={<TermsView />} />
       </Route>
-      <Route path="/profile-setup" element={<OnboardingRoute loading={loading} user={user} hasProfile={hasProfile}><ProfileSetupView t={t} nickname={nickname} setNickname={setNickname} nationality={nationality} setNationality={setNationality} marketingConsent={marketingConsent} setMarketingConsent={setMarketingConsent} savingProfile={savingProfile} handleSaveProfile={handleSaveProfile} /></OnboardingRoute>} />
+      <Route path="/profile-setup" element={<OnboardingRoute loading={loading} user={user} hasProfile={hasProfile}><ProfileSetupView t={t} nickname={nickname} setNickname={setNickname} nationality={nationality} setNationality={setNationality} phoneNumber={phoneNumber} setPhoneNumber={setPhoneNumber} termsAgreed={termsAgreed} setTermsAgreed={setTermsAgreed} privacyAgreed={privacyAgreed} setPrivacyAgreed={setPrivacyAgreed} marketingConsent={marketingConsent} setMarketingConsent={setMarketingConsent} savingProfile={savingProfile} handleSaveProfile={handleSaveProfile} /></OnboardingRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
@@ -582,18 +610,38 @@ function ProfileSetupView({
   setNickname,
   nationality,
   setNationality,
+  phoneNumber,
+  setPhoneNumber,
+  termsAgreed,
+  setTermsAgreed,
+  privacyAgreed,
+  setPrivacyAgreed,
   marketingConsent,
   setMarketingConsent,
   savingProfile,
   handleSaveProfile
 }) {
+  const canSubmit = isProfileFormComplete({
+    nickname,
+    nationality,
+    phoneNumber,
+    termsAgreed,
+    privacyAgreed,
+  });
+
+  const handleAgreeAll = () => {
+    setTermsAgreed(true);
+    setPrivacyAgreed(true);
+    setMarketingConsent(true);
+  };
+
   return (
     <div className="app-container">
       <div className="linear-card profile-card">
         <h2>{t('setup_profile')}</h2>
         <form onSubmit={handleSaveProfile}>
           <div className="form-group">
-            <label>{t('nickname')}</label>
+            <label>{t('nickname')}<span className="required-mark">*</span></label>
             <input
               type="text"
               placeholder={t('enter_nickname')}
@@ -606,7 +654,7 @@ function ProfileSetupView({
           </div>
           
           <div className="form-group">
-            <label>{t('nationality')}</label>
+            <label>{t('nationality')}<span className="required-mark">*</span></label>
             <select
               value={nationality}
               onChange={(e) => setNationality(e.target.value)}
@@ -621,8 +669,52 @@ function ProfileSetupView({
             </select>
           </div>
 
+          <div className="form-group">
+            <label>{t('phone_number')}<span className="required-mark">*</span></label>
+            <input
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              placeholder={t('enter_phone_number')}
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              maxLength={30}
+              required
+            />
+            <span className="field-hint">{t('phone_number_hint')}</span>
+          </div>
+
           <div className="consent-box">
+            <div className="consent-box-header">
+              <button type="button" className="agree-all-btn" onClick={handleAgreeAll}>
+                {t('agree_all')}
+              </button>
+            </div>
             <label className="checkbox-container">
+              <input
+                type="checkbox"
+                checked={termsAgreed}
+                onChange={(e) => setTermsAgreed(e.target.checked)}
+                required
+              />
+              <span className="checkmark"></span>
+              <span className="consent-label">
+                <LinkedConsentLabel text={t('terms_required_label')} t={t} />
+              </span>
+            </label>
+            <label className="checkbox-container">
+              <input
+                type="checkbox"
+                checked={privacyAgreed}
+                onChange={(e) => setPrivacyAgreed(e.target.checked)}
+                required
+              />
+              <span className="checkmark"></span>
+              <span className="consent-label">
+                <LinkedConsentLabel text={t('privacy_required_label')} t={t} />
+              </span>
+            </label>
+            <label className="checkbox-container optional-consent">
               <input
                 type="checkbox"
                 checked={marketingConsent}
@@ -634,12 +726,33 @@ function ProfileSetupView({
             <p className="nudge-text">{t('nudge')}</p>
           </div>
 
-          <button type="submit" disabled={savingProfile} className="btn-primary">
-            {savingProfile ? 'Saving...' : t('submit_profile')}
+          <button type="submit" disabled={savingProfile || !canSubmit} className="btn-primary">
+            {savingProfile ? t('saving_profile') : t('submit_profile')}
           </button>
+          <ProfileTermsNotice t={t} />
         </form>
       </div>
     </div>
+  );
+}
+
+function LinkedConsentLabel({ text, t }) {
+  return text.split(/(\{terms\}|\{privacy\})/g).map((part, index) => {
+    if (part === '{terms}') {
+      return <Link key={index} to="/terms">{t('terms_link')}</Link>;
+    }
+    if (part === '{privacy}') {
+      return <Link key={index} to="/privacy">{t('privacy_link')}</Link>;
+    }
+    return <React.Fragment key={index}>{part}</React.Fragment>;
+  });
+}
+
+function ProfileTermsNotice({ t }) {
+  return (
+    <p className="profile-terms-notice">
+      <LinkedConsentLabel text={t('profile_terms_notice')} t={t} />
+    </p>
   );
 }
 
@@ -842,7 +955,7 @@ function AdminConsoleView({
         <div className="admin-table-card">
           <div className="admin-grid-header">
             <div>User (Nickname / Name)</div>
-            <div>Phone / Gender / Nation</div>
+            <div>Phone / Nation</div>
             <div>Screenshot Image</div>
             <div>AI Extracted Balance</div>
             <div>Status / Actions</div>
@@ -860,7 +973,7 @@ function AdminConsoleView({
                     </div>
                     <div className="admin-col-meta">
                       <div>{row.profiles?.phone_number || 'No Phone'}</div>
-                      <div className="sub-text">{row.profiles?.gender} / {row.nationality}</div>
+                      <div className="sub-text">{row.nationality}</div>
                     </div>
                     <div className="admin-col-img">
                       <a href={row.screenshot_url} target="_blank" rel="noopener noreferrer">

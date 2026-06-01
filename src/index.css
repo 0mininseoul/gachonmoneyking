@@ -362,6 +362,12 @@ h1.headline-uz, h1.headline-mn {
   font-weight: 500;
 }
 
+.required-mark {
+  color: #f59e0b;
+  margin-left: 4px;
+  font-weight: 600;
+}
+
 .form-group input, .form-group select {
   background-color: var(--color-surface-2);
   color: var(--color-ink);
@@ -380,9 +386,33 @@ h1.headline-uz, h1.headline-mn {
 .consent-box {
   background-color: var(--color-surface-2);
   border: 1px solid var(--color-hairline);
-  padding: var(--spacing-md);
+  padding: 10px 12px;
   border-radius: var(--rounded-md);
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.consent-box-header {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.profile-card .agree-all-btn {
+  width: auto;
+  padding: 4px 9px;
+  border: 1px solid var(--color-hairline);
+  background-color: var(--color-surface-1);
+  color: var(--color-ink-muted);
+  border-radius: var(--rounded-sm);
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+
+.profile-card .agree-all-btn:hover {
+  border-color: var(--color-hairline-strong);
+  color: var(--color-ink);
 }
 
 .checkbox-container {
@@ -390,7 +420,7 @@ h1.headline-uz, h1.headline-mn {
   align-items: center;
   gap: var(--spacing-sm);
   cursor: pointer;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   user-select: none;
   position: relative;
 }
@@ -448,16 +478,36 @@ h1.headline-uz, h1.headline-mn {
   color: var(--color-ink-muted);
 }
 
+.consent-label a {
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .nudge-text {
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   color: #f59e0b;
-  margin-top: var(--spacing-xs);
-  line-height: 1.4;
+  margin-top: 0;
+  line-height: 1.35;
 }
 
 .profile-card button {
   width: 100%;
   padding: 10px;
+}
+
+.profile-terms-notice {
+  margin-top: var(--spacing-sm);
+  color: var(--color-ink-subtle);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.profile-terms-notice a {
+  color: var(--color-ink-muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 /* Leaderboard Component Styling */
@@ -1024,7 +1074,7 @@ h1.headline-uz, h1.headline-mn {
 /* Profile field hint text */
 .field-hint {
   font-size: 0.75rem;
-  color: #f59e0b;
+  color: var(--color-ink-subtle);
   line-height: 1.4;
   margin-top: 2px;
 }

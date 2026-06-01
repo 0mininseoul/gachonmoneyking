@@ -5,8 +5,6 @@ export function SignupView() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
-    gender: '',
-    birthYear: '',
     phone: '',
     email: '',
     password: '',
@@ -74,36 +72,7 @@ export function SignupView() {
             </div>
 
             <div className="form-group">
-              <label>성별 (Gender) <span style={{ color: '#ef4444' }}>*</span></label>
-              <select
-                name="gender"
-                value={formData.gender}
-                onChange={handleChange}
-                required
-              >
-                <option value="">-- 성별 선택 --</option>
-                <option value="male">남성 (Male)</option>
-                <option value="female">여성 (Female)</option>
-                <option value="other">기타 (Other)</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label>출생 연도 (Birth Year) <span style={{ color: '#ef4444' }}>*</span></label>
-              <input
-                type="number"
-                name="birthYear"
-                placeholder="예: 2002"
-                min="1950"
-                max="2026"
-                value={formData.birthYear}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label>카카오계정 전화번호 (Phone Number) <span style={{ color: '#ef4444' }}>*</span></label>
+              <label>전화번호 (Phone Number) <span style={{ color: '#ef4444' }}>*</span></label>
               <input
                 type="tel"
                 name="phone"

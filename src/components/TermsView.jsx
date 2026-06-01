@@ -38,7 +38,7 @@ export function TermsView() {
             </h2>
             <p style={{ marginBottom: '16px' }}>
               1. 이용계약은 이용자가 본 약관 및 개인정보처리방침에 동의한 후 카카오 계정을 통한 소셜 로그인을 완료하거나 회원가입 절차를 진행함으로써 성립됩니다.<br />
-              2. 이용자는 카카오 로그인 시 이름, 성별, 출생연도, 전화번호를 필수 수집 항목으로 제공하는 것에 동의하여야 정상적인 리더보드 랭킹 참여 및 혜택 수령이 가능합니다.
+              2. 이용자는 카카오 로그인 후 프로필 설정 단계에서 닉네임, 국적, 전화번호를 필수 항목으로 제공하여야 정상적인 리더보드 랭킹 참여 및 혜택 수령이 가능합니다.
             </p>
 
             <h2 style={{ fontSize: '1.25rem', color: 'var(--color-ink)', marginTop: '24px', marginBottom: '12px', fontWeight: 500 }}>
@@ -68,7 +68,7 @@ export function TermsView() {
             </h2>
             <p style={{ marginBottom: '16px' }}>
               1. 리더보드 활성화를 위한 이벤트의 당첨자 선정 기준(순위권 및 추첨 20명 등)은 서비스 화면에 고지된 규정을 따릅니다.<br />
-              2. 당첨자에게 경품(편의점 기프티콘 등)을 발송하기 위해 수집된 카카오계정 전화번호로 모바일 쿠폰이 발송되며, 이를 거부하거나 번호가 불명확한 경우 당첨이 취소될 수 있습니다.
+              2. 당첨자에게 경품(편의점 기프티콘 등)을 발송하거나 리더보드 수상 안내 문자를 보내기 위해 프로필 설정에서 수집된 전화번호를 사용하며, 이를 거부하거나 번호가 불명확한 경우 당첨 또는 수상 안내가 제한될 수 있습니다.
             </p>
 
             <h2 style={{ fontSize: '1.25rem', color: 'var(--color-ink)', marginTop: '24px', marginBottom: '12px', fontWeight: 500 }}>
@@ -120,7 +120,7 @@ export function TermsView() {
             </h2>
             <p style={{ marginBottom: '16px' }}>
               1. The contract of use is established when a user agrees to these Terms and the Privacy Policy and completes social login through a Kakao account or proceeds with the sign-up form.<br />
-              2. Users must consent to provide their name, gender, birth year, and phone number as mandatory items upon Kakao login to participate in the leaderboard ranking and receive prizes.
+              2. After Kakao login, users must provide nickname, nationality, and phone number during profile setup to participate in the leaderboard ranking and receive benefits.
             </p>
 
             <h2 style={{ fontSize: '1.25rem', color: 'var(--color-ink)', marginTop: '24px', marginBottom: '12px', fontWeight: 500 }}>
@@ -150,7 +150,7 @@ export function TermsView() {
             </h2>
             <p style={{ marginBottom: '16px' }}>
               1. Criteria for selecting event winners (e.g., top ranks and 20 raffle winners) follow the rules announced on the service screens.<br />
-              2. Mobile coupons will be sent via SMS to the Kakao account phone number collected from winners. If the number is invalid or delivery is refused, the prize eligibility may be canceled.
+              2. The phone number collected during profile setup is used to send prizes (e.g., mobile coupons) and leaderboard award SMS notices. If the number is invalid or delivery is refused, prize or award notification may be limited.
             </p>
 
             <h2 style={{ fontSize: '1.25rem', color: 'var(--color-ink)', marginTop: '24px', marginBottom: '12px', fontWeight: 500 }}>

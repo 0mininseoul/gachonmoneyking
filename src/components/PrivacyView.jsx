@@ -25,8 +25,9 @@ export function PrivacyView() {
               서비스는 최초 회원가입 및 카카오 계정 연동 로그인 시 다음과 같은 최소한의 개인정보를 수집하고 있습니다.
             </p>
             <ul style={{ paddingLeft: '20px', marginBottom: '16px', listStyleType: 'disc' }}>
-              <li><strong>필수 수집 항목:</strong> 이름, 성별, 출생연도, 카카오 계정 전화번호, 이메일 주소, 카카오 고유 ID</li>
-              <li><strong>서비스 이용 과정 중 수집 항목:</strong> 닉네임, 국적, 은행 잔고 증명 이미지(스크린샷) 및 분석된 자산 금액</li>
+              <li><strong>카카오 로그인 연동 항목:</strong> 이름, 이메일 주소, 프로필 이미지 URL, 카카오 고유 ID</li>
+              <li><strong>프로필 설정 필수 항목:</strong> 닉네임, 국적, 전화번호</li>
+              <li><strong>서비스 이용 과정 중 수집 항목:</strong> 은행 잔고 증명 이미지(스크린샷) 및 분석된 자산 금액</li>
               <li><strong>수집 방법:</strong> 회원가입 폼 작성, 카카오 간편 가입 API 연동, 이미지 업로드 인터페이스</li>
             </ul>
 
@@ -39,7 +40,7 @@ export function PrivacyView() {
             <ul style={{ paddingLeft: '20px', marginBottom: '16px', listStyleType: 'disc' }}>
               <li><strong>회원 관리:</strong> 가천대학교 유학생 본인 확인 및 중복 가입 방지</li>
               <li><strong>리더보드 집계:</strong> 잔고 스크린샷 검증을 통한 자산 순위(랭킹) 부여</li>
-              <li><strong>이벤트 운영:</strong> 우수 자산가 대상 상품 발송, 추첨 이벤트(편의점 기프티콘 등) 당첨자 고지 및 모바일 기프티콘 SMS 발송</li>
+              <li><strong>이벤트 운영:</strong> 우수 자산가 대상 상품 발송, 추첨 이벤트(편의점 기프티콘 등) 당첨자 고지 및 리더보드 수상 안내 SMS 발송</li>
               <li><strong>서비스 개선:</strong> 다국어 이용 통계 분석 및 고객 고충 처리</li>
             </ul>
 
@@ -115,8 +116,9 @@ export function PrivacyView() {
               The Service collects the following minimum amount of personal information upon initial membership registration and Kakao account integration login.
             </p>
             <ul style={{ paddingLeft: '20px', marginBottom: '16px', listStyleType: 'disc' }}>
-              <li><strong>Mandatory Items:</strong> Name, Gender, Birth Year, Kakao Account Phone Number, Email Address, Kakao Unique ID</li>
-              <li><strong>Items Collected During Service Use:</strong> Nickname, Nationality, Bank Balance Statement Image (Screenshot), and Analyzed Asset Amount</li>
+              <li><strong>Kakao Login Items:</strong> Name, Email Address, Profile Image URL, Kakao Unique ID</li>
+              <li><strong>Mandatory Profile Setup Items:</strong> Nickname, Nationality, Phone Number</li>
+              <li><strong>Items Collected During Service Use:</strong> Bank Balance Statement Image (Screenshot), and Analyzed Asset Amount</li>
               <li><strong>Collection Method:</strong> Registration form inputs, Kakao Simple Login API integration, Image upload interface</li>
             </ul>
 
@@ -129,7 +131,7 @@ export function PrivacyView() {
             <ul style={{ paddingLeft: '20px', marginBottom: '16px', listStyleType: 'disc' }}>
               <li><strong>Member Management:</strong> Identity verification of Gachon University international students and prevention of duplicate registrations</li>
               <li><strong>Leaderboard Ranking:</strong> Review and verification of bank screenshots to grant asset ranking</li>
-              <li><strong>Event Operation:</strong> Prize shipment for top asset holders, winner announcement of drawing events (e.g., convenience store coupons), and SMS transmission of mobile coupons</li>
+              <li><strong>Event Operation:</strong> Prize shipment for top asset holders, winner announcement of drawing events (e.g., convenience store coupons), and SMS notices for leaderboard awards</li>
               <li><strong>Service Improvement:</strong> Statistical analysis of multilingual usage and customer complaint resolution</li>
             </ul>
 
