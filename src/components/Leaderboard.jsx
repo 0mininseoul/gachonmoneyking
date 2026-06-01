@@ -73,7 +73,7 @@ export function Leaderboard({ list, isAuthenticated, currentUserId }) {
 
       <div className="leaderboard-table-card">
         <div className="table-header">
-          <div className="col-rank">{t('ranking')}</div>
+          <div className="col-rank" title={t('ranking')}>#</div>
           <div className="col-user">{t('nickname')}</div>
           <div className="col-nationality">{t('nationality')}</div>
           <div className="col-balance">{t('balance')}</div>
@@ -136,4 +136,3 @@ export function Leaderboard({ list, isAuthenticated, currentUserId }) {
     </div>
   );
 }
-
