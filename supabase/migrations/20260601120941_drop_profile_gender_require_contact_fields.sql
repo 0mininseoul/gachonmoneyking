@@ -1,5 +1,16 @@
-alter table public.profiles
-  drop column if exists gender;
+do $$
+begin
+  if exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'profiles'
+      and column_name = 'gender'
+  ) then
+    alter table public.profiles
+      alter column gender drop not null;
+  end if;
+end $$;
 
 alter table public.profiles
   add column if not exists terms_agreed boolean default false not null,
