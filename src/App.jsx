@@ -505,7 +505,7 @@ function MainLayout({ isAdmin, locale, setLocale, user, handleLogout, handleLogi
           if (idx === -1) return <span>{text}</span>;
           return (
             <>
-              <span>{text.slice(0, idx).trimEnd()}</span>
+              <span className="banner-main">{text.slice(0, idx).trimEnd()}</span>
               <span className="banner-paren">{text.slice(idx)}</span>
             </>
           );

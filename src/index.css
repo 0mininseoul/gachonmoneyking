@@ -75,7 +75,7 @@ body {
   gap: var(--spacing-xs);
   font-weight: 600;
   font-size: 1.2rem;
-  letter-spacing: -0.5px;
+  letter-spacing: 0;
   color: var(--color-ink);
   white-space: nowrap;
   flex-shrink: 0;
@@ -85,6 +85,12 @@ body {
   height: 24px;
   width: 24px;
   object-fit: contain;
+}
+
+.brand span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .nav-controls {
@@ -143,9 +149,9 @@ body {
 }
 
 h1 {
-  font-size: clamp(1.2rem, 5.5vw, 2.2rem);
+  font-size: 2.2rem;
   font-weight: 600;
-  letter-spacing: -1.2px;
+  letter-spacing: 0;
   line-height: 1.15;
   margin-bottom: var(--spacing-xs);
   color: var(--color-ink);
@@ -155,8 +161,8 @@ h1 {
 }
 
 h1.headline-uz, h1.headline-mn {
-  font-size: clamp(0.85rem, 3.8vw, 1.8rem);
-  letter-spacing: -0.8px;
+  font-size: 1.8rem;
+  letter-spacing: 0;
   line-height: 1.2;
 }
 
@@ -231,18 +237,26 @@ h1.headline-uz, h1.headline-mn {
 
 /* Auth Nudge Banner */
 .auth-nudge-banner {
-  text-align: center;
-  padding: var(--spacing-xl);
+  text-align: left;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-lg);
 }
 
 .banner-notice {
-  font-size: 1.1rem;
+  font-size: 0.95rem;
+  line-height: 1.45;
   color: var(--color-ink-muted);
-  margin-bottom: var(--spacing-md);
+  margin-bottom: 0;
+  max-width: 520px;
+  text-wrap: pretty;
 }
 
 .banner-login-btn {
-  box-shadow: 0 0 20px rgba(94, 106, 210, 0.4);
+  flex-shrink: 0;
+  box-shadow: 0 0 0 1px rgba(130, 143, 255, 0.18), 0 10px 26px rgba(94, 106, 210, 0.24);
 }
 
 /* User Dashboard / Upload Card */
@@ -330,7 +344,7 @@ h1.headline-uz, h1.headline-mn {
 .profile-card h2 {
   font-size: 1.5rem;
   font-weight: 600;
-  letter-spacing: -0.5px;
+  letter-spacing: 0;
   margin-bottom: var(--spacing-lg);
   text-align: center;
 }
@@ -533,7 +547,7 @@ h1.headline-uz, h1.headline-mn {
   border-radius: var(--rounded-xs);
   margin-left: var(--spacing-xs);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0;
   display: inline-block;
   vertical-align: middle;
 }
@@ -555,7 +569,7 @@ h1.headline-uz, h1.headline-mn {
   font-weight: 600;
   text-transform: uppercase;
   color: var(--color-ink-subtle);
-  letter-spacing: 0.5px;
+  letter-spacing: 0;
   align-items: center;
 }
 
@@ -734,14 +748,14 @@ h1.headline-uz, h1.headline-mn {
 }
 
 .loader-text {
-  font-size: clamp(0.9rem, 4vw, 1.15rem);
+  font-size: 1.05rem;
   color: var(--color-ink-muted);
   font-weight: 500;
   white-space: nowrap;
 }
 
 .loader-caution {
-  font-size: clamp(0.7rem, 3.2vw, 0.8rem);
+  font-size: 0.8rem;
   color: #ff6b6b;
   max-width: 320px;
   line-height: 1.5;
@@ -841,7 +855,7 @@ h1.headline-uz, h1.headline-mn {
   color: var(--color-ink-subtle);
   font-size: 0.75rem;
   text-transform: uppercase;
-  letter-spacing: 0.4px;
+  letter-spacing: 0;
   margin-bottom: 4px;
 }
 
@@ -877,7 +891,7 @@ h1.headline-uz, h1.headline-mn {
 .celebration-text {
   color: var(--color-ink-muted);
   margin: var(--spacing-md) 0 var(--spacing-lg) 0;
-  font-size: clamp(0.75rem, 3.2vw, 0.95rem);
+  font-size: 0.95rem;
   white-space: nowrap;
 }
 
@@ -1239,7 +1253,7 @@ h1.headline-uz, h1.headline-mn {
     white-space: nowrap;
   }
   .content-area {
-    padding: var(--spacing-md) var(--spacing-sm);
+    padding: 18px var(--spacing-sm);
   }
   .linear-card {
     padding: var(--spacing-md);
@@ -1305,7 +1319,7 @@ h1.headline-uz, h1.headline-mn {
     font-size: 0.75rem;
     color: var(--color-ink-subtle);
     font-weight: 600;
-    letter-spacing: 0.5px;
+    letter-spacing: 0;
   }
   /* Truncate nickname/balance headers if too long for their column */
   .table-header .col-user,
@@ -1317,9 +1331,30 @@ h1.headline-uz, h1.headline-mn {
   .celebration-text {
     white-space: normal;
   }
-  /* i18n mobile: reduce auth nudge card padding so long notices wrap in 2 lines not 3 */
+  /* Mobile hierarchy: keep the auth card compact so it reads below the hero, not as a competing headline. */
   .auth-nudge-banner {
-    padding: var(--spacing-md) var(--spacing-sm);
+    padding: 14px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-sm);
+    text-align: center;
+  }
+  .banner-notice {
+    font-size: 0.92rem;
+    line-height: 1.45;
+  }
+  .banner-login-btn {
+    width: min(100%, 260px);
+    align-self: center;
+    padding: 10px 14px;
+    font-size: 0.95rem;
+  }
+  .leaderboard-wrapper {
+    margin-top: var(--spacing-lg);
+  }
+  .leaderboard-container {
+    margin-top: 0;
+    gap: var(--spacing-sm);
   }
 
   .main-footer {
@@ -1348,7 +1383,7 @@ h1.headline-uz, h1.headline-mn {
     justify-content: center;
     gap: 4px 6px;
     font-size: 0.63rem;
-    letter-spacing: -0.2px;
+    letter-spacing: 0;
     text-align: center;
     line-height: 1.5;
   }
@@ -1372,36 +1407,73 @@ h1.headline-uz, h1.headline-mn {
   }
 }
 
+@media (max-width: 360px) {
+  .top-nav {
+    padding: 0 var(--spacing-xs);
+  }
+  .brand {
+    max-width: 142px;
+    min-width: 0;
+    flex-shrink: 1;
+    gap: 4px;
+    font-size: 0.82rem;
+  }
+  .nav-controls {
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .lang-select {
+    padding: 4px 18px 4px 21px;
+    font-size: 0.68rem;
+  }
+  .btn-sm {
+    padding: 4px 8px;
+    font-size: 0.7rem;
+  }
+}
+
 /* Announcement Banner */
 .announcement-banner {
   background: linear-gradient(90deg, rgba(94, 106, 210, 0.15) 0%, rgba(94, 106, 210, 0.05) 100%);
   border-bottom: 1px solid rgba(94, 106, 210, 0.25);
-  padding: 10px var(--spacing-lg);
-  font-size: 0.85rem;
+  padding: 9px var(--spacing-lg);
+  font-size: 0.82rem;
   font-weight: 500;
   color: #e0e7ff;
   text-align: center;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  line-height: 1.4;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+  line-height: 1.35;
   z-index: 99;
+}
+
+.banner-main {
+  text-wrap: balance;
+}
+
+.banner-paren {
+  color: rgba(224, 231, 255, 0.72);
 }
 
 @media (max-width: 480px) {
   .announcement-banner {
-    padding: 8px var(--spacing-sm);
+    padding: 8px 14px;
     font-size: 0.72rem;
     text-align: center;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 2px;
+    min-height: 58px;
+  }
+  .announcement-banner > span {
+    max-width: 34rem;
   }
   .banner-paren {
     display: block;
-    opacity: 0.8;
+    font-size: 0.95em;
   }
 }
-

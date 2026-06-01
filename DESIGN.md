@@ -206,7 +206,7 @@ mobile_overrides:
     padding: "8px 12px"
     font_size: 0.72rem
     text_align: left
-    notes: "Long Mongolian/Uzbek banner text wraps to 2–3 lines; this is acceptable given the critical event info it carries"
+    notes: "Deadline copy is kept short and split into a balanced event line plus a lower-emphasis reward line; do not reduce below 0.72rem on mobile"
 
   footer:
     flex_direction: column
