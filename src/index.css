@@ -341,12 +341,88 @@ h1.headline-uz, h1.headline-mn {
   border-color: var(--color-hairline-strong);
 }
 
+.profile-wizard-card {
+  min-height: min(720px, calc(100dvh - 56px));
+  display: flex;
+  flex-direction: column;
+}
+
 .profile-card h2 {
   font-size: 1.5rem;
   font-weight: 600;
   letter-spacing: 0;
   margin-bottom: var(--spacing-lg);
   text-align: center;
+}
+
+.profile-wizard-form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.profile-progress {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.profile-progress-segment {
+  height: 6px;
+  border-radius: var(--rounded-pill);
+  background-color: var(--color-surface-3);
+}
+
+.profile-progress-segment.active {
+  background-color: var(--color-primary);
+}
+
+.profile-step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.profile-step h3 {
+  font-size: clamp(1.5rem, 5vw, 2rem);
+  line-height: 1.25;
+  color: var(--color-ink);
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.profile-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.profile-choice-btn {
+  min-height: 52px;
+  border: 1px solid var(--color-hairline);
+  background-color: var(--color-surface-2);
+  color: var(--color-ink-muted);
+  border-radius: var(--rounded-pill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.profile-choice-btn.selected {
+  background-color: rgba(94, 106, 210, 0.18);
+  border-color: var(--color-primary);
+  color: var(--color-ink);
+  box-shadow: inset 0 0 0 1px var(--color-primary);
+}
+
+.profile-step-field {
+  margin-top: var(--spacing-md);
 }
 
 .form-group {
@@ -383,36 +459,35 @@ h1.headline-uz, h1.headline-mn {
   border-color: var(--color-primary);
 }
 
+.phone-segment-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+
+.phone-segment-grid input {
+  min-width: 0;
+  text-align: center;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.phone-separator {
+  color: var(--color-ink-subtle);
+  font-weight: 600;
+  line-height: 1;
+}
+
 .consent-box {
   background-color: var(--color-surface-2);
   border: 1px solid var(--color-hairline);
-  padding: 10px 12px;
+  padding: 18px 16px;
   border-radius: var(--rounded-md);
   margin-bottom: var(--spacing-md);
   display: flex;
   flex-direction: column;
-  gap: 8px;
-}
-
-.consent-box-header {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.profile-card .agree-all-btn {
-  width: auto;
-  padding: 4px 9px;
-  border: 1px solid var(--color-hairline);
-  background-color: var(--color-surface-1);
-  color: var(--color-ink-muted);
-  border-radius: var(--rounded-sm);
-  font-size: 0.72rem;
-  cursor: pointer;
-}
-
-.profile-card .agree-all-btn:hover {
-  border-color: var(--color-hairline-strong);
-  color: var(--color-ink);
+  gap: 13px;
 }
 
 .checkbox-container {
@@ -420,9 +495,27 @@ h1.headline-uz, h1.headline-mn {
   align-items: center;
   gap: var(--spacing-sm);
   cursor: pointer;
-  font-size: 0.85rem;
+  min-height: 24px;
+  font-size: 0.9rem;
   user-select: none;
   position: relative;
+}
+
+.agree-all-row {
+  padding-bottom: 13px;
+  border-bottom: 1px solid var(--color-hairline);
+}
+
+.agree-all-row .consent-label {
+  color: var(--color-ink);
+  font-size: 1.08rem;
+  font-weight: 600;
+}
+
+.consent-item {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
 }
 
 .checkbox-container input {
@@ -485,29 +578,30 @@ h1.headline-uz, h1.headline-mn {
 }
 
 .nudge-text {
-  font-size: 0.72rem;
+  font-size: 0.76rem;
   color: #f59e0b;
   margin-top: 0;
-  line-height: 1.35;
+  margin-left: calc(18px + var(--spacing-sm));
+  line-height: 1.45;
 }
 
-.profile-card button {
+.profile-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: auto;
+}
+
+.profile-actions.single-action {
+  grid-template-columns: 1fr;
+}
+
+.profile-nav-btn {
   width: 100%;
-  padding: 10px;
-}
-
-.profile-terms-notice {
-  margin-top: var(--spacing-sm);
-  color: var(--color-ink-subtle);
-  font-size: 0.75rem;
-  line-height: 1.5;
-  text-align: center;
-}
-
-.profile-terms-notice a {
-  color: var(--color-ink-muted);
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Leaderboard Component Styling */

@@ -7,7 +7,13 @@ import { Leaderboard } from './components/Leaderboard';
 import { SignupView } from './components/SignupView';
 import { PrivacyView } from './components/PrivacyView';
 import { TermsView } from './components/TermsView';
-import { buildProfilePayload, isProfileFormComplete } from './lib/profilePayload';
+import {
+  buildProfilePayload,
+  isPhoneNumberComplete,
+  isProfileFormComplete,
+  joinPhoneSegments,
+  splitPhoneNumber,
+} from './lib/profilePayload';
 
 function App() {
   const { locale, setLocale, t } = useLanguage();
@@ -621,6 +627,7 @@ function ProfileSetupView({
   savingProfile,
   handleSaveProfile
 }) {
+  const [currentStep, setCurrentStep] = useState(0);
   const canSubmit = isProfileFormComplete({
     nickname,
     nationality,
@@ -629,107 +636,227 @@ function ProfileSetupView({
     privacyAgreed,
   });
 
-  const handleAgreeAll = () => {
-    setTermsAgreed(true);
-    setPrivacyAgreed(true);
-    setMarketingConsent(true);
+  const allConsentsChecked = termsAgreed && privacyAgreed && marketingConsent;
+  const phoneSegments = splitPhoneNumber(phoneNumber);
+  const steps = [
+    {
+      key: 'nationality',
+      title: t('profile_step_nationality_title'),
+      complete: Boolean(nationality),
+    },
+    {
+      key: 'nickname',
+      title: t('profile_step_nickname_title'),
+      complete: Boolean(nickname.trim()),
+    },
+    {
+      key: 'phone',
+      title: t('profile_step_phone_title'),
+      complete: isPhoneNumberComplete(phoneNumber),
+    },
+    {
+      key: 'consent',
+      title: t('profile_step_consent_title'),
+      complete: termsAgreed && privacyAgreed,
+    },
+  ];
+  const currentStepData = steps[currentStep];
+  const isLastStep = currentStep === steps.length - 1;
+
+  const handleAgreeAllChange = (checked) => {
+    setTermsAgreed(checked);
+    setPrivacyAgreed(checked);
+    setMarketingConsent(checked);
+  };
+
+  const handlePhoneSegmentChange = (segment, value) => {
+    setPhoneNumber(joinPhoneSegments({
+      ...phoneSegments,
+      [segment]: value,
+    }));
+  };
+
+  const goToNextStep = () => {
+    if (currentStepData.complete) {
+      setCurrentStep((step) => Math.min(step + 1, steps.length - 1));
+    }
+  };
+
+  const goToPreviousStep = () => {
+    setCurrentStep((step) => Math.max(step - 1, 0));
+  };
+
+  const handleProfileStepSubmit = (e) => {
+    if (!isLastStep) {
+      e.preventDefault();
+      goToNextStep();
+      return;
+    }
+    handleSaveProfile(e);
   };
 
   return (
     <div className="app-container">
-      <div className="linear-card profile-card">
+      <div className="linear-card profile-card profile-wizard-card">
         <h2>{t('setup_profile')}</h2>
-        <form onSubmit={handleSaveProfile}>
-          <div className="form-group">
-            <label>{t('nickname')}<span className="required-mark">*</span></label>
-            <input
-              type="text"
-              placeholder={t('enter_nickname')}
-              value={nickname}
-              onChange={(e) => setNickname(e.target.value)}
-              maxLength={20}
-              required
-            />
-            <span className="field-hint">{t('nickname_hint')}</span>
-          </div>
-          
-          <div className="form-group">
-            <label>{t('nationality')}<span className="required-mark">*</span></label>
-            <select
-              value={nationality}
-              onChange={(e) => setNationality(e.target.value)}
-              required
-            >
-              <option value="">-- {t('select_nationality')} --</option>
-              {nationalities.map(nat => (
-                <option key={nat.code} value={nat.code}>
-                  {nat.flag} {nat.name}
-                </option>
-              ))}
-            </select>
+        <form onSubmit={handleProfileStepSubmit} className="profile-wizard-form">
+          <div className="profile-progress" aria-label={`${currentStep + 1} / ${steps.length}`}>
+            {steps.map((step, index) => (
+              <span
+                key={step.key}
+                className={`profile-progress-segment ${index <= currentStep ? 'active' : ''}`}
+              />
+            ))}
           </div>
 
-          <div className="form-group">
-            <label>{t('phone_number')}<span className="required-mark">*</span></label>
-            <input
-              type="tel"
-              inputMode="tel"
-              autoComplete="tel"
-              placeholder={t('enter_phone_number')}
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-              maxLength={30}
-              required
-            />
-            <span className="field-hint">{t('phone_number_hint')}</span>
+          <div className="profile-step">
+            <h3>{currentStepData.title}</h3>
+
+            {currentStepData.key === 'nationality' && (
+              <div className="profile-choice-grid">
+                {nationalities.map((nat) => (
+                  <button
+                    key={nat.code}
+                    type="button"
+                    className={`profile-choice-btn ${nationality === nat.code ? 'selected' : ''}`}
+                    onClick={() => setNationality(nat.code)}
+                  >
+                    <span>{nat.flag}</span>
+                    <span>{nat.name}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {currentStepData.key === 'nickname' && (
+              <div className="form-group profile-step-field">
+                <label>{t('nickname')}<span className="required-mark">*</span></label>
+                <input
+                  type="text"
+                  placeholder={t('enter_nickname')}
+                  value={nickname}
+                  onChange={(e) => setNickname(e.target.value)}
+                  maxLength={20}
+                  required
+                />
+                <span className="field-hint">{t('nickname_hint')}</span>
+              </div>
+            )}
+
+            {currentStepData.key === 'phone' && (
+              <div className="form-group profile-step-field">
+                <label>{t('phone_number')}<span className="required-mark">*</span></label>
+                <div className="phone-segment-grid">
+                  <input
+                    type="tel"
+                    inputMode="numeric"
+                    autoComplete="tel-national"
+                    aria-label={`${t('phone_number')} 1`}
+                    placeholder="010"
+                    value={phoneSegments.first}
+                    onChange={(e) => handlePhoneSegmentChange('first', e.target.value)}
+                    maxLength={3}
+                    required
+                  />
+                  <span className="phone-separator">-</span>
+                  <input
+                    type="tel"
+                    inputMode="numeric"
+                    aria-label={`${t('phone_number')} 2`}
+                    placeholder="1234"
+                    value={phoneSegments.middle}
+                    onChange={(e) => handlePhoneSegmentChange('middle', e.target.value)}
+                    maxLength={4}
+                    required
+                  />
+                  <span className="phone-separator">-</span>
+                  <input
+                    type="tel"
+                    inputMode="numeric"
+                    aria-label={`${t('phone_number')} 3`}
+                    placeholder="5678"
+                    value={phoneSegments.last}
+                    onChange={(e) => handlePhoneSegmentChange('last', e.target.value)}
+                    maxLength={4}
+                    required
+                  />
+                </div>
+                <span className="field-hint">{t('phone_number_hint')}</span>
+              </div>
+            )}
+
+            {currentStepData.key === 'consent' && (
+              <div className="consent-box">
+                <label className="checkbox-container agree-all-row">
+                  <input
+                    type="checkbox"
+                    checked={allConsentsChecked}
+                    onChange={(e) => handleAgreeAllChange(e.target.checked)}
+                  />
+                  <span className="checkmark"></span>
+                  <span className="consent-label">{t('agree_all')}</span>
+                </label>
+                <label className="checkbox-container">
+                  <input
+                    type="checkbox"
+                    checked={termsAgreed}
+                    onChange={(e) => setTermsAgreed(e.target.checked)}
+                    required
+                  />
+                  <span className="checkmark"></span>
+                  <span className="consent-label">
+                    <LinkedConsentLabel text={t('terms_required_label')} t={t} />
+                  </span>
+                </label>
+                <label className="checkbox-container">
+                  <input
+                    type="checkbox"
+                    checked={privacyAgreed}
+                    onChange={(e) => setPrivacyAgreed(e.target.checked)}
+                    required
+                  />
+                  <span className="checkmark"></span>
+                  <span className="consent-label">
+                    <LinkedConsentLabel text={t('privacy_required_label')} t={t} />
+                  </span>
+                </label>
+                <div className="consent-item">
+                  <label className="checkbox-container optional-consent">
+                    <input
+                      type="checkbox"
+                      checked={marketingConsent}
+                      onChange={(e) => setMarketingConsent(e.target.checked)}
+                    />
+                    <span className="checkmark"></span>
+                    <span className="consent-label">{t('marketing_consent_label')}</span>
+                  </label>
+                  <p className="nudge-text">{t('nudge')}</p>
+                </div>
+              </div>
+            )}
           </div>
 
-          <div className="consent-box">
-            <div className="consent-box-header">
-              <button type="button" className="agree-all-btn" onClick={handleAgreeAll}>
-                {t('agree_all')}
+          <div className={`profile-actions ${currentStep === 0 ? 'single-action' : ''}`}>
+            {currentStep > 0 && (
+              <button type="button" className="btn-secondary profile-nav-btn" onClick={goToPreviousStep}>
+                {t('previous_profile_step')}
               </button>
-            </div>
-            <label className="checkbox-container">
-              <input
-                type="checkbox"
-                checked={termsAgreed}
-                onChange={(e) => setTermsAgreed(e.target.checked)}
-                required
-              />
-              <span className="checkmark"></span>
-              <span className="consent-label">
-                <LinkedConsentLabel text={t('terms_required_label')} t={t} />
-              </span>
-            </label>
-            <label className="checkbox-container">
-              <input
-                type="checkbox"
-                checked={privacyAgreed}
-                onChange={(e) => setPrivacyAgreed(e.target.checked)}
-                required
-              />
-              <span className="checkmark"></span>
-              <span className="consent-label">
-                <LinkedConsentLabel text={t('privacy_required_label')} t={t} />
-              </span>
-            </label>
-            <label className="checkbox-container optional-consent">
-              <input
-                type="checkbox"
-                checked={marketingConsent}
-                onChange={(e) => setMarketingConsent(e.target.checked)}
-              />
-              <span className="checkmark"></span>
-              <span className="consent-label">{t('marketing_consent_label')}</span>
-            </label>
-            <p className="nudge-text">{t('nudge')}</p>
+            )}
+            {isLastStep ? (
+              <button type="submit" disabled={savingProfile || !canSubmit} className="btn-primary profile-nav-btn">
+                {savingProfile ? t('saving_profile') : t('submit_profile')}
+              </button>
+            ) : (
+              <button
+                type="button"
+                disabled={!currentStepData.complete}
+                className="btn-primary profile-nav-btn"
+                onClick={goToNextStep}
+              >
+                {t('next_profile_step')}
+              </button>
+            )}
           </div>
-
-          <button type="submit" disabled={savingProfile || !canSubmit} className="btn-primary">
-            {savingProfile ? t('saving_profile') : t('submit_profile')}
-          </button>
-          <ProfileTermsNotice t={t} />
         </form>
       </div>
     </div>
@@ -746,14 +873,6 @@ function LinkedConsentLabel({ text, t }) {
     }
     return <React.Fragment key={index}>{part}</React.Fragment>;
   });
-}
-
-function ProfileTermsNotice({ t }) {
-  return (
-    <p className="profile-terms-notice">
-      <LinkedConsentLabel text={t('profile_terms_notice')} t={t} />
-    </p>
-  );
 }
 
 function DashboardView({
