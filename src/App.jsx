@@ -7,6 +7,7 @@ import { Leaderboard } from './components/Leaderboard';
 import { PrivacyView } from './components/PrivacyView';
 import { TermsView } from './components/TermsView';
 import { trackPosterQrOpen } from './lib/analytics';
+import { nextProgress, stageForProgress, STAGE_KEYS } from './lib/analysisProgress';
 import {
   buildFallbackRankReport,
   buildRankInsight,
@@ -46,6 +47,7 @@ function App() {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState(null);
   const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [showRankCard, setShowRankCard] = useState(false);
 
   // Admin access state
@@ -130,6 +132,19 @@ function App() {
       fetchAdminQueue();
     }
   }, [location.pathname, isAdmin]);
+
+  // Drive the analysis progress gauge while an upload is processing
+  useEffect(() => {
+    if (!uploading) {
+      setUploadProgress(0);
+      return;
+    }
+    setUploadProgress(8);
+    const id = setInterval(() => {
+      setUploadProgress((p) => nextProgress(p));
+    }, 220);
+    return () => clearInterval(id);
+  }, [uploading]);
 
   const checkUserProfile = async (currentUser) => {
     try {
@@ -432,6 +447,8 @@ function App() {
   }
 
   if (uploading) {
+    const stageKey = STAGE_KEYS[stageForProgress(uploadProgress)];
+    const pct = Math.round(uploadProgress);
     return (
       <div className="app-container loader-overlay">
         <div className="loader-box">
@@ -442,6 +459,15 @@ function App() {
           </div>
           <div className="loader-content-wrap">
             <p className="loader-text">{t('loading')}</p>
+            <div className="loader-progress">
+              <div className="loader-progress-track">
+                <div className="loader-progress-fill" style={{ width: `${pct}%` }}></div>
+              </div>
+              <div className="loader-progress-meta">
+                <span className="loader-stage">{t(stageKey)}</span>
+                <span className="loader-percent">{pct}%</span>
+              </div>
+            </div>
             <p className="loader-caution">{t('loading_caution')}</p>
           </div>
         </div>

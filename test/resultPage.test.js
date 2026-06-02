@@ -21,3 +21,9 @@ test('verify page drops the locked-balance strip and uses banking-app hint', () 
   assert.match(verifyBlock, /t\('upload_desc'\)/);
   assert.doesNotMatch(verifyBlock, /t\('verify_upload_hint'\)/);
 });
+
+test('analysis loader renders an eased progress gauge', () => {
+  assert.match(appSource, /from '\.\/lib\/analysisProgress'/);
+  assert.match(appSource, /loader-progress/);
+  assert.match(appSource, /uploadProgress/);
+});
