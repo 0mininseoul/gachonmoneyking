@@ -17,6 +17,9 @@ serve(async (req) => {
     return new Response('ok', { headers: corsHeaders });
   }
 
+  const startedAt = Date.now();
+  let requestId = createRequestId();
+
   try {
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -24,11 +27,16 @@ serve(async (req) => {
     );
 
     // Get request body
-    const { filePath, userId, locale } = await req.json();
+    const { filePath, userId, locale, requestId: bodyRequestId } = await req.json();
+    requestId = normalizeRequestId(bodyRequestId) || requestId;
     if (!filePath || !userId) {
       throw new Error("Missing filePath or userId");
     }
     const reportLocale = normalizeLocale(locale);
+    logFunctionEvent(requestId, 'verify_balance_started', {
+      stage: 'request_received',
+      locale: reportLocale,
+    });
 
     // 1. Download screenshot file from Supabase Storage
     const { data: fileData, error: downloadError } = await supabaseClient
@@ -39,6 +47,11 @@ serve(async (req) => {
     if (downloadError || !fileData) {
       throw new Error(`Failed to download screenshot: ${downloadError?.message || 'No data'}`);
     }
+    logFunctionEvent(requestId, 'screenshot_downloaded', {
+      stage: 'storage_downloaded',
+      mime_type: fileData.type || 'unknown',
+      size_bucket: sizeBucket(fileData.size),
+    });
 
     // Convert blob to base64
     const arrayBuffer = await fileData.arrayBuffer();
@@ -51,6 +64,10 @@ serve(async (req) => {
 
     // 2. Prepare Vertex AI Gemini client
     const vertexClient = await createVertexClient();
+    logFunctionEvent(requestId, 'vertex_client_ready', {
+      stage: 'vertex_auth',
+      model: MODEL_NAME,
+    });
 
     const promptText = `
       Analyze this image which is expected to be a mobile banking screenshot showing a bank account balance.
@@ -82,6 +99,10 @@ serve(async (req) => {
     const parsedResult = JSON.parse(responseText.trim());
     const isVerified = parsedResult.is_bank_statement === true;
     const extractedBalance = Number(parsedResult.balance) || 0;
+    logFunctionEvent(requestId, 'vertex_balance_completed', {
+      stage: 'balance_analysis',
+      verified: isVerified,
+    });
 
     // 4. Update the Leaderboard record in Supabase DB
     // Get user details to cache nickname and nationality
@@ -110,6 +131,10 @@ serve(async (req) => {
     if (upsertError) {
       throw new Error(`Failed to update leaderboard: ${upsertError.message}`);
     }
+    logFunctionEvent(requestId, 'leaderboard_upserted', {
+      stage: 'database_upsert',
+      verified: isVerified,
+    });
 
     let rankInsight = null;
     let rankReport = null;
@@ -142,6 +167,10 @@ serve(async (req) => {
         });
         rankReport = normalizeRankReport(generatedReport, fallbackReport);
       } catch (_reportError) {
+        logFunctionEvent(requestId, 'rank_report_failed', {
+          stage: 'rank_report',
+          error_code: errorCode(_reportError),
+        }, 'error');
         rankReport = fallbackReport;
       }
 
@@ -152,8 +181,16 @@ serve(async (req) => {
           result_report_generated_at: new Date().toISOString(),
         })
         .eq('user_id', userId);
+      logFunctionEvent(requestId, 'rank_report_saved', {
+        stage: 'rank_report',
+      });
     }
 
+    logFunctionEvent(requestId, 'verify_balance_completed', {
+      stage: 'completed',
+      verified: isVerified,
+      duration_ms: Date.now() - startedAt,
+    });
     return new Response(
       JSON.stringify({ 
         success: true, 
@@ -161,6 +198,7 @@ serve(async (req) => {
         balance: extractedBalance,
         rankInsight,
         rankReport,
+        requestId,
       }), 
       { 
         headers: { ...corsHeaders, "Content-Type": "application/json" } 
@@ -168,8 +206,13 @@ serve(async (req) => {
     );
 
   } catch (err) {
+    logFunctionEvent(requestId, 'verify_balance_failed', {
+      stage: 'failed',
+      error_code: errorCode(err),
+      duration_ms: Date.now() - startedAt,
+    }, 'error');
     return new Response(
-      JSON.stringify({ success: false, error: errorMessage(err) }), 
+      JSON.stringify({ success: false, error: errorMessage(err), requestId }),
       { 
         status: 400, 
         headers: { ...corsHeaders, "Content-Type": "application/json" } 
@@ -177,6 +220,72 @@ serve(async (req) => {
     );
   }
 });
+
+function logFunctionEvent(
+  requestId: string,
+  stage: string,
+  properties: Record<string, unknown> = {},
+  level: 'info' | 'error' = 'info',
+) {
+  const { stage: step, ...safeProperties } = sanitizeLogProperties(properties);
+  const payload = {
+    source: 'verify-balance',
+    requestId,
+    stage,
+    step,
+    ...safeProperties,
+    timestamp: new Date().toISOString(),
+  };
+
+  if (level === 'error') {
+    console.error(JSON.stringify(payload));
+    return;
+  }
+  console.info(JSON.stringify(payload));
+}
+
+function sanitizeLogProperties(properties: Record<string, unknown>) {
+  const blocked = /(phone|email|name|nick|avatar|screen|image|token|secret|credential|key|amount|money|asset|balance|file|path|user)/i;
+  const sanitized: Record<string, unknown> = {};
+  for (const [property, value] of Object.entries(properties)) {
+    if (blocked.test(property)) continue;
+    if (value === undefined || typeof value === 'function') continue;
+    if (typeof value === 'string') sanitized[property] = value.slice(0, 120);
+    else if (typeof value === 'number' || typeof value === 'boolean' || value === null) sanitized[property] = value;
+    else sanitized[property] = String(value).slice(0, 120);
+  }
+  return sanitized;
+}
+
+function createRequestId() {
+  try {
+    return crypto.randomUUID();
+  } catch {
+    return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  }
+}
+
+function normalizeRequestId(value: unknown) {
+  if (typeof value !== 'string') return '';
+  return value.replace(/[^\w-]/g, '').slice(0, 96);
+}
+
+function sizeBucket(bytes = 0) {
+  const size = Number(bytes) || 0;
+  if (size <= 0) return 'unknown';
+  if (size < 500_000) return '<500kb';
+  if (size < 2_000_000) return '500kb-2mb';
+  if (size < 5_000_000) return '2mb-5mb';
+  return '5mb+';
+}
+
+function errorCode(error: unknown) {
+  return errorMessage(error)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 80) || 'unknown_error';
+}
 
 function normalizeLocale(value: unknown) {
   if (typeof value !== "string") return "en";

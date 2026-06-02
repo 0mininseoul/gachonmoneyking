@@ -7,7 +7,20 @@ import { Leaderboard } from './components/Leaderboard';
 import { ResultCard } from './components/ResultCard';
 import { PrivacyView } from './components/PrivacyView';
 import { TermsView } from './components/TermsView';
-import { trackPosterQrOpen } from './lib/analytics';
+import {
+  clearAnalyticsUser,
+  setAnalyticsUser,
+  trackPosterQrOpen,
+  trackUserAction,
+} from './lib/analytics';
+import {
+  createEventId,
+  EVENTS,
+  fileExtension,
+  safeErrorCode,
+  sizeBucket,
+  textLengthBucket,
+} from './lib/analyticsEvents';
 import { nextProgress, stageForProgress, STAGE_KEYS } from './lib/analysisProgress';
 import {
   buildFallbackRankReport,
@@ -60,6 +73,18 @@ function App() {
   const [adminQueue, setAdminQueue] = useState([]);
   const [loadingAdminQueue, setLoadingAdminQueue] = useState(false);
 
+  const handleLanguageChange = (nextLocale, source = 'header') => {
+    const previousLocale = locale;
+    setLocale(nextLocale);
+    if (previousLocale !== nextLocale) {
+      trackUserAction(EVENTS.LANGUAGE_CHANGED, {
+        from_locale: previousLocale,
+        to_locale: nextLocale,
+        source,
+      });
+    }
+  };
+
   useEffect(() => {
     trackPosterQrOpen({ locale, url: window.location.href });
   }, [locale, location.pathname, location.search]);
@@ -70,9 +95,11 @@ function App() {
       const currentUser = session?.user ?? null;
       setUser(currentUser);
       if (currentUser) {
+        setAnalyticsUser(currentUser);
         checkUserProfile(currentUser);
         checkAdminRole(currentUser);
       } else {
+        clearAnalyticsUser();
         setLoading(false);
       }
     });
@@ -82,9 +109,11 @@ function App() {
       const currentUser = session?.user ?? null;
       setUser(currentUser);
       if (currentUser) {
+        setAnalyticsUser(currentUser);
         checkUserProfile(currentUser);
         checkAdminRole(currentUser);
       } else {
+        clearAnalyticsUser();
         setHasProfile(false);
         setUserRecord(null);
         setIsAdmin(false);
@@ -132,6 +161,7 @@ function App() {
   // Fetch admin queue when navigating to /admin
   useEffect(() => {
     if (location.pathname === '/admin' && isAdmin) {
+      trackUserAction(EVENTS.ADMIN_CONSOLE_VIEWED, { queue_loaded: adminQueue.length > 0 });
       fetchAdminQueue();
     }
   }, [location.pathname, isAdmin]);
@@ -203,6 +233,10 @@ function App() {
       // Check if this was a just-logged-in event
       if (sessionStorage.getItem('just_logged_in') === 'true') {
         sessionStorage.removeItem('just_logged_in');
+        trackUserAction(EVENTS.LOGIN_COMPLETED, {
+          has_profile: hasProf,
+          destination: hasProf ? 'dashboard' : 'profile_setup',
+        });
         if (hasProf) {
           navigate('/dashboard');
         } else {
@@ -290,7 +324,10 @@ function App() {
         .from('leaderboard')
         .update({ correction_note: null })
         .eq('id', recordId);
-      if (!error) fetchAdminQueue();
+      if (!error) {
+        trackUserAction(EVENTS.ADMIN_CORRECTION_CLEARED, { record_present: Boolean(recordId) }, { operational: true });
+        fetchAdminQueue();
+      }
     } catch (err) {
       console.error("Error clearing correction note:", err);
     }
@@ -304,6 +341,10 @@ function App() {
         .update({ status, balance: balanceVal })
         .eq('id', recordId);
       if (!error) {
+        trackUserAction(EVENTS.ADMIN_VERIFICATION_UPDATED, {
+          status,
+          record_present: Boolean(recordId),
+        }, { operational: true });
         fetchAdminQueue();
         fetchLeaderboard();
       }
@@ -313,6 +354,7 @@ function App() {
   };
 
   const handleLogin = async () => {
+    trackUserAction(EVENTS.LOGIN_CLICKED, { provider: 'kakao' });
     sessionStorage.setItem('just_logged_in', 'true');
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'kakao',
@@ -320,11 +362,19 @@ function App() {
         redirectTo: window.location.origin
       }
     });
-    if (error) console.error("Error logging in via Kakao:", error);
+    if (error) {
+      trackUserAction(EVENTS.LOGIN_FAILED, {
+        provider: 'kakao',
+        error_code: safeErrorCode(error),
+      }, { operational: true });
+      console.error("Error logging in via Kakao:", error);
+    }
   };
 
   const handleLogout = async () => {
+    trackUserAction(EVENTS.LOGOUT_CLICKED);
     await supabase.auth.signOut();
+    clearAnalyticsUser();
     setUser(null);
     setHasProfile(false);
     setUserRecord(null);
@@ -341,6 +391,12 @@ function App() {
     e.preventDefault();
     if (!isProfileFormComplete({ nickname, nationality, phoneNumber, termsAgreed, privacyAgreed })) return;
 
+    const requestId = createEventId('profile');
+    trackUserAction(EVENTS.PROFILE_SAVE_STARTED, {
+      request_id: requestId,
+      nationality,
+      marketing_consent: marketingConsent,
+    });
     setSavingProfile(true);
     try {
       const profilePayload = buildProfilePayload({
@@ -358,13 +414,26 @@ function App() {
         .upsert(profilePayload, { onConflict: 'id' });
 
       if (!error) {
+        trackUserAction(EVENTS.PROFILE_SAVE_SUCCEEDED, {
+          request_id: requestId,
+          nationality,
+          marketing_consent: marketingConsent,
+        }, { operational: true });
         setHasProfile(true);
         await checkUserProfile(user);
         navigate('/verify-balance');
       } else {
+        trackUserAction(EVENTS.PROFILE_SAVE_FAILED, {
+          request_id: requestId,
+          error_code: safeErrorCode(error),
+        }, { operational: true });
         console.error("Error saving profile:", error);
       }
     } catch (err) {
+      trackUserAction(EVENTS.PROFILE_SAVE_FAILED, {
+        request_id: requestId,
+        error_code: safeErrorCode(err),
+      }, { operational: true });
       console.error("Error saving profile:", err);
     } finally {
       setSavingProfile(false);
@@ -374,10 +443,18 @@ function App() {
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    const requestId = createEventId('verify');
+    let failureStage = 'storage_upload';
 
     setUploading(true);
     setUploadError(null);
     setUploadSuccess(false);
+    trackUserAction(EVENTS.BALANCE_UPLOAD_STARTED, {
+      request_id: requestId,
+      upload_extension: fileExtension(file.name),
+      upload_size_bucket: sizeBucket(file.size),
+      had_verified_record: userRecord?.status === 'verified',
+    }, { operational: true });
 
     try {
       const fileExt = file.name.split('.').pop();
@@ -390,8 +467,13 @@ function App() {
 
       if (uploadError) throw new Error(uploadError.message);
 
+      failureStage = 'edge_function';
+      trackUserAction(EVENTS.BALANCE_VERIFICATION_STARTED, {
+        request_id: requestId,
+        locale,
+      }, { operational: true });
       const { data: edgeData, error: edgeError } = await supabase.functions.invoke('verify-balance', {
-        body: { filePath: uploadData.path, userId: user.id, locale }
+        body: { filePath: uploadData.path, userId: user.id, locale, requestId }
       });
 
       if (edgeError || !edgeData.success) {
@@ -399,16 +481,37 @@ function App() {
       }
 
       if (edgeData.verified) {
+        trackUserAction(EVENTS.BALANCE_VERIFICATION_SUCCEEDED, {
+          request_id: requestId,
+          locale,
+          rank_report_returned: Boolean(edgeData.rankReport),
+        }, { operational: true });
         setUploadSuccess(true);
         await fetchLeaderboard();
         await fetchUserLeaderboardRecord(user.id);
         setShowRankCard(true);
         navigate('/dashboard');
       } else {
-        throw new Error(t('error_invalid'));
+        trackUserAction(EVENTS.BALANCE_VERIFICATION_REJECTED, {
+          request_id: requestId,
+          locale,
+          reason: 'not_bank_statement',
+        }, { operational: true });
+        setUploadError(t('error_invalid'));
+        return;
       }
 
     } catch (err) {
+      trackUserAction(
+        failureStage === 'storage_upload' ? EVENTS.BALANCE_UPLOAD_FAILED : EVENTS.BALANCE_VERIFICATION_FAILED,
+        {
+          request_id: requestId,
+          locale,
+          failure_stage: failureStage,
+          error_code: safeErrorCode(err),
+        },
+        { operational: true }
+      );
       setUploadError(err.message);
     } finally {
       setUploading(false);
@@ -416,6 +519,7 @@ function App() {
   };
 
   const exportCSV = () => {
+    trackUserAction(EVENTS.ADMIN_CSV_EXPORTED, { row_count: adminQueue.length });
     let csvContent = "data:text/csv;charset=utf-8,";
     csvContent += "Nickname,Real Name,Phone Number,Nationality,Balance,Status,Marketing Consent,Uploaded At\n";
     
@@ -482,7 +586,7 @@ function App() {
 
   return (
     <Routes>
-      <Route element={<MainLayout isAdmin={isAdmin} locale={locale} setLocale={setLocale} user={user} handleLogout={handleLogout} handleLogin={handleLogin} navigate={navigate} location={location} t={t} />}>
+      <Route element={<MainLayout isAdmin={isAdmin} locale={locale} setLocale={handleLanguageChange} user={user} handleLogout={handleLogout} handleLogin={handleLogin} navigate={navigate} location={location} t={t} />}>
         <Route path="/" element={<PublicRoute loading={loading} user={user} hasProfile={hasProfile}><LandingView user={user} rankings={rankings} handleLogin={handleLogin} t={t} navigate={navigate} /></PublicRoute>} />
         <Route path="/dashboard" element={<ProtectedRoute loading={loading} user={user} hasProfile={hasProfile}><DashboardView t={t} user={user} userRecord={userRecord} showRankCard={showRankCard} setShowRankCard={setShowRankCard} rankings={rankings} /></ProtectedRoute>} />
         <Route path="/verify-balance" element={<ProtectedRoute loading={loading} user={user} hasProfile={hasProfile}><BalanceUploadView t={t} userRecord={userRecord} uploadError={uploadError} uploadSuccess={uploadSuccess} handleFileUpload={handleFileUpload} /></ProtectedRoute>} />
@@ -533,17 +637,22 @@ function AdminRoute({ children, loading, user, hasProfile, isAdmin }) {
 }
 
 function MainLayout({ isAdmin, locale, setLocale, user, handleLogout, handleLogin, navigate, location, t }) {
+  const navigateWithTracking = (destination, source) => {
+    trackUserAction(EVENTS.NAVIGATION_CLICKED, { destination, source });
+    navigate(destination);
+  };
+
   return (
     <div className="main-layout">
       <header className="top-nav">
-        <div className="brand" style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
+        <div className="brand" style={{ cursor: 'pointer' }} onClick={() => navigateWithTracking('/', 'brand')}>
           <img src="/logo.png" className="brand-logo" alt="logo" />
           <span>Gachon Money King</span>
         </div>
         <div className="nav-controls">
           {isAdmin && (
             <button 
-              onClick={() => navigate(location.pathname === '/admin' ? '/dashboard' : '/admin')} 
+              onClick={() => navigateWithTracking(location.pathname === '/admin' ? '/dashboard' : '/admin', 'admin_toggle')}
               className="btn-secondary btn-sm admin-btn"
             >
               {location.pathname === '/admin' ? 'Go to Leaderboard' : 'Admin Console'}
@@ -554,7 +663,7 @@ function MainLayout({ isAdmin, locale, setLocale, user, handleLogout, handleLogi
             <span className="lang-globe">🌐</span>
             <select 
               value={locale} 
-              onChange={(e) => setLocale(e.target.value)}
+              onChange={(e) => setLocale(e.target.value, 'header')}
               className="lang-select"
             >
               <option value="vi">Tiếng Việt</option>
@@ -604,9 +713,9 @@ function MainLayout({ isAdmin, locale, setLocale, user, handleLogout, handleLogi
             </a>
           </div>
           <div className="footer-links">
-            <span onClick={() => navigate('/terms')}>{t('terms_link')}</span>
+            <span onClick={() => navigateWithTracking('/terms', 'footer_terms')}>{t('terms_link')}</span>
             <span className="divider">|</span>
-            <span onClick={() => navigate('/privacy')}>{t('privacy_link')}</span>
+            <span onClick={() => navigateWithTracking('/privacy', 'footer_privacy')}>{t('privacy_link')}</span>
           </div>
         </div>
         <div className="footer-separator"></div>
@@ -629,7 +738,13 @@ function LandingView({ user, rankings, handleLogin, t, navigate }) {
       {user ? (
         <div className="auth-nudge-banner linear-card animate-fade-in">
           <p className="banner-notice">{t('logged_in_no_profile_notice')}</p>
-          <button onClick={() => navigate('/profile-setup')} className="btn-primary btn-lg banner-login-btn">
+          <button
+            onClick={() => {
+              trackUserAction(EVENTS.NAVIGATION_CLICKED, { destination: 'profile_setup', source: 'landing_profile_nudge' });
+              navigate('/profile-setup');
+            }}
+            className="btn-primary btn-lg banner-login-btn"
+          >
             {t('setup_profile_btn')}
           </button>
         </div>
@@ -666,7 +781,7 @@ function ProfileSetupView({
   handleSaveProfile
 }) {
   const [currentStep, setCurrentStep] = useState(0);
-  const { setLocale } = useLanguage();
+  const { locale, setLocale } = useLanguage();
   const canSubmit = isProfileFormComplete({
     nickname,
     nationality,
@@ -719,11 +834,28 @@ function ProfileSetupView({
     if (!currentStepData.complete) return;
     if (currentStepData.key === 'nationality' && nationality) {
       setLocale(nationality);
+      if (locale !== nationality) {
+        trackUserAction(EVENTS.LANGUAGE_CHANGED, {
+          from_locale: locale,
+          to_locale: nationality,
+          source: 'profile_nationality',
+        });
+      }
     }
+    trackUserAction(EVENTS.PROFILE_STEP_COMPLETED, {
+      step: currentStepData.key,
+      next_step: steps[Math.min(currentStep + 1, steps.length - 1)]?.key || currentStepData.key,
+      nationality: currentStepData.key === 'nationality' ? nationality : undefined,
+      marketing_consent: currentStepData.key === 'consent' ? marketingConsent : undefined,
+    });
     setCurrentStep((step) => Math.min(step + 1, steps.length - 1));
   };
 
   const goToPreviousStep = () => {
+    trackUserAction(EVENTS.NAVIGATION_CLICKED, {
+      source: 'profile_previous_step',
+      destination: steps[Math.max(currentStep - 1, 0)]?.key || 'profile_start',
+    });
     setCurrentStep((step) => Math.max(step - 1, 0));
   };
 
@@ -978,7 +1110,13 @@ function DashboardView({
 
   const handleShare = async () => {
     if (!userRecord) return;
+    const requestId = createEventId('share');
     const url = buildShareUrl(window.location.origin, userRecord.id);
+    trackUserAction(EVENTS.RESULT_SHARE_STARTED, {
+      request_id: requestId,
+      context: 'owner_dashboard',
+      has_rank_report: Boolean(rankReport),
+    });
     const result = await shareResult({
       url,
       title: t('shared_result_headline').replace('{nickname}', userRecord.nickname),
@@ -987,6 +1125,11 @@ function DashboardView({
       ctaLabel: t('anonymous_rank_cta'),
       homeUrl: window.location.origin,
     });
+    trackUserAction(EVENTS.RESULT_SHARE_COMPLETED, {
+      request_id: requestId,
+      context: 'owner_dashboard',
+      method: result,
+    }, { operational: result === 'failed' });
     if (result === 'copied') {
       setShareToast(true);
       window.setTimeout(() => setShareToast(false), 1800);
@@ -996,6 +1139,12 @@ function DashboardView({
   const handleCorrectionSubmit = async (e) => {
     e.preventDefault();
     if (!correctionText.trim()) return;
+    const requestId = createEventId('correction');
+    trackUserAction(EVENTS.CORRECTION_REQUEST_SUBMITTED, {
+      request_id: requestId,
+      has_attachment: Boolean(correctionImage),
+      text_length_bucket: textLengthBucket(correctionText),
+    }, { operational: true });
     setSubmittingCorrection(true);
     try {
       let imageUrl = userRecord?.correction_image_url || null;
@@ -1014,9 +1163,22 @@ function DashboardView({
         .update({ correction_note: correctionText.trim(), correction_image_url: imageUrl })
         .eq('user_id', user.id);
       if (!error) {
+        trackUserAction(EVENTS.CORRECTION_REQUEST_SUCCEEDED, {
+          request_id: requestId,
+          has_attachment: Boolean(correctionImage),
+        }, { operational: true });
         setCorrectionSuccess(true);
+      } else {
+        trackUserAction(EVENTS.CORRECTION_REQUEST_FAILED, {
+          request_id: requestId,
+          error_code: safeErrorCode(error),
+        }, { operational: true });
       }
     } catch (err) {
+      trackUserAction(EVENTS.CORRECTION_REQUEST_FAILED, {
+        request_id: requestId,
+        error_code: safeErrorCode(err),
+      }, { operational: true });
       console.error('Error submitting correction:', err);
     } finally {
       setSubmittingCorrection(false);
@@ -1024,6 +1186,9 @@ function DashboardView({
   };
 
   const openCorrectionModal = () => {
+    trackUserAction(EVENTS.CORRECTION_MODAL_OPENED, {
+      has_pending_correction: Boolean(userRecord?.correction_note),
+    });
     setCorrectionText(userRecord?.correction_note || '');
     setCorrectionImage(null);
     setCorrectionSuccess(false);
@@ -1049,7 +1214,14 @@ function DashboardView({
       ) : (
         !isVerified && (
           <div className="dashboard-verify-prompt">
-            <button type="button" className="btn-primary btn-lg" onClick={() => navigate('/verify-balance')}>
+            <button
+              type="button"
+              className="btn-primary btn-lg"
+              onClick={() => {
+                trackUserAction(EVENTS.DASHBOARD_VERIFY_CLICKED, { source: 'dashboard_prompt' });
+                navigate('/verify-balance');
+              }}
+            >
               {t('go_verify_balance_btn')}
             </button>
           </div>
@@ -1064,9 +1236,21 @@ function DashboardView({
 
       {/* Correction Request Modal */}
       {showCorrectionModal && (
-        <div className="overlay-celebration" onClick={() => setShowCorrectionModal(false)}>
+        <div
+          className="overlay-celebration"
+          onClick={() => {
+            trackUserAction(EVENTS.CORRECTION_MODAL_CLOSED, { source: 'overlay' });
+            setShowCorrectionModal(false);
+          }}
+        >
           <div className="correction-modal linear-card" onClick={(e) => e.stopPropagation()}>
-            <button className="close-overlay" onClick={() => setShowCorrectionModal(false)}>×</button>
+            <button
+              className="close-overlay"
+              onClick={() => {
+                trackUserAction(EVENTS.CORRECTION_MODAL_CLOSED, { source: 'close_button' });
+                setShowCorrectionModal(false);
+              }}
+            >×</button>
             <h3>{t('correction_modal_title')}</h3>
             <p>{t('correction_modal_desc')}</p>
             {correctionSuccess ? (
@@ -1091,7 +1275,16 @@ function DashboardView({
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={(e) => setCorrectionImage(e.target.files[0] || null)}
+                    onChange={(e) => {
+                      const nextFile = e.target.files[0] || null;
+                      setCorrectionImage(nextFile);
+                      if (nextFile) {
+                        trackUserAction(EVENTS.CORRECTION_IMAGE_ATTACHED, {
+                          upload_extension: fileExtension(nextFile.name),
+                          upload_size_bucket: sizeBucket(nextFile.size),
+                        });
+                      }
+                    }}
                     className="file-hidden-input"
                   />
                   <span className="btn-secondary btn-sm">📎 {t('correction_attach_image')}</span>
@@ -1107,9 +1300,21 @@ function DashboardView({
       )}
 
       {showRankCard && userRecord && (
-        <div className="overlay-celebration" onClick={() => setShowRankCard(false)}>
+        <div
+          className="overlay-celebration"
+          onClick={() => {
+            trackUserAction(EVENTS.RESULT_CARD_DISMISSED, { source: 'overlay' });
+            setShowRankCard(false);
+          }}
+        >
           <div className="rank-celebration-card linear-card" onClick={(e) => e.stopPropagation()}>
-            <button className="close-overlay" onClick={() => setShowRankCard(false)}>×</button>
+            <button
+              className="close-overlay"
+              onClick={() => {
+                trackUserAction(EVENTS.RESULT_CARD_DISMISSED, { source: 'close_button' });
+                setShowRankCard(false);
+              }}
+            >×</button>
             <div className="medal-icon">🏆</div>
             <h2>{rankReport?.mainCopy || titleText}</h2>
             <p className="celebration-rank-summary">
@@ -1118,7 +1323,13 @@ function DashboardView({
                 .replace('{percentile}', percentileLabel)}
             </p>
             <p className="celebration-text">{subtitleText}</p>
-            <button onClick={() => setShowRankCard(false)} className="btn-primary">
+            <button
+              onClick={() => {
+                trackUserAction(EVENTS.RESULT_CARD_DISMISSED, { source: 'view_leaderboard' });
+                setShowRankCard(false);
+              }}
+              className="btn-primary"
+            >
               {t('view_leaderboard_btn')}
             </button>
           </div>
@@ -1147,7 +1358,14 @@ function BalanceUploadView({
     <div className="app-container verify-page">
       <div className="verify-mobile-shell">
         <div className="verify-step-header">
-          <button type="button" className="verify-back-btn" onClick={() => navigate('/dashboard')}>
+          <button
+            type="button"
+            className="verify-back-btn"
+            onClick={() => {
+              trackUserAction(EVENTS.NAVIGATION_CLICKED, { destination: 'dashboard', source: 'verify_back' });
+              navigate('/dashboard');
+            }}
+          >
             ←
           </button>
           <div>
@@ -1203,17 +1421,35 @@ function SharedResultView({ rankings, rankingsLoaded, user, userRecord, handleLo
   const { locale } = useLanguage();
   const navigate = useNavigate();
   const [shareToast, setShareToast] = React.useState(false);
+  const record = rankings.find((r) => r.id === recordId);
+  const canViewBalances = Boolean(userRecord && userRecord.status === 'verified');
+
+  useEffect(() => {
+    if (!rankingsLoaded) return;
+    trackUserAction(EVENTS.SHARED_RESULT_VIEWED, {
+      result_found: Boolean(record),
+      can_view_balances: canViewBalances,
+      locale,
+    });
+  }, [rankingsLoaded, recordId, Boolean(record), canViewBalances, locale]);
 
   if (!rankingsLoaded) {
     return <div className="app-container loading-container"><div className="spinner"></div></div>;
   }
 
-  const record = rankings.find((r) => r.id === recordId);
   if (!record) {
     return (
       <div className="app-container shared-result-view shared-result-missing">
         <p className="shared-not-found">{t('shared_not_found')}</p>
-        <button className="btn-primary btn-lg" onClick={() => navigate('/')}>{t('anonymous_rank_cta')}</button>
+        <button
+          className="btn-primary btn-lg"
+          onClick={() => {
+            trackUserAction(EVENTS.SHARED_RESULT_CTA_CLICKED, { state: 'missing_result', destination: 'home' });
+            navigate('/');
+          }}
+        >
+          {t('anonymous_rank_cta')}
+        </button>
       </div>
     );
   }
@@ -1224,10 +1460,15 @@ function SharedResultView({ rankings, rankingsLoaded, user, userRecord, handleLo
     insight,
     locale
   );
-  const canViewBalances = Boolean(userRecord && userRecord.status === 'verified');
 
   const handleShare = async () => {
+    const requestId = createEventId('share');
     const url = buildShareUrl(window.location.origin, record.id);
+    trackUserAction(EVENTS.RESULT_SHARE_STARTED, {
+      request_id: requestId,
+      context: 'public_shared_result',
+      can_view_balances: canViewBalances,
+    });
     const result = await shareResult({
       url,
       title: t('shared_result_headline').replace('{nickname}', record.nickname),
@@ -1236,6 +1477,11 @@ function SharedResultView({ rankings, rankingsLoaded, user, userRecord, handleLo
       ctaLabel: t('anonymous_rank_cta'),
       homeUrl: window.location.origin,
     });
+    trackUserAction(EVENTS.RESULT_SHARE_COMPLETED, {
+      request_id: requestId,
+      context: 'public_shared_result',
+      method: result,
+    }, { operational: result === 'failed' });
     if (result === 'copied') {
       setShareToast(true);
       window.setTimeout(() => setShareToast(false), 1800);
@@ -1257,7 +1503,16 @@ function SharedResultView({ rankings, rankingsLoaded, user, userRecord, handleLo
       </div>
 
       <div className="shared-cta-wrap">
-        <button className="btn-primary btn-lg" onClick={user ? () => navigate('/dashboard') : handleLogin}>
+        <button
+          className="btn-primary btn-lg"
+          onClick={user ? () => {
+            trackUserAction(EVENTS.SHARED_RESULT_CTA_CLICKED, { state: 'logged_in', destination: 'dashboard' });
+            navigate('/dashboard');
+          } : () => {
+            trackUserAction(EVENTS.SHARED_RESULT_CTA_CLICKED, { state: 'logged_out', destination: 'login' });
+            handleLogin();
+          }}
+        >
           {t('anonymous_rank_cta')}
         </button>
       </div>

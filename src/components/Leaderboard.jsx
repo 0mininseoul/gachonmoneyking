@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { nationalities } from '../i18n/translations';
 import { useLanguage } from '../i18n/LanguageContext';
+import { trackUserAction } from '../lib/analytics';
+import { EVENTS } from '../lib/analyticsEvents';
 
 export function Leaderboard({ list, canViewBalances = false, currentUserId }) {
   const { t } = useLanguage();
@@ -57,6 +59,16 @@ export function Leaderboard({ list, canViewBalances = false, currentUserId }) {
     return `${flag} ${t(`tab_${tab}`)}`;
   };
 
+  const selectTab = (tab) => {
+    setActiveTab(tab);
+    trackUserAction(EVENTS.LEADERBOARD_TAB_SELECTED, {
+      tab,
+      can_view_balances: canViewBalances,
+      has_current_user: Boolean(currentUserId),
+      visible_rows: tab === 'all' ? list.length : list.filter(item => item.nationality === tab).length,
+    });
+  };
+
   return (
     <div className="leaderboard-container">
       <div className="leaderboard-tabs">
@@ -64,7 +76,7 @@ export function Leaderboard({ list, canViewBalances = false, currentUserId }) {
           <button
             key={tab}
             className={`tab-btn ${activeTab === tab ? 'active' : ''}`}
-            onClick={() => setActiveTab(tab)}
+            onClick={() => selectTab(tab)}
           >
             {getTabLabel(tab)}
           </button>
