@@ -1152,11 +1152,6 @@ function BalanceUploadView({
           {isVerified ? t('upload_desc_verified') : t('verify_page_subtitle')}
         </p>
 
-        <div className="verify-status-strip">
-          <span>{t('anonymous_badge_label')}</span>
-          <strong>{isVerified ? t('leaderboard_unlocked_label') : t('leaderboard_locked_label')}</strong>
-        </div>
-
         {isVerified && (
           <div className="verify-balance-summary">
             <span>{t('registered_balance_label')}</span>
@@ -1185,7 +1180,7 @@ function BalanceUploadView({
           <label htmlFor="screenshot-file-upload" className="btn-primary verify-upload-btn">
             {isVerified ? t('update_balance_btn') : t('upload_btn')}
           </label>
-          <p>{t('verify_upload_hint')}</p>
+          <p>{t('upload_desc')}</p>
         </div>
 
         {uploadError && <p className="error-message verify-feedback">{uploadError}</p>}

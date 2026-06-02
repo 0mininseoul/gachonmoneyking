@@ -14,3 +14,10 @@ test('profile save navigates straight to verify-balance', () => {
 test('selecting nationality switches the active locale', () => {
   assert.match(appSource, /setLocale\(nationality\)/);
 });
+
+test('verify page drops the locked-balance strip and uses banking-app hint', () => {
+  assert.doesNotMatch(appSource, /verify-status-strip/);
+  const verifyBlock = appSource.slice(appSource.indexOf('function BalanceUploadView'));
+  assert.match(verifyBlock, /t\('upload_desc'\)/);
+  assert.doesNotMatch(verifyBlock, /t\('verify_upload_hint'\)/);
+});
