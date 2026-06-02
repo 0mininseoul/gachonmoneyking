@@ -17,7 +17,7 @@ function ShareIcon() {
 export function ResultCard({ insight, report, t, variant = 'owner', onShare, onCorrection }) {
   const zoneLabel = ZONE_LABELS[insight.balanceZone] || ZONE_LABELS.maintenance;
   return (
-    <section className="result-card linear-card">
+    <section className="result-card linear-card amp-mask">
       <button type="button" className="result-share-btn" onClick={onShare} aria-label={t('share_result_btn')}>
         <ShareIcon />
       </button>

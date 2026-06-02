@@ -38,13 +38,16 @@ export default async function handler(req, res) {
     return;
   }
 
+  const timestamp = new Date();
   const payload = {
     source: 'vercel_ops_log',
     eventName,
     requestId: safeString(body?.requestId, 96),
+    clientLoggedAtKst: safeString(body?.logged_at_kst, 40),
     properties: sanitizeProperties(body?.properties || {}),
     vercelEnv: process.env.VERCEL_ENV || 'local',
-    timestamp: new Date().toISOString(),
+    timestamp: timestamp.toISOString(),
+    timestamp_kst: formatKstTimestamp(timestamp),
   };
 
   console.log(JSON.stringify(payload));
@@ -83,6 +86,13 @@ function sanitizeProperties(properties) {
 
 function safeString(value, maxLength) {
   return String(value || '')
-    .replace(/[^\w .:/-]/g, '')
+    .replace(/[^\w .:+/-]/g, '')
     .slice(0, maxLength);
+}
+
+function formatKstTimestamp(value = new Date()) {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  const kstDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+  return kstDate.toISOString().replace('Z', '+09:00');
 }

@@ -111,7 +111,7 @@ export function Leaderboard({ list, canViewBalances = false, currentUserId }) {
                 <span className="country-name">{getCountryName(userItem.nationality)}</span>
               </div>
               <div className="col-balance">
-                <span className={canViewBalances ? 'balance-amount' : 'balance-amount blurred'}>
+                <span className={canViewBalances ? 'balance-amount amp-mask' : 'balance-amount blurred amp-mask'}>
                   {canViewBalances ? `${Number(userItem.balance).toLocaleString()} KRW` : '●●●,●●●,●●● KRW'}
                 </span>
               </div>
@@ -136,7 +136,7 @@ export function Leaderboard({ list, canViewBalances = false, currentUserId }) {
                   <span className="country-name">{getCountryName(item.nationality)}</span>
                 </div>
                 <div className="col-balance">
-                  <span className={canViewBalances ? 'balance-amount' : 'balance-amount blurred'}>
+                  <span className={canViewBalances ? 'balance-amount amp-mask' : 'balance-amount blurred amp-mask'}>
                     {canViewBalances ? `${Number(item.balance).toLocaleString()} KRW` : '●●●,●●●,●●● KRW'}
                   </span>
                 </div>

@@ -95,11 +95,74 @@ test('Vercel ops log endpoint allowlists operational events and redacts unsafe v
   assert.match(apiSource, /console\.log\(JSON\.stringify/);
   assert.match(apiSource, /requestId/);
   assert.match(apiSource, /sanitizeProperties/);
+  assert.match(apiSource, /timestamp_kst/);
   assert.doesNotMatch(apiSource, /phone_number|real_name|screenshot_url|service_role/i);
 
   const analyticsSource = readProjectFile('src/lib/analytics.js');
   assert.match(analyticsSource, /sendOperationalLog/);
   assert.match(analyticsSource, /\/api\/ops-log/);
+});
+
+test('Amplitude Session Replay is configured with conservative privacy controls', () => {
+  const packageJson = JSON.parse(readProjectFile('package.json'));
+  assert.ok(
+    packageJson.dependencies['@amplitude/plugin-session-replay-browser'],
+    'missing Session Replay browser plugin dependency'
+  );
+
+  const analyticsSource = readProjectFile('src/lib/analytics.js');
+  assert.match(analyticsSource, /sessionReplayPlugin/);
+  assert.match(analyticsSource, /VITE_AMPLITUDE_SESSION_REPLAY_SAMPLE_RATE/);
+  assert.match(analyticsSource, /defaultMaskLevel:\s*'conservative'/);
+  assert.match(analyticsSource, /sampleRate:\s*sessionReplaySampleRate/);
+  assert.match(analyticsSource, /amplitude\.add\(sessionReplayTracking\)/);
+  assert.match(analyticsSource, /forceSessionTracking:\s*true/);
+
+  for (const selector of [
+    '.admin-thumb',
+    '.admin-col-img',
+    '.verify-balance-summary',
+    '.result-card',
+    '.balance-amount',
+    '.admin-col-meta',
+    '.admin-correction-text',
+    '.correction-existing',
+    '.correction-file-name',
+    '.phone-segment-grid',
+  ]) {
+    assert.match(analyticsSource, new RegExp(selector.replace('.', '\\.')), `missing privacy selector ${selector}`);
+  }
+});
+
+test('sensitive financial and user-generated UI is marked for replay masking or blocking', () => {
+  const appSource = readProjectFile('src/App.jsx');
+  const leaderboardSource = readProjectFile('src/components/Leaderboard.jsx');
+  const resultCardSource = readProjectFile('src/components/ResultCard.jsx');
+
+  assert.match(appSource, /className="verify-balance-summary amp-mask"/);
+  assert.match(appSource, /className="correction-existing amp-mask"/);
+  assert.match(appSource, /className="correction-file-name amp-mask"/);
+  assert.match(appSource, /className="admin-thumb amp-block"/);
+  assert.match(appSource, /className="admin-col-meta amp-mask"/);
+  assert.match(appSource, /className="admin-col-balance amp-mask"/);
+  assert.match(appSource, /className="admin-correction-text amp-mask"/);
+  assert.match(leaderboardSource, /balance-amount amp-mask/);
+  assert.match(resultCardSource, /className="result-card linear-card amp-mask"/);
+});
+
+test('Amplitude events and operational logs include KST timestamp properties', () => {
+  const analyticsSource = readProjectFile('src/lib/analytics.js');
+  const appSource = readProjectFile('src/App.jsx');
+
+  assert.match(analyticsSource, /getKstEventProperties/);
+  assert.match(analyticsSource, /kstTimestampEnrichmentPlugin/);
+  assert.match(analyticsSource, /event_time_kst/);
+  assert.match(analyticsSource, /event_date_kst/);
+  assert.match(analyticsSource, /event_hour_kst/);
+  assert.match(analyticsSource, /event_timezone/);
+  assert.match(analyticsSource, /logged_at_kst/);
+  assert.match(appSource, /row\.updated_at_kst \|\| formatKstTimestamp\(row\.updated_at\)/);
+  assert.match(appSource, /formatKstDate\(new Date\(\)\)/);
 });
 
 test('verify-balance function writes structured non-PII logs with request ids', () => {
@@ -112,6 +175,7 @@ test('verify-balance function writes structured non-PII logs with request ids', 
   assert.match(source, /verify_balance_failed/);
   assert.match(source, /console\.(info|error)\(JSON\.stringify/);
   assert.match(source, /requestId,\s*stage/);
+  assert.match(source, /timestamp_kst/);
   assert.doesNotMatch(source, /console\.(info|log|error)\([^)]*filePath/);
   assert.doesNotMatch(source, /console\.(info|log|error)\([^)]*userId/);
 });

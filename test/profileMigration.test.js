@@ -13,6 +13,10 @@ const rankReportMigrationSql = readFileSync(
   resolve(__dirname, '../supabase/migrations/20260602063418_add_rank_report_json.sql'),
   'utf8'
 );
+const kstTimestampMigrationSql = readFileSync(
+  resolve(__dirname, '../supabase/migrations/20260603000000_add_kst_timestamp_columns.sql'),
+  'utf8'
+);
 const verifyBalanceSource = readFileSync(
   resolve(__dirname, '../supabase/functions/verify-balance/index.ts'),
   'utf8'
@@ -34,6 +38,24 @@ test('rank report migration stores generated result JSON without changing leader
   assert.match(rankReportMigrationSql, /add\s+column\s+if\s+not\s+exists\s+result_report_json\s+jsonb/i);
   assert.match(rankReportMigrationSql, /add\s+column\s+if\s+not\s+exists\s+result_report_generated_at/i);
   assert.doesNotMatch(rankReportMigrationSql, /drop\s+policy|drop\s+table|disable\s+row\s+level\s+security/i);
+});
+
+test('KST timestamp migration adds synced display columns without changing UTC source columns', () => {
+  for (const column of [
+    'created_at_kst',
+    'terms_agreed_at_kst',
+    'privacy_agreed_at_kst',
+    'updated_at_kst',
+    'result_report_generated_at_kst',
+  ]) {
+    assert.match(kstTimestampMigrationSql, new RegExp(`add\\s+column\\s+if\\s+not\\s+exists\\s+${column}`, 'i'));
+  }
+
+  assert.match(kstTimestampMigrationSql, /at\s+time\s+zone\s+'Asia\/Seoul'/i);
+  assert.match(kstTimestampMigrationSql, /sync_profiles_kst_timestamps/i);
+  assert.match(kstTimestampMigrationSql, /sync_leaderboard_kst_timestamps/i);
+  assert.doesNotMatch(kstTimestampMigrationSql, /alter\s+column\s+(created_at|updated_at)\s+type/i);
+  assert.doesNotMatch(kstTimestampMigrationSql, /default\s+timezone\('Asia\/Seoul'/i);
 });
 
 test('verify-balance function generates spicy anonymous rank report copy', () => {

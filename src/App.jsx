@@ -35,6 +35,7 @@ import {
   splitPhoneNumber,
 } from './lib/profilePayload';
 import { buildShareUrl, shareResult } from './lib/shareResult';
+import { formatKstDate, formatKstTimestamp } from './lib/kstTime';
 
 function App() {
   const { locale, setLocale, t } = useLanguage();
@@ -519,10 +520,11 @@ function App() {
   const exportCSV = () => {
     trackUserAction(EVENTS.ADMIN_CSV_EXPORTED, { row_count: adminQueue.length });
     let csvContent = "data:text/csv;charset=utf-8,";
-    csvContent += "Nickname,Real Name,Phone Number,Nationality,Balance,Status,Marketing Consent,Uploaded At\n";
+    csvContent += "Nickname,Real Name,Phone Number,Nationality,Balance,Status,Marketing Consent,Uploaded At (KST)\n";
     
     adminQueue.forEach((row) => {
       const profile = row.profiles || {};
+      const uploadedAtKst = row.updated_at_kst || formatKstTimestamp(row.updated_at);
       const line = [
         row.nickname,
         profile.real_name || '',
@@ -531,7 +533,7 @@ function App() {
         row.balance,
         row.status,
         profile.marketing_consent ? 'Yes' : 'No',
-        row.updated_at
+        uploadedAtKst
       ].join(",");
       csvContent += line + "\n";
     });
@@ -539,7 +541,7 @@ function App() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `gachon_balance_leaderboard_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute("download", `gachon_balance_leaderboard_${formatKstDate(new Date())}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -917,7 +919,7 @@ function ProfileSetupView({
             {currentStepData.key === 'phone' && (
               <div className="form-group profile-step-field">
                 <label>{t('phone_number')}<span className="required-mark">*</span></label>
-                <div className="phone-segment-grid">
+                <div className="phone-segment-grid amp-mask">
                   <input
                     type="tel"
                     inputMode="numeric"
@@ -1258,7 +1260,7 @@ function DashboardView({
             ) : (
               <form onSubmit={handleCorrectionSubmit}>
                 {userRecord?.correction_note && (
-                  <div className="correction-existing">
+                  <div className="correction-existing amp-mask">
                     <strong>{t('correction_existing')}</strong>
                     {userRecord.correction_note}
                   </div>
@@ -1286,7 +1288,7 @@ function DashboardView({
                     className="file-hidden-input"
                   />
                   <span className="btn-secondary btn-sm">📎 {t('correction_attach_image')}</span>
-                  {correctionImage && <span className="correction-file-name">{correctionImage.name}</span>}
+                  {correctionImage && <span className="correction-file-name amp-mask">{correctionImage.name}</span>}
                 </label>
                 <button type="submit" disabled={submittingCorrection} className="btn-primary">
                   {submittingCorrection ? '...' : t('correction_submit')}
@@ -1377,7 +1379,7 @@ function BalanceUploadView({
         </p>
 
         {isVerified && (
-          <div className="verify-balance-summary">
+          <div className="verify-balance-summary amp-mask">
             <span>{t('registered_balance_label')}</span>
             <strong>{Number(userRecord.balance).toLocaleString()} KRW</strong>
           </div>
@@ -1551,25 +1553,25 @@ function AdminConsoleView({
               adminQueue.map((row) => (
                 <div key={row.id}>
                   <div className="admin-row">
-                    <div className="admin-col-user">
+                    <div className="admin-col-user amp-mask">
                       <strong>{row.nickname}</strong>
                       <span className="sub-text">{row.profiles?.real_name || 'No Name'}</span>
                     </div>
-                    <div className="admin-col-meta">
+                    <div className="admin-col-meta amp-mask">
                       <div>{row.profiles?.phone_number || 'No Phone'}</div>
                       <div className="sub-text">{row.nationality}</div>
                     </div>
-                    <div className="admin-col-img">
+                    <div className="admin-col-img amp-block">
                       <a href={row.screenshot_url} target="_blank" rel="noopener noreferrer">
-                        <img src={row.screenshot_url} alt="Bank Screen" className="admin-thumb" />
+                        <img src={row.screenshot_url} alt="Bank Screen" className="admin-thumb amp-block" />
                       </a>
                     </div>
-                    <div className="admin-col-balance">
+                    <div className="admin-col-balance amp-mask">
                       <input
                         type="number"
                         defaultValue={row.balance}
                         onBlur={(e) => updateVerificationStatus(row.id, row.status, e.target.value)}
-                        className="balance-edit-input"
+                        className="balance-edit-input amp-mask"
                       />
                     </div>
                     <div className="admin-col-actions">
@@ -1595,9 +1597,9 @@ function AdminConsoleView({
                   {row.correction_note && (
                     <div className="admin-correction-row">
                       <span className="admin-correction-label">🔄 수정 요청</span>
-                      <span className="admin-correction-text">{row.correction_note}</span>
+                      <span className="admin-correction-text amp-mask">{row.correction_note}</span>
                       {row.correction_image_url && (
-                        <a href={row.correction_image_url} target="_blank" rel="noopener noreferrer" className="admin-correction-img-link">
+                        <a href={row.correction_image_url} target="_blank" rel="noopener noreferrer" className="admin-correction-img-link amp-block">
                           🖼️ 이미지 보기
                         </a>
                       )}

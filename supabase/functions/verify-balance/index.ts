@@ -228,13 +228,16 @@ function logFunctionEvent(
   level: 'info' | 'error' = 'info',
 ) {
   const { stage: step, ...safeProperties } = sanitizeLogProperties(properties);
+  const timestamp = new Date();
   const payload = {
     source: 'verify-balance',
     requestId,
     stage,
     step,
     ...safeProperties,
-    timestamp: new Date().toISOString(),
+    timestamp: timestamp.toISOString(),
+    timestamp_kst: formatKstTimestamp(timestamp),
+    timezone: 'Asia/Seoul',
   };
 
   if (level === 'error') {
@@ -242,6 +245,13 @@ function logFunctionEvent(
     return;
   }
   console.info(JSON.stringify(payload));
+}
+
+function formatKstTimestamp(value = new Date()) {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  const kstDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+  return kstDate.toISOString().replace('Z', '+09:00');
 }
 
 function sanitizeLogProperties(properties: Record<string, unknown>) {
