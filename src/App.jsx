@@ -4,6 +4,7 @@ import { supabase } from './lib/supabaseClient';
 import { useLanguage } from './i18n/LanguageContext';
 import { nationalities } from './i18n/translations';
 import { Leaderboard } from './components/Leaderboard';
+import { ResultCard } from './components/ResultCard';
 import { PrivacyView } from './components/PrivacyView';
 import { TermsView } from './components/TermsView';
 import { trackPosterQrOpen } from './lib/analytics';
@@ -20,6 +21,7 @@ import {
   joinPhoneSegments,
   splitPhoneNumber,
 } from './lib/profilePayload';
+import { buildShareUrl, shareResult } from './lib/shareResult';
 
 function App() {
   const { locale, setLocale, t } = useLanguage();
@@ -923,7 +925,8 @@ function DashboardView({
   const [correctionText, setCorrectionText] = React.useState('');
   const [submittingCorrection, setSubmittingCorrection] = React.useState(false);
   const [correctionSuccess, setCorrectionSuccess] = React.useState(false);
-  const [copiedShareIndex, setCopiedShareIndex] = React.useState(null);
+  const [correctionImage, setCorrectionImage] = React.useState(null);
+  const [shareToast, setShareToast] = React.useState(false);
   const canViewLeaderboardBalances = Boolean(userRecord && userRecord.status === 'verified');
   const isVerified = canViewLeaderboardBalances;
 
@@ -969,14 +972,20 @@ function DashboardView({
     ? normalizeRankReport(userRecord?.result_report_json || buildFallbackRankReport(reportInsight, locale), reportInsight, locale)
     : null;
 
-  const handleCopyShareCard = async (card, index) => {
-    const text = `${card.title}\n${card.subtitle}`;
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopiedShareIndex(index);
-      window.setTimeout(() => setCopiedShareIndex(null), 1600);
-    } catch (err) {
-      console.error('Could not copy share card:', err);
+  const handleShare = async () => {
+    if (!userRecord) return;
+    const url = buildShareUrl(window.location.origin, userRecord.id);
+    const result = await shareResult({
+      url,
+      title: t('shared_result_headline').replace('{nickname}', userRecord.nickname),
+      description: rankReport?.mainCopy || '',
+      imageUrl: `${window.location.origin}/logo.png`,
+      ctaLabel: t('anonymous_rank_cta'),
+      homeUrl: window.location.origin,
+    });
+    if (result === 'copied') {
+      setShareToast(true);
+      window.setTimeout(() => setShareToast(false), 1800);
     }
   };
 
@@ -1012,88 +1021,30 @@ function DashboardView({
         <p className="subtitle">{t('subtitle')}</p>
       </div>
 
-      <div className={`leaderboard-access-rail ${isVerified ? 'unlocked' : 'locked'}`}>
-        <div>
-          <span>{isVerified ? t('leaderboard_unlocked_label') : t('leaderboard_locked_label')}</span>
-          <p>{isVerified ? t('leaderboard_unlocked_desc') : t('leaderboard_locked_desc')}</p>
-        </div>
-        <div className="leaderboard-access-actions">
-          {isVerified && (
-            <button type="button" className="btn-secondary btn-sm" onClick={openCorrectionModal}>
-              {t('correction_btn')}
+      {isVerified && rankReport && reportInsight ? (
+        <ResultCard
+          insight={reportInsight}
+          report={rankReport}
+          t={t}
+          variant="owner"
+          onShare={handleShare}
+          onCorrection={openCorrectionModal}
+        />
+      ) : (
+        !isVerified && (
+          <div className="dashboard-verify-prompt">
+            <button type="button" className="btn-primary btn-lg" onClick={() => navigate('/verify-balance')}>
+              {t('go_verify_balance_btn')}
             </button>
-          )}
-          <button type="button" className="btn-primary btn-sm" onClick={() => navigate('/verify-balance')}>
-            {isVerified ? t('update_balance_btn') : t('go_verify_balance_btn')}
-          </button>
-        </div>
-      </div>
+          </div>
+        )
+      )}
 
       {hasPendingCorrection && (
         <p className="correction-pending-notice dashboard-correction-notice">{t('correction_pending_status')}</p>
       )}
 
-      {isVerified && rankReport && reportInsight && (
-        <section className="rank-report-panel">
-          <div className="rank-report-hero linear-card">
-            <div className="anonymous-pill">{t('anonymous_badge_label')}</div>
-            <h2>{rankReport.mainCopy}</h2>
-            <p>{rankReport.personaDescription}</p>
-            <div className="rank-metric-grid">
-              <MetricTile label={t('rank_report_overall')} value={`#${reportInsight.overallRank} / ${reportInsight.overallTotal}`} />
-              <MetricTile label={t('rank_report_nationality')} value={`#${reportInsight.nationalRank} / ${reportInsight.nationalTotal}`} />
-              <MetricTile label={t('rank_report_percentile')} value={`${t('percentile_top')} ${reportInsight.percentileTop}%`} />
-              <MetricTile label={t('rank_report_next_gap')} value={reportInsight.gapToNextRank > 0 ? `₩${Number(reportInsight.gapToNextRank).toLocaleString()}` : 'TOP'} />
-              <MetricTile label={t('rank_report_people_below')} value={`${reportInsight.peopleBelow}`} />
-            </div>
-          </div>
-
-          <div className="rank-report-grid">
-            <article className="rank-report-block">
-              <span>{rankReport.personaName}</span>
-              <h3>{t('rank_report_title')}</h3>
-              <p>{rankReport.rankComment}</p>
-            </article>
-            <article className="rank-report-block">
-              <span>{t('rank_report_next_gap')}</span>
-              <h3>{reportInsight.gapToNextRank > 0 ? `₩${Number(reportInsight.gapToNextRank).toLocaleString()}` : 'TOP'}</h3>
-              <p>{rankReport.gapComment}</p>
-            </article>
-            <article className="rank-report-block">
-              <span>{t('rank_report_nationality')}</span>
-              <h3>#{reportInsight.nationalRank}</h3>
-              <p>{rankReport.nationalityComment}</p>
-            </article>
-            <article className="rank-report-block">
-              <span>WALLET MAP</span>
-              <div className={`wallet-zone-map zone-${reportInsight.balanceZone}`}>
-                <i></i><i></i><i></i><i></i><i></i>
-              </div>
-              <p>{rankReport.positionMapComment}</p>
-            </article>
-          </div>
-
-          <div className="rank-conclusion-card linear-card">
-            <p>{rankReport.finalConclusion}</p>
-          </div>
-
-          <div className="share-card-section">
-            <h3>{t('rank_report_share_title')}</h3>
-            <div className="share-card-grid">
-              {rankReport.shareCards.map((card, index) => (
-                <article key={`${card.type}-${index}`} className="share-copy-card">
-                  <span>{card.type}</span>
-                  <h4>{card.title}</h4>
-                  <p>{card.subtitle}</p>
-                  <button type="button" className="btn-secondary btn-sm" onClick={() => handleCopyShareCard(card, index)}>
-                    {copiedShareIndex === index ? t('share_card_copied') : t('copy_share_card')}
-                  </button>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+      {shareToast && <div className="share-toast">{t('copy_link_done')}</div>}
 
       {/* Correction Request Modal */}
       {showCorrectionModal && (
@@ -1217,15 +1168,6 @@ function BalanceUploadView({
         {uploadError && <p className="error-message verify-feedback">{uploadError}</p>}
         {uploadSuccess && <p className="success-message verify-feedback">{t('success')}</p>}
       </div>
-    </div>
-  );
-}
-
-function MetricTile({ label, value }) {
-  return (
-    <div className="rank-metric-tile">
-      <span>{label}</span>
-      <strong>{value}</strong>
     </div>
   );
 }

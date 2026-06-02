@@ -36,3 +36,11 @@ test('celebration modal uses the spicy main copy + rank summary and no longer tr
   const h2Block = cssSource.slice(cssSource.indexOf('.rank-celebration-card h2'));
   assert.doesNotMatch(h2Block.slice(0, 160), /white-space:\s*nowrap/);
 });
+
+test('dashboard collapses into a single ResultCard above the leaderboard', () => {
+  assert.ok(existsSync(resolve(__dirname, '../src/components/ResultCard.jsx')));
+  assert.match(appSource, /import \{ ResultCard \}/);
+  assert.match(appSource, /<ResultCard/);
+  assert.doesNotMatch(appSource, /rank-report-panel/);
+  assert.doesNotMatch(appSource, /leaderboard-access-rail/);
+});
