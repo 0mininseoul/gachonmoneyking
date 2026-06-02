@@ -82,10 +82,30 @@ export function textLengthBucket(text = '') {
 }
 
 export function safeErrorCode(error) {
-  const raw = error?.name || error?.code || error?.message || 'unknown_error';
-  return String(raw)
+  const code = sanitizeErrorCode(error?.code);
+  if (code) return code;
+
+  const message = String(error?.message || error?.name || '').toLowerCase();
+  if (/download|screenshot/.test(message)) return 'storage_download_failed';
+  if (/upload|storage/.test(message)) return 'storage_upload_failed';
+  if (/oauth|kakao|sign.?in|auth/.test(message)) return 'auth_failed';
+  if (/profile/.test(message)) return 'profile_save_failed';
+  if (/leaderboard|database|upsert|update/.test(message)) return 'database_write_failed';
+  if (/vertex|gemini|ai/.test(message)) return 'ai_verification_failed';
+  if (/network|fetch|timeout/.test(message)) return 'network_failed';
+  if (/invalid|rejected|bank_statement|statement/.test(message)) return 'verification_rejected';
+  if (/missing|required/.test(message)) return 'missing_required_input';
+
+  return sanitizeErrorCode(error?.name) || 'unknown_error';
+}
+
+function sanitizeErrorCode(value) {
+  if (typeof value !== 'string' || !value.trim()) return '';
+  const sanitized = value
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '_')
     .replace(/^_+|_+$/g, '')
-    .slice(0, 80) || 'unknown_error';
+    .slice(0, 48);
+  if (!sanitized || sanitized.length > 40 || /\d{6,}/.test(sanitized)) return '';
+  return sanitized;
 }

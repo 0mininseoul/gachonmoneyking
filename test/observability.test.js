@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { safeErrorCode } from '../src/lib/analyticsEvents.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
@@ -66,6 +67,23 @@ test('App emits custom Amplitude events for key interactions beyond QR opens', (
   for (const usage of expectedUsage) {
     assert.match(appSource + leaderboardSource, new RegExp(usage.replace('.', '\\.')), `missing ${usage}`);
   }
+});
+
+test('anonymous visitors are not reset on every unauthenticated app load', () => {
+  const appSource = readProjectFile('src/App.jsx');
+  const resetCalls = appSource.match(/clearAnalyticsUser\(\);/g) || [];
+
+  assert.equal(resetCalls.length, 1, 'clearAnalyticsUser should only run during explicit logout');
+  assert.match(appSource, /const handleLogout = async \(\) => \{[\s\S]*clearAnalyticsUser\(\);/);
+});
+
+test('safe error codes do not preserve raw ids or paths from provider messages', () => {
+  const code = safeErrorCode({
+    message: 'Failed to download screenshot: users/123e4567-e89b-12d3-a456-426614174000/private.png',
+  });
+
+  assert.doesNotMatch(code, /123e4567|426614174000|private|png|users/);
+  assert.equal(code, 'storage_download_failed');
 });
 
 test('Vercel ops log endpoint allowlists operational events and redacts unsafe values', () => {

@@ -280,11 +280,15 @@ function sizeBucket(bytes = 0) {
 }
 
 function errorCode(error: unknown) {
-  return errorMessage(error)
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '_')
-    .replace(/^_+|_+$/g, '')
-    .slice(0, 80) || 'unknown_error';
+  const message = errorMessage(error).toLowerCase();
+  if (/download|screenshot/.test(message)) return 'storage_download_failed';
+  if (/upload|storage/.test(message)) return 'storage_upload_failed';
+  if (/google_genai_use_vertexai|google_cloud_project|service account|credential|authentication|access token/.test(message)) return 'vertex_auth_failed';
+  if (/vertex|gemini|aiplatform|generatecontent/.test(message)) return 'vertex_generate_failed';
+  if (/leaderboard|database|upsert|update/.test(message)) return 'database_write_failed';
+  if (/json|parse/.test(message)) return 'model_parse_failed';
+  if (/missing|required/.test(message)) return 'missing_required_input';
+  return 'unknown_error';
 }
 
 function normalizeLocale(value: unknown) {

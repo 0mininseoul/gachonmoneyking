@@ -99,7 +99,6 @@ function App() {
         checkUserProfile(currentUser);
         checkAdminRole(currentUser);
       } else {
-        clearAnalyticsUser();
         setLoading(false);
       }
     });
@@ -113,7 +112,6 @@ function App() {
         checkUserProfile(currentUser);
         checkAdminRole(currentUser);
       } else {
-        clearAnalyticsUser();
         setHasProfile(false);
         setUserRecord(null);
         setIsAdmin(false);
