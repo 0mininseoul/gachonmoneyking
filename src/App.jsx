@@ -4,7 +4,6 @@ import { supabase } from './lib/supabaseClient';
 import { useLanguage } from './i18n/LanguageContext';
 import { nationalities } from './i18n/translations';
 import { Leaderboard } from './components/Leaderboard';
-import { SignupView } from './components/SignupView';
 import { PrivacyView } from './components/PrivacyView';
 import { TermsView } from './components/TermsView';
 import { trackPosterQrOpen } from './lib/analytics';
@@ -457,7 +456,6 @@ function App() {
         <Route path="/dashboard" element={<ProtectedRoute loading={loading} user={user} hasProfile={hasProfile}><DashboardView t={t} user={user} userRecord={userRecord} showRankCard={showRankCard} setShowRankCard={setShowRankCard} rankings={rankings} /></ProtectedRoute>} />
         <Route path="/verify-balance" element={<ProtectedRoute loading={loading} user={user} hasProfile={hasProfile}><BalanceUploadView t={t} userRecord={userRecord} uploadError={uploadError} uploadSuccess={uploadSuccess} handleFileUpload={handleFileUpload} /></ProtectedRoute>} />
         <Route path="/admin" element={<AdminRoute loading={loading} user={user} hasProfile={hasProfile} isAdmin={isAdmin}><AdminConsoleView loadingAdminQueue={loadingAdminQueue} exportCSV={exportCSV} adminQueue={adminQueue} updateVerificationStatus={updateVerificationStatus} clearCorrectionNote={clearCorrectionNote} /></AdminRoute>} />
-        <Route path="/signup" element={<SignupView />} />
         <Route path="/privacy" element={<PrivacyView />} />
         <Route path="/terms" element={<TermsView />} />
       </Route>
@@ -577,8 +575,6 @@ function MainLayout({ isAdmin, locale, setLocale, user, handleLogout, handleLogi
             <span onClick={() => navigate('/terms')}>{t('terms_link')}</span>
             <span className="divider">|</span>
             <span onClick={() => navigate('/privacy')}>{t('privacy_link')}</span>
-            <span className="divider">|</span>
-            <span onClick={() => navigate('/signup')}>{t('signup_link')}</span>
           </div>
         </div>
         <div className="footer-separator"></div>
