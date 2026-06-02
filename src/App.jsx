@@ -340,7 +340,7 @@ function App() {
       if (!error) {
         setHasProfile(true);
         await checkUserProfile(user);
-        navigate('/dashboard');
+        navigate('/verify-balance');
       } else {
         console.error("Error saving profile:", error);
       }
@@ -634,6 +634,7 @@ function ProfileSetupView({
   handleSaveProfile
 }) {
   const [currentStep, setCurrentStep] = useState(0);
+  const { setLocale } = useLanguage();
   const canSubmit = isProfileFormComplete({
     nickname,
     nationality,
@@ -683,9 +684,11 @@ function ProfileSetupView({
   };
 
   const goToNextStep = () => {
-    if (currentStepData.complete) {
-      setCurrentStep((step) => Math.min(step + 1, steps.length - 1));
+    if (!currentStepData.complete) return;
+    if (currentStepData.key === 'nationality' && nationality) {
+      setLocale(nationality);
     }
+    setCurrentStep((step) => Math.min(step + 1, steps.length - 1));
   };
 
   const goToPreviousStep = () => {
