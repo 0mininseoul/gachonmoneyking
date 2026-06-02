@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { nationalities } from '../i18n/translations';
 import { useLanguage } from '../i18n/LanguageContext';
 
-export function Leaderboard({ list, isAuthenticated, currentUserId }) {
+export function Leaderboard({ list, canViewBalances = false, currentUserId }) {
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState('all');
 
@@ -99,8 +99,8 @@ export function Leaderboard({ list, isAuthenticated, currentUserId }) {
                 <span className="country-name">{getCountryName(userItem.nationality)}</span>
               </div>
               <div className="col-balance">
-                <span className={isAuthenticated ? 'balance-amount' : 'balance-amount blurred'}>
-                  {isAuthenticated ? `${Number(userItem.balance).toLocaleString()} KRW` : '●●●,●●●,●●● KRW'}
+                <span className={canViewBalances ? 'balance-amount' : 'balance-amount blurred'}>
+                  {canViewBalances ? `${Number(userItem.balance).toLocaleString()} KRW` : '●●●,●●●,●●● KRW'}
                 </span>
               </div>
             </div>
@@ -124,8 +124,8 @@ export function Leaderboard({ list, isAuthenticated, currentUserId }) {
                   <span className="country-name">{getCountryName(item.nationality)}</span>
                 </div>
                 <div className="col-balance">
-                  <span className={isAuthenticated ? 'balance-amount' : 'balance-amount blurred'}>
-                    {isAuthenticated ? `${Number(item.balance).toLocaleString()} KRW` : '●●●,●●●,●●● KRW'}
+                  <span className={canViewBalances ? 'balance-amount' : 'balance-amount blurred'}>
+                    {canViewBalances ? `${Number(item.balance).toLocaleString()} KRW` : '●●●,●●●,●●● KRW'}
                   </span>
                 </div>
               </div>

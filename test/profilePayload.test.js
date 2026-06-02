@@ -127,3 +127,38 @@ test('profile phone and agreement copy exists for every locale', () => {
     assert.match(copy.profile_terms_notice, /\{privacy\}/, `${locale} missing privacy placeholder`);
   }
 });
+
+test('rank report and upload trust copy exists for every locale', () => {
+  const requiredKeys = [
+    'anonymous_rank_cta',
+    'upload_trust_title',
+    'upload_trust_ai_reads',
+    'upload_trust_public_identity',
+    'upload_trust_delete',
+    'upload_trust_reward',
+    'anonymous_badge_label',
+    'rank_report_title',
+    'rank_report_overall',
+    'rank_report_nationality',
+    'rank_report_percentile',
+    'rank_report_next_gap',
+    'rank_report_people_below',
+    'rank_report_share_title',
+    'copy_share_card',
+    'share_card_copied',
+    'leaderboard_locked_label',
+    'leaderboard_locked_desc',
+    'leaderboard_unlocked_label',
+    'leaderboard_unlocked_desc',
+    'go_verify_balance_btn',
+    'verify_step_label',
+    'verify_page_subtitle',
+    'verify_upload_hint',
+  ];
+
+  for (const [locale, copy] of Object.entries(translations)) {
+    for (const key of requiredKeys) {
+      assert.ok(copy[key], `${locale} missing ${key}`);
+    }
+  }
+});

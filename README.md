@@ -14,6 +14,7 @@
 ## 🛠 Tech Stack
 - **Frontend**: React (Vite), React Router DOM (v6)
 - **Backend / Database**: Supabase (PostgreSQL, Auth, Database)
+- **AI Verification**: Vertex AI Gemini through Supabase Edge Functions
 - **Authentication**: Kakao OAuth (카카오 로그인) 및 일반 이메일 가입
 - **Styling**: Vanilla CSS (Linear.app 스타일 디자인 시스템 적용)
 - **Font**: Pretendard Variable (Main Font)
@@ -57,6 +58,19 @@ npm run dev
 ```bash
 npm run build
 ```
+
+### 4. Vertex AI 환경 변수
+AI 호출은 Vercel 서버가 아니라 Supabase Edge Function(`verify-balance`)에서 실행됩니다. 로컬 Edge Function과 배포된 Supabase Function에 아래 값을 설정해야 합니다.
+
+```bash
+GOOGLE_CLOUD_PROJECT=your-gcp-project-id
+GOOGLE_CLOUD_LOCATION=global
+GOOGLE_GENAI_USE_VERTEXAI=true
+VERTEX_AI_MODEL=gemini-2.5-flash
+GOOGLE_APPLICATION_CREDENTIALS=.secrets/gachon-money-king-vertex-ai.json
+```
+
+Vercel에 같은 값을 둘 수는 있지만, 현재 AI 검증 런타임은 Supabase Edge Function입니다. 배포 환경에서는 서비스 계정 JSON을 출력하지 말고 base64로 인코딩해 `GOOGLE_SERVICE_ACCOUNT_KEY_BASE64`에 저장하세요.
 
 ---
 

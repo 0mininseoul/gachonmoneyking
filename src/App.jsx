@@ -9,6 +9,11 @@ import { PrivacyView } from './components/PrivacyView';
 import { TermsView } from './components/TermsView';
 import { trackPosterQrOpen } from './lib/analytics';
 import {
+  buildFallbackRankReport,
+  buildRankInsight,
+  normalizeRankReport,
+} from './lib/rankReport';
+import {
   buildProfilePayload,
   isPhoneNumberComplete,
   isProfileFormComplete,
@@ -212,8 +217,10 @@ function App() {
       if (data) {
         setRankings(data);
       }
+      return data || [];
     } catch (err) {
       console.error("Error fetching leaderboard:", err);
+      return [];
     }
   };
 
@@ -227,8 +234,10 @@ function App() {
       if (data) {
         setUserRecord(data);
       }
+      return data || null;
     } catch (err) {
       console.error("Error fetching user leaderboard record:", err);
+      return null;
     }
   };
 
@@ -363,7 +372,7 @@ function App() {
       if (uploadError) throw new Error(uploadError.message);
 
       const { data: edgeData, error: edgeError } = await supabase.functions.invoke('verify-balance', {
-        body: { filePath: uploadData.path, userId: user.id }
+        body: { filePath: uploadData.path, userId: user.id, locale }
       });
 
       if (edgeError || !edgeData.success) {
@@ -372,9 +381,10 @@ function App() {
 
       if (edgeData.verified) {
         setUploadSuccess(true);
+        await fetchLeaderboard();
+        await fetchUserLeaderboardRecord(user.id);
         setShowRankCard(true);
-        fetchLeaderboard();
-        fetchUserLeaderboardRecord(user.id);
+        navigate('/dashboard');
       } else {
         throw new Error(t('error_invalid'));
       }
@@ -444,7 +454,8 @@ function App() {
     <Routes>
       <Route element={<MainLayout isAdmin={isAdmin} locale={locale} setLocale={setLocale} user={user} handleLogout={handleLogout} handleLogin={handleLogin} navigate={navigate} location={location} t={t} />}>
         <Route path="/" element={<PublicRoute loading={loading} user={user} hasProfile={hasProfile}><LandingView user={user} rankings={rankings} handleLogin={handleLogin} t={t} navigate={navigate} /></PublicRoute>} />
-        <Route path="/dashboard" element={<ProtectedRoute loading={loading} user={user} hasProfile={hasProfile}><DashboardView t={t} user={user} userRecord={userRecord} uploading={uploading} uploadError={uploadError} uploadSuccess={uploadSuccess} showRankCard={showRankCard} setShowRankCard={setShowRankCard} handleFileUpload={handleFileUpload} rankings={rankings} /></ProtectedRoute>} />
+        <Route path="/dashboard" element={<ProtectedRoute loading={loading} user={user} hasProfile={hasProfile}><DashboardView t={t} user={user} userRecord={userRecord} showRankCard={showRankCard} setShowRankCard={setShowRankCard} rankings={rankings} /></ProtectedRoute>} />
+        <Route path="/verify-balance" element={<ProtectedRoute loading={loading} user={user} hasProfile={hasProfile}><BalanceUploadView t={t} userRecord={userRecord} uploadError={uploadError} uploadSuccess={uploadSuccess} handleFileUpload={handleFileUpload} /></ProtectedRoute>} />
         <Route path="/admin" element={<AdminRoute loading={loading} user={user} hasProfile={hasProfile} isAdmin={isAdmin}><AdminConsoleView loadingAdminQueue={loadingAdminQueue} exportCSV={exportCSV} adminQueue={adminQueue} updateVerificationStatus={updateVerificationStatus} clearCorrectionNote={clearCorrectionNote} /></AdminRoute>} />
         <Route path="/signup" element={<SignupView />} />
         <Route path="/privacy" element={<PrivacyView />} />
@@ -598,12 +609,12 @@ function LandingView({ user, rankings, handleLogin, t, navigate }) {
         <div className="auth-nudge-banner linear-card">
           <p className="banner-notice">{t('non_logged_in_notice')}</p>
           <button onClick={handleLogin} className="btn-primary btn-lg banner-login-btn">
-            {t('login_btn')}
+            {t('anonymous_rank_cta')}
           </button>
         </div>
       )}
       <div className="leaderboard-wrapper">
-        <Leaderboard list={rankings} isAuthenticated={!!user} currentUserId={user?.id} />
+        <Leaderboard list={rankings} canViewBalances={false} currentUserId={user?.id} />
       </div>
     </>
   );
@@ -878,18 +889,18 @@ function DashboardView({
   t,
   user,
   userRecord,
-  uploading,
-  uploadError,
-  uploadSuccess,
   showRankCard,
   setShowRankCard,
-  handleFileUpload,
   rankings
 }) {
+  const navigate = useNavigate();
   const [showCorrectionModal, setShowCorrectionModal] = React.useState(false);
   const [correctionText, setCorrectionText] = React.useState('');
   const [submittingCorrection, setSubmittingCorrection] = React.useState(false);
   const [correctionSuccess, setCorrectionSuccess] = React.useState(false);
+  const [copiedShareIndex, setCopiedShareIndex] = React.useState(null);
+  const canViewLeaderboardBalances = Boolean(userRecord && userRecord.status === 'verified');
+  const isVerified = canViewLeaderboardBalances;
 
   const currentBalance = userRecord ? Number(userRecord.balance) : 0;
   const otherHigherRanked = rankings.filter(
@@ -920,9 +931,29 @@ function DashboardView({
         .replace('{balance}', Number(userRecord.balance).toLocaleString())
     : '';
 
-  const isVerified = userRecord && userRecord.status === 'verified';
   const hasPendingCorrection = isVerified && !!userRecord?.correction_note;
   const { locale } = useLanguage();
+  const reportInsight = isVerified
+    ? buildRankInsight({
+        userId: user.id,
+        userRecord,
+        rankings: rankings.length ? rankings : [userRecord],
+      })
+    : null;
+  const rankReport = reportInsight
+    ? normalizeRankReport(userRecord?.result_report_json || buildFallbackRankReport(reportInsight, locale), reportInsight, locale)
+    : null;
+
+  const handleCopyShareCard = async (card, index) => {
+    const text = `${card.title}\n${card.subtitle}`;
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedShareIndex(index);
+      window.setTimeout(() => setCopiedShareIndex(null), 1600);
+    } catch (err) {
+      console.error('Could not copy share card:', err);
+    }
+  };
 
   const handleCorrectionSubmit = async (e) => {
     e.preventDefault();
@@ -956,48 +987,88 @@ function DashboardView({
         <p className="subtitle">{t('subtitle')}</p>
       </div>
 
-      <div className="user-dashboard-card linear-card">
-        <h3>{isVerified ? t('upload_title_verified') : t('upload_title')}</h3>
-        <p className="desc">{isVerified ? t('upload_desc_verified') : t('upload_desc')}</p>
-
-        {userRecord && userRecord.status ? (
-          <div className="user-record-status">
-            <p className="verified-status-info">
-              {t('status_label')}<strong className={`status-${userRecord.status}`}>{userRecord.status.toUpperCase()}</strong>
-            </p>
-            <p className="balance-info-text">
-              {t('registered_balance_label')}<strong>{Number(userRecord.balance).toLocaleString()} KRW</strong>
-            </p>
-          </div>
-        ) : null}
-
-        <div className="upload-input-container">
-          {isVerified ? (
-            <button onClick={openCorrectionModal} className="btn-secondary upload-label-btn">
+      <div className={`leaderboard-access-rail ${isVerified ? 'unlocked' : 'locked'}`}>
+        <div>
+          <span>{isVerified ? t('leaderboard_unlocked_label') : t('leaderboard_locked_label')}</span>
+          <p>{isVerified ? t('leaderboard_unlocked_desc') : t('leaderboard_locked_desc')}</p>
+        </div>
+        <div className="leaderboard-access-actions">
+          {isVerified && (
+            <button type="button" className="btn-secondary btn-sm" onClick={openCorrectionModal}>
               {t('correction_btn')}
             </button>
-          ) : (
-            <>
-              <input
-                type="file"
-                id="screenshot-file-upload"
-                accept="image/*"
-                onChange={handleFileUpload}
-                className="file-hidden-input"
-              />
-              <label htmlFor="screenshot-file-upload" className="btn-primary upload-label-btn">
-                {t('upload_btn')}
-              </label>
-            </>
           )}
+          <button type="button" className="btn-primary btn-sm" onClick={() => navigate('/verify-balance')}>
+            {isVerified ? t('update_balance_btn') : t('go_verify_balance_btn')}
+          </button>
         </div>
-
-        {hasPendingCorrection && (
-          <p className="correction-pending-notice">{t('correction_pending_status')}</p>
-        )}
-        {!isVerified && uploadError && <p className="error-message">❌ {uploadError}</p>}
-        {!isVerified && uploadSuccess && <p className="success-message">✅ {t('success')}</p>}
       </div>
+
+      {hasPendingCorrection && (
+        <p className="correction-pending-notice dashboard-correction-notice">{t('correction_pending_status')}</p>
+      )}
+
+      {isVerified && rankReport && reportInsight && (
+        <section className="rank-report-panel">
+          <div className="rank-report-hero linear-card">
+            <div className="anonymous-pill">{t('anonymous_badge_label')}</div>
+            <h2>{rankReport.mainCopy}</h2>
+            <p>{rankReport.personaDescription}</p>
+            <div className="rank-metric-grid">
+              <MetricTile label={t('rank_report_overall')} value={`#${reportInsight.overallRank} / ${reportInsight.overallTotal}`} />
+              <MetricTile label={t('rank_report_nationality')} value={`#${reportInsight.nationalRank} / ${reportInsight.nationalTotal}`} />
+              <MetricTile label={t('rank_report_percentile')} value={`${t('percentile_top')} ${reportInsight.percentileTop}%`} />
+              <MetricTile label={t('rank_report_next_gap')} value={reportInsight.gapToNextRank > 0 ? `₩${Number(reportInsight.gapToNextRank).toLocaleString()}` : 'TOP'} />
+              <MetricTile label={t('rank_report_people_below')} value={`${reportInsight.peopleBelow}`} />
+            </div>
+          </div>
+
+          <div className="rank-report-grid">
+            <article className="rank-report-block">
+              <span>{rankReport.personaName}</span>
+              <h3>{t('rank_report_title')}</h3>
+              <p>{rankReport.rankComment}</p>
+            </article>
+            <article className="rank-report-block">
+              <span>{t('rank_report_next_gap')}</span>
+              <h3>{reportInsight.gapToNextRank > 0 ? `₩${Number(reportInsight.gapToNextRank).toLocaleString()}` : 'TOP'}</h3>
+              <p>{rankReport.gapComment}</p>
+            </article>
+            <article className="rank-report-block">
+              <span>{t('rank_report_nationality')}</span>
+              <h3>#{reportInsight.nationalRank}</h3>
+              <p>{rankReport.nationalityComment}</p>
+            </article>
+            <article className="rank-report-block">
+              <span>WALLET MAP</span>
+              <div className={`wallet-zone-map zone-${reportInsight.balanceZone}`}>
+                <i></i><i></i><i></i><i></i><i></i>
+              </div>
+              <p>{rankReport.positionMapComment}</p>
+            </article>
+          </div>
+
+          <div className="rank-conclusion-card linear-card">
+            <p>{rankReport.finalConclusion}</p>
+          </div>
+
+          <div className="share-card-section">
+            <h3>{t('rank_report_share_title')}</h3>
+            <div className="share-card-grid">
+              {rankReport.shareCards.map((card, index) => (
+                <article key={`${card.type}-${index}`} className="share-copy-card">
+                  <span>{card.type}</span>
+                  <h4>{card.title}</h4>
+                  <p>{card.subtitle}</p>
+                  <button type="button" className="btn-secondary btn-sm" onClick={() => handleCopyShareCard(card, index)}>
+                    {copiedShareIndex === index ? t('share_card_copied') : t('copy_share_card')}
+                  </button>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Correction Request Modal */}
       {showCorrectionModal && (
@@ -1048,9 +1119,89 @@ function DashboardView({
       )}
 
       <div className="leaderboard-wrapper">
-        <Leaderboard list={rankings} isAuthenticated={true} currentUserId={user?.id} />
+        <Leaderboard list={rankings} canViewBalances={canViewLeaderboardBalances} currentUserId={user?.id} />
       </div>
     </>
+  );
+}
+
+function BalanceUploadView({
+  t,
+  userRecord,
+  uploadError,
+  uploadSuccess,
+  handleFileUpload
+}) {
+  const navigate = useNavigate();
+  const { locale } = useLanguage();
+  const isVerified = userRecord && userRecord.status === 'verified';
+
+  return (
+    <div className="app-container verify-page">
+      <div className="verify-mobile-shell">
+        <div className="verify-step-header">
+          <button type="button" className="verify-back-btn" onClick={() => navigate('/dashboard')}>
+            ←
+          </button>
+          <div>
+            <span>{t('verify_step_label')}</span>
+            <h1 className={`headline-${locale}`}>{isVerified ? t('upload_title_verified') : t('upload_title')}</h1>
+          </div>
+        </div>
+
+        <p className="verify-page-subtitle">
+          {isVerified ? t('upload_desc_verified') : t('verify_page_subtitle')}
+        </p>
+
+        <div className="verify-status-strip">
+          <span>{t('anonymous_badge_label')}</span>
+          <strong>{isVerified ? t('leaderboard_unlocked_label') : t('leaderboard_locked_label')}</strong>
+        </div>
+
+        {isVerified && (
+          <div className="verify-balance-summary">
+            <span>{t('registered_balance_label')}</span>
+            <strong>{Number(userRecord.balance).toLocaleString()} KRW</strong>
+          </div>
+        )}
+
+        <div className="upload-trust-sheet verify-trust-sheet">
+          <div className="trust-sheet-title">{t('upload_trust_title')}</div>
+          <ul>
+            <li>{t('upload_trust_ai_reads')}</li>
+            <li>{t('upload_trust_public_identity')}</li>
+            <li>{t('upload_trust_delete')}</li>
+            <li>{t('upload_trust_reward')}</li>
+          </ul>
+        </div>
+
+        <div className="verify-upload-zone">
+          <input
+            type="file"
+            id="screenshot-file-upload"
+            accept="image/*"
+            onChange={handleFileUpload}
+            className="file-hidden-input"
+          />
+          <label htmlFor="screenshot-file-upload" className="btn-primary verify-upload-btn">
+            {isVerified ? t('update_balance_btn') : t('upload_btn')}
+          </label>
+          <p>{t('verify_upload_hint')}</p>
+        </div>
+
+        {uploadError && <p className="error-message verify-feedback">{uploadError}</p>}
+        {uploadSuccess && <p className="success-message verify-feedback">{t('success')}</p>}
+      </div>
+    </div>
+  );
+}
+
+function MetricTile({ label, value }) {
+  return (
+    <div className="rank-metric-tile">
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
   );
 }
 
