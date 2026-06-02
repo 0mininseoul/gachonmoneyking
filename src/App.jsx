@@ -1134,7 +1134,12 @@ function DashboardView({
           <div className="rank-celebration-card linear-card" onClick={(e) => e.stopPropagation()}>
             <button className="close-overlay" onClick={() => setShowRankCard(false)}>×</button>
             <div className="medal-icon">🏆</div>
-            <h2>{titleText}</h2>
+            <h2>{rankReport?.mainCopy || titleText}</h2>
+            <p className="celebration-rank-summary">
+              {t('celebration_rank_summary')
+                .replace('{rank}', userRank)
+                .replace('{percentile}', percentileLabel)}
+            </p>
             <p className="celebration-text">{subtitleText}</p>
             <button onClick={() => setShowRankCard(false)} className="btn-primary">
               {t('view_leaderboard_btn')}

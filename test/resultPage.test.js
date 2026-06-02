@@ -6,6 +6,7 @@ import { dirname, resolve } from 'node:path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const appSource = readFileSync(resolve(__dirname, '../src/App.jsx'), 'utf8');
+const cssSource = readFileSync(resolve(__dirname, '../src/index.css'), 'utf8');
 
 test('profile save navigates straight to verify-balance', () => {
   assert.match(appSource, /navigate\('\/verify-balance'\)/);
@@ -26,4 +27,12 @@ test('analysis loader renders an eased progress gauge', () => {
   assert.match(appSource, /from '\.\/lib\/analysisProgress'/);
   assert.match(appSource, /loader-progress/);
   assert.match(appSource, /uploadProgress/);
+});
+
+test('celebration modal uses the spicy main copy + rank summary and no longer truncates', () => {
+  const modal = appSource.slice(appSource.indexOf('showRankCard && userRecord'));
+  assert.match(modal, /rankReport\?\.mainCopy/);
+  assert.match(modal, /celebration_rank_summary/);
+  const h2Block = cssSource.slice(cssSource.indexOf('.rank-celebration-card h2'));
+  assert.doesNotMatch(h2Block.slice(0, 160), /white-space:\s*nowrap/);
 });
