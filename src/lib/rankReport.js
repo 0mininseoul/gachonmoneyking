@@ -1,4 +1,4 @@
-const ZONE_LABELS = {
+export const ZONE_LABELS = {
   money_king: 'Money King Zone',
   flex: 'Flex Zone',
   survivor: 'Survivor Zone',

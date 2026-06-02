@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Link, Routes, Route, Navigate, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { Link, Routes, Route, Navigate, Outlet, useNavigate, useLocation, useParams } from 'react-router-dom';
 import { supabase } from './lib/supabaseClient';
 import { useLanguage } from './i18n/LanguageContext';
 import { nationalities } from './i18n/translations';
 import { Leaderboard } from './components/Leaderboard';
-import { SignupView } from './components/SignupView';
+import { ResultCard } from './components/ResultCard';
 import { PrivacyView } from './components/PrivacyView';
 import { TermsView } from './components/TermsView';
 import { trackPosterQrOpen } from './lib/analytics';
+import { nextProgress, stageForProgress, STAGE_KEYS } from './lib/analysisProgress';
 import {
   buildFallbackRankReport,
   buildRankInsight,
@@ -20,6 +21,7 @@ import {
   joinPhoneSegments,
   splitPhoneNumber,
 } from './lib/profilePayload';
+import { buildShareUrl, shareResult } from './lib/shareResult';
 
 function App() {
   const { locale, setLocale, t } = useLanguage();
@@ -41,12 +43,14 @@ function App() {
 
   // Leaderboard & Rank State
   const [rankings, setRankings] = useState([]);
+  const [rankingsLoaded, setRankingsLoaded] = useState(false);
   const [userRecord, setUserRecord] = useState(null);
 
   // Upload & OCR State
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState(null);
   const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [showRankCard, setShowRankCard] = useState(false);
 
   // Admin access state
@@ -131,6 +135,19 @@ function App() {
       fetchAdminQueue();
     }
   }, [location.pathname, isAdmin]);
+
+  // Drive the analysis progress gauge while an upload is processing
+  useEffect(() => {
+    if (!uploading) {
+      setUploadProgress(0);
+      return;
+    }
+    setUploadProgress(8);
+    const id = setInterval(() => {
+      setUploadProgress((p) => nextProgress(p));
+    }, 220);
+    return () => clearInterval(id);
+  }, [uploading]);
 
   const checkUserProfile = async (currentUser) => {
     try {
@@ -221,6 +238,8 @@ function App() {
     } catch (err) {
       console.error("Error fetching leaderboard:", err);
       return [];
+    } finally {
+      setRankingsLoaded(true);
     }
   };
 
@@ -341,7 +360,7 @@ function App() {
       if (!error) {
         setHasProfile(true);
         await checkUserProfile(user);
-        navigate('/dashboard');
+        navigate('/verify-balance');
       } else {
         console.error("Error saving profile:", error);
       }
@@ -433,6 +452,8 @@ function App() {
   }
 
   if (uploading) {
+    const stageKey = STAGE_KEYS[stageForProgress(uploadProgress)];
+    const pct = Math.round(uploadProgress);
     return (
       <div className="app-container loader-overlay">
         <div className="loader-box">
@@ -443,6 +464,15 @@ function App() {
           </div>
           <div className="loader-content-wrap">
             <p className="loader-text">{t('loading')}</p>
+            <div className="loader-progress">
+              <div className="loader-progress-track">
+                <div className="loader-progress-fill" style={{ width: `${pct}%` }}></div>
+              </div>
+              <div className="loader-progress-meta">
+                <span className="loader-stage">{t(stageKey)}</span>
+                <span className="loader-percent">{pct}%</span>
+              </div>
+            </div>
             <p className="loader-caution">{t('loading_caution')}</p>
           </div>
         </div>
@@ -457,9 +487,9 @@ function App() {
         <Route path="/dashboard" element={<ProtectedRoute loading={loading} user={user} hasProfile={hasProfile}><DashboardView t={t} user={user} userRecord={userRecord} showRankCard={showRankCard} setShowRankCard={setShowRankCard} rankings={rankings} /></ProtectedRoute>} />
         <Route path="/verify-balance" element={<ProtectedRoute loading={loading} user={user} hasProfile={hasProfile}><BalanceUploadView t={t} userRecord={userRecord} uploadError={uploadError} uploadSuccess={uploadSuccess} handleFileUpload={handleFileUpload} /></ProtectedRoute>} />
         <Route path="/admin" element={<AdminRoute loading={loading} user={user} hasProfile={hasProfile} isAdmin={isAdmin}><AdminConsoleView loadingAdminQueue={loadingAdminQueue} exportCSV={exportCSV} adminQueue={adminQueue} updateVerificationStatus={updateVerificationStatus} clearCorrectionNote={clearCorrectionNote} /></AdminRoute>} />
-        <Route path="/signup" element={<SignupView />} />
         <Route path="/privacy" element={<PrivacyView />} />
         <Route path="/terms" element={<TermsView />} />
+        <Route path="/r/:recordId" element={<SharedResultView rankings={rankings} rankingsLoaded={rankingsLoaded} user={user} userRecord={userRecord} handleLogin={handleLogin} t={t} />} />
       </Route>
       <Route path="/profile-setup" element={<OnboardingRoute loading={loading} user={user} hasProfile={hasProfile}><ProfileSetupView t={t} nickname={nickname} setNickname={setNickname} nationality={nationality} setNationality={setNationality} phoneNumber={phoneNumber} setPhoneNumber={setPhoneNumber} termsAgreed={termsAgreed} setTermsAgreed={setTermsAgreed} privacyAgreed={privacyAgreed} setPrivacyAgreed={setPrivacyAgreed} marketingConsent={marketingConsent} setMarketingConsent={setMarketingConsent} savingProfile={savingProfile} handleSaveProfile={handleSaveProfile} /></OnboardingRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />
@@ -577,8 +607,6 @@ function MainLayout({ isAdmin, locale, setLocale, user, handleLogout, handleLogi
             <span onClick={() => navigate('/terms')}>{t('terms_link')}</span>
             <span className="divider">|</span>
             <span onClick={() => navigate('/privacy')}>{t('privacy_link')}</span>
-            <span className="divider">|</span>
-            <span onClick={() => navigate('/signup')}>{t('signup_link')}</span>
           </div>
         </div>
         <div className="footer-separator"></div>
@@ -638,6 +666,7 @@ function ProfileSetupView({
   handleSaveProfile
 }) {
   const [currentStep, setCurrentStep] = useState(0);
+  const { setLocale } = useLanguage();
   const canSubmit = isProfileFormComplete({
     nickname,
     nationality,
@@ -687,9 +716,11 @@ function ProfileSetupView({
   };
 
   const goToNextStep = () => {
-    if (currentStepData.complete) {
-      setCurrentStep((step) => Math.min(step + 1, steps.length - 1));
+    if (!currentStepData.complete) return;
+    if (currentStepData.key === 'nationality' && nationality) {
+      setLocale(nationality);
     }
+    setCurrentStep((step) => Math.min(step + 1, steps.length - 1));
   };
 
   const goToPreviousStep = () => {
@@ -898,7 +929,8 @@ function DashboardView({
   const [correctionText, setCorrectionText] = React.useState('');
   const [submittingCorrection, setSubmittingCorrection] = React.useState(false);
   const [correctionSuccess, setCorrectionSuccess] = React.useState(false);
-  const [copiedShareIndex, setCopiedShareIndex] = React.useState(null);
+  const [correctionImage, setCorrectionImage] = React.useState(null);
+  const [shareToast, setShareToast] = React.useState(false);
   const canViewLeaderboardBalances = Boolean(userRecord && userRecord.status === 'verified');
   const isVerified = canViewLeaderboardBalances;
 
@@ -944,14 +976,20 @@ function DashboardView({
     ? normalizeRankReport(userRecord?.result_report_json || buildFallbackRankReport(reportInsight, locale), reportInsight, locale)
     : null;
 
-  const handleCopyShareCard = async (card, index) => {
-    const text = `${card.title}\n${card.subtitle}`;
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopiedShareIndex(index);
-      window.setTimeout(() => setCopiedShareIndex(null), 1600);
-    } catch (err) {
-      console.error('Could not copy share card:', err);
+  const handleShare = async () => {
+    if (!userRecord) return;
+    const url = buildShareUrl(window.location.origin, userRecord.id);
+    const result = await shareResult({
+      url,
+      title: t('shared_result_headline').replace('{nickname}', userRecord.nickname),
+      description: rankReport?.mainCopy || '',
+      imageUrl: `${window.location.origin}/logo.png`,
+      ctaLabel: t('anonymous_rank_cta'),
+      homeUrl: window.location.origin,
+    });
+    if (result === 'copied') {
+      setShareToast(true);
+      window.setTimeout(() => setShareToast(false), 1800);
     }
   };
 
@@ -960,9 +998,20 @@ function DashboardView({
     if (!correctionText.trim()) return;
     setSubmittingCorrection(true);
     try {
+      let imageUrl = userRecord?.correction_image_url || null;
+      if (correctionImage) {
+        const ext = correctionImage.name.split('.').pop();
+        const path = `${user.id}/correction-${Date.now()}.${ext}`;
+        const { data, error: upErr } = await supabase.storage
+          .from('screenshots')
+          .upload(path, correctionImage, { upsert: true });
+        if (!upErr && data) {
+          imageUrl = supabase.storage.from('screenshots').getPublicUrl(data.path).data.publicUrl;
+        }
+      }
       const { error } = await supabase
         .from('leaderboard')
-        .update({ correction_note: correctionText.trim() })
+        .update({ correction_note: correctionText.trim(), correction_image_url: imageUrl })
         .eq('user_id', user.id);
       if (!error) {
         setCorrectionSuccess(true);
@@ -976,6 +1025,7 @@ function DashboardView({
 
   const openCorrectionModal = () => {
     setCorrectionText(userRecord?.correction_note || '');
+    setCorrectionImage(null);
     setCorrectionSuccess(false);
     setShowCorrectionModal(true);
   };
@@ -987,88 +1037,30 @@ function DashboardView({
         <p className="subtitle">{t('subtitle')}</p>
       </div>
 
-      <div className={`leaderboard-access-rail ${isVerified ? 'unlocked' : 'locked'}`}>
-        <div>
-          <span>{isVerified ? t('leaderboard_unlocked_label') : t('leaderboard_locked_label')}</span>
-          <p>{isVerified ? t('leaderboard_unlocked_desc') : t('leaderboard_locked_desc')}</p>
-        </div>
-        <div className="leaderboard-access-actions">
-          {isVerified && (
-            <button type="button" className="btn-secondary btn-sm" onClick={openCorrectionModal}>
-              {t('correction_btn')}
+      {isVerified && rankReport && reportInsight ? (
+        <ResultCard
+          insight={reportInsight}
+          report={rankReport}
+          t={t}
+          variant="owner"
+          onShare={handleShare}
+          onCorrection={openCorrectionModal}
+        />
+      ) : (
+        !isVerified && (
+          <div className="dashboard-verify-prompt">
+            <button type="button" className="btn-primary btn-lg" onClick={() => navigate('/verify-balance')}>
+              {t('go_verify_balance_btn')}
             </button>
-          )}
-          <button type="button" className="btn-primary btn-sm" onClick={() => navigate('/verify-balance')}>
-            {isVerified ? t('update_balance_btn') : t('go_verify_balance_btn')}
-          </button>
-        </div>
-      </div>
+          </div>
+        )
+      )}
 
       {hasPendingCorrection && (
         <p className="correction-pending-notice dashboard-correction-notice">{t('correction_pending_status')}</p>
       )}
 
-      {isVerified && rankReport && reportInsight && (
-        <section className="rank-report-panel">
-          <div className="rank-report-hero linear-card">
-            <div className="anonymous-pill">{t('anonymous_badge_label')}</div>
-            <h2>{rankReport.mainCopy}</h2>
-            <p>{rankReport.personaDescription}</p>
-            <div className="rank-metric-grid">
-              <MetricTile label={t('rank_report_overall')} value={`#${reportInsight.overallRank} / ${reportInsight.overallTotal}`} />
-              <MetricTile label={t('rank_report_nationality')} value={`#${reportInsight.nationalRank} / ${reportInsight.nationalTotal}`} />
-              <MetricTile label={t('rank_report_percentile')} value={`${t('percentile_top')} ${reportInsight.percentileTop}%`} />
-              <MetricTile label={t('rank_report_next_gap')} value={reportInsight.gapToNextRank > 0 ? `₩${Number(reportInsight.gapToNextRank).toLocaleString()}` : 'TOP'} />
-              <MetricTile label={t('rank_report_people_below')} value={`${reportInsight.peopleBelow}`} />
-            </div>
-          </div>
-
-          <div className="rank-report-grid">
-            <article className="rank-report-block">
-              <span>{rankReport.personaName}</span>
-              <h3>{t('rank_report_title')}</h3>
-              <p>{rankReport.rankComment}</p>
-            </article>
-            <article className="rank-report-block">
-              <span>{t('rank_report_next_gap')}</span>
-              <h3>{reportInsight.gapToNextRank > 0 ? `₩${Number(reportInsight.gapToNextRank).toLocaleString()}` : 'TOP'}</h3>
-              <p>{rankReport.gapComment}</p>
-            </article>
-            <article className="rank-report-block">
-              <span>{t('rank_report_nationality')}</span>
-              <h3>#{reportInsight.nationalRank}</h3>
-              <p>{rankReport.nationalityComment}</p>
-            </article>
-            <article className="rank-report-block">
-              <span>WALLET MAP</span>
-              <div className={`wallet-zone-map zone-${reportInsight.balanceZone}`}>
-                <i></i><i></i><i></i><i></i><i></i>
-              </div>
-              <p>{rankReport.positionMapComment}</p>
-            </article>
-          </div>
-
-          <div className="rank-conclusion-card linear-card">
-            <p>{rankReport.finalConclusion}</p>
-          </div>
-
-          <div className="share-card-section">
-            <h3>{t('rank_report_share_title')}</h3>
-            <div className="share-card-grid">
-              {rankReport.shareCards.map((card, index) => (
-                <article key={`${card.type}-${index}`} className="share-copy-card">
-                  <span>{card.type}</span>
-                  <h4>{card.title}</h4>
-                  <p>{card.subtitle}</p>
-                  <button type="button" className="btn-secondary btn-sm" onClick={() => handleCopyShareCard(card, index)}>
-                    {copiedShareIndex === index ? t('share_card_copied') : t('copy_share_card')}
-                  </button>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+      {shareToast && <div className="share-toast">{t('copy_link_done')}</div>}
 
       {/* Correction Request Modal */}
       {showCorrectionModal && (
@@ -1095,6 +1087,16 @@ function DashboardView({
                   placeholder={t('correction_placeholder')}
                   required
                 />
+                <label className="correction-attach">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setCorrectionImage(e.target.files[0] || null)}
+                    className="file-hidden-input"
+                  />
+                  <span className="btn-secondary btn-sm">📎 {t('correction_attach_image')}</span>
+                  {correctionImage && <span className="correction-file-name">{correctionImage.name}</span>}
+                </label>
                 <button type="submit" disabled={submittingCorrection} className="btn-primary">
                   {submittingCorrection ? '...' : t('correction_submit')}
                 </button>
@@ -1109,7 +1111,12 @@ function DashboardView({
           <div className="rank-celebration-card linear-card" onClick={(e) => e.stopPropagation()}>
             <button className="close-overlay" onClick={() => setShowRankCard(false)}>×</button>
             <div className="medal-icon">🏆</div>
-            <h2>{titleText}</h2>
+            <h2>{rankReport?.mainCopy || titleText}</h2>
+            <p className="celebration-rank-summary">
+              {t('celebration_rank_summary')
+                .replace('{rank}', userRank)
+                .replace('{percentile}', percentileLabel)}
+            </p>
             <p className="celebration-text">{subtitleText}</p>
             <button onClick={() => setShowRankCard(false)} className="btn-primary">
               {t('view_leaderboard_btn')}
@@ -1153,11 +1160,6 @@ function BalanceUploadView({
           {isVerified ? t('upload_desc_verified') : t('verify_page_subtitle')}
         </p>
 
-        <div className="verify-status-strip">
-          <span>{t('anonymous_badge_label')}</span>
-          <strong>{isVerified ? t('leaderboard_unlocked_label') : t('leaderboard_locked_label')}</strong>
-        </div>
-
         {isVerified && (
           <div className="verify-balance-summary">
             <span>{t('registered_balance_label')}</span>
@@ -1186,7 +1188,7 @@ function BalanceUploadView({
           <label htmlFor="screenshot-file-upload" className="btn-primary verify-upload-btn">
             {isVerified ? t('update_balance_btn') : t('upload_btn')}
           </label>
-          <p>{t('verify_upload_hint')}</p>
+          <p>{t('upload_desc')}</p>
         </div>
 
         {uploadError && <p className="error-message verify-feedback">{uploadError}</p>}
@@ -1196,11 +1198,71 @@ function BalanceUploadView({
   );
 }
 
-function MetricTile({ label, value }) {
+function SharedResultView({ rankings, rankingsLoaded, user, userRecord, handleLogin, t }) {
+  const { recordId } = useParams();
+  const { locale } = useLanguage();
+  const navigate = useNavigate();
+  const [shareToast, setShareToast] = React.useState(false);
+
+  if (!rankingsLoaded) {
+    return <div className="app-container loading-container"><div className="spinner"></div></div>;
+  }
+
+  const record = rankings.find((r) => r.id === recordId);
+  if (!record) {
+    return (
+      <div className="app-container shared-result-view shared-result-missing">
+        <p className="shared-not-found">{t('shared_not_found')}</p>
+        <button className="btn-primary btn-lg" onClick={() => navigate('/')}>{t('anonymous_rank_cta')}</button>
+      </div>
+    );
+  }
+
+  const insight = buildRankInsight({ userId: record.user_id, userRecord: record, rankings });
+  const report = normalizeRankReport(
+    record.result_report_json || buildFallbackRankReport(insight, locale),
+    insight,
+    locale
+  );
+  const canViewBalances = Boolean(userRecord && userRecord.status === 'verified');
+
+  const handleShare = async () => {
+    const url = buildShareUrl(window.location.origin, record.id);
+    const result = await shareResult({
+      url,
+      title: t('shared_result_headline').replace('{nickname}', record.nickname),
+      description: report.mainCopy || '',
+      imageUrl: `${window.location.origin}/logo.png`,
+      ctaLabel: t('anonymous_rank_cta'),
+      homeUrl: window.location.origin,
+    });
+    if (result === 'copied') {
+      setShareToast(true);
+      window.setTimeout(() => setShareToast(false), 1800);
+    }
+  };
+
   return (
-    <div className="rank-metric-tile">
-      <span>{label}</span>
-      <strong>{value}</strong>
+    <div className="shared-result-view">
+      <div className="hero-section">
+        <h1 className={`headline-${locale}`}>
+          {t('shared_result_headline').replace('{nickname}', record.nickname)}
+        </h1>
+      </div>
+
+      <ResultCard insight={insight} report={report} t={t} variant="public" onShare={handleShare} />
+
+      <div className="leaderboard-wrapper">
+        <Leaderboard list={rankings} canViewBalances={canViewBalances} currentUserId={user?.id} />
+      </div>
+
+      <div className="shared-cta-wrap">
+        <button className="btn-primary btn-lg" onClick={user ? () => navigate('/dashboard') : handleLogin}>
+          {t('anonymous_rank_cta')}
+        </button>
+      </div>
+
+      {shareToast && <div className="share-toast">{t('copy_link_done')}</div>}
     </div>
   );
 }
@@ -1281,6 +1343,11 @@ function AdminConsoleView({
                     <div className="admin-correction-row">
                       <span className="admin-correction-label">🔄 수정 요청</span>
                       <span className="admin-correction-text">{row.correction_note}</span>
+                      {row.correction_image_url && (
+                        <a href={row.correction_image_url} target="_blank" rel="noopener noreferrer" className="admin-correction-img-link">
+                          🖼️ 이미지 보기
+                        </a>
+                      )}
                       <button
                         onClick={() => clearCorrectionNote(row.id)}
                         className="btn-action"
