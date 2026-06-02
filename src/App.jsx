@@ -994,9 +994,20 @@ function DashboardView({
     if (!correctionText.trim()) return;
     setSubmittingCorrection(true);
     try {
+      let imageUrl = userRecord?.correction_image_url || null;
+      if (correctionImage) {
+        const ext = correctionImage.name.split('.').pop();
+        const path = `${user.id}/correction-${Date.now()}.${ext}`;
+        const { data, error: upErr } = await supabase.storage
+          .from('screenshots')
+          .upload(path, correctionImage, { upsert: true });
+        if (!upErr && data) {
+          imageUrl = supabase.storage.from('screenshots').getPublicUrl(data.path).data.publicUrl;
+        }
+      }
       const { error } = await supabase
         .from('leaderboard')
-        .update({ correction_note: correctionText.trim() })
+        .update({ correction_note: correctionText.trim(), correction_image_url: imageUrl })
         .eq('user_id', user.id);
       if (!error) {
         setCorrectionSuccess(true);
@@ -1010,6 +1021,7 @@ function DashboardView({
 
   const openCorrectionModal = () => {
     setCorrectionText(userRecord?.correction_note || '');
+    setCorrectionImage(null);
     setCorrectionSuccess(false);
     setShowCorrectionModal(true);
   };
@@ -1071,6 +1083,16 @@ function DashboardView({
                   placeholder={t('correction_placeholder')}
                   required
                 />
+                <label className="correction-attach">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setCorrectionImage(e.target.files[0] || null)}
+                    className="file-hidden-input"
+                  />
+                  <span className="btn-secondary btn-sm">📎 {t('correction_attach_image')}</span>
+                  {correctionImage && <span className="correction-file-name">{correctionImage.name}</span>}
+                </label>
                 <button type="submit" disabled={submittingCorrection} className="btn-primary">
                   {submittingCorrection ? '...' : t('correction_submit')}
                 </button>
@@ -1248,6 +1270,11 @@ function AdminConsoleView({
                     <div className="admin-correction-row">
                       <span className="admin-correction-label">🔄 수정 요청</span>
                       <span className="admin-correction-text">{row.correction_note}</span>
+                      {row.correction_image_url && (
+                        <a href={row.correction_image_url} target="_blank" rel="noopener noreferrer" className="admin-correction-img-link">
+                          🖼️ 이미지 보기
+                        </a>
+                      )}
                       <button
                         onClick={() => clearCorrectionNote(row.id)}
                         className="btn-action"

@@ -44,3 +44,13 @@ test('dashboard collapses into a single ResultCard above the leaderboard', () =>
   assert.doesNotMatch(appSource, /rank-report-panel/);
   assert.doesNotMatch(appSource, /leaderboard-access-rail/);
 });
+
+test('correction stores an optional image url', () => {
+  const correctionMigration = readFileSync(
+    resolve(__dirname, '../supabase/migrations/20260602120000_add_correction_image_url.sql'),
+    'utf8'
+  );
+  assert.match(correctionMigration, /add\s+column\s+if\s+not\s+exists\s+correction_image_url/i);
+  assert.match(appSource, /correction_image_url/);
+  assert.match(appSource, /correction_attach_image/);
+});
