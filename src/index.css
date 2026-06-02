@@ -850,6 +850,29 @@ h1.headline-uz, h1.headline-mn {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
 }
 
+.shared-result-view {
+  display: flex;
+  flex-direction: column;
+}
+
+.shared-cta-wrap {
+  display: flex;
+  justify-content: center;
+  margin: var(--spacing-lg) 0 var(--spacing-xl);
+}
+
+.shared-result-missing {
+  align-items: center;
+  text-align: center;
+  gap: var(--spacing-md);
+  padding-top: var(--spacing-xxl);
+}
+
+.shared-not-found {
+  color: var(--color-ink-muted);
+  font-size: 1rem;
+}
+
 .share-card-section h3 {
   font-size: 1rem;
   margin-bottom: var(--spacing-sm);

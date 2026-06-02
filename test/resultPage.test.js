@@ -54,3 +54,12 @@ test('correction stores an optional image url', () => {
   assert.match(appSource, /correction_image_url/);
   assert.match(appSource, /correction_attach_image/);
 });
+
+test('public shared result route exists and is unguarded', () => {
+  assert.match(appSource, /path="\/r\/:recordId"/);
+  assert.match(appSource, /function SharedResultView/);
+  const shared = appSource.slice(appSource.indexOf('function SharedResultView'));
+  assert.match(shared, /shared_result_headline/);
+  assert.match(shared, /anonymous_rank_cta/);
+  assert.match(shared, /canViewBalances=\{/);
+});

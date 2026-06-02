@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, Routes, Route, Navigate, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { Link, Routes, Route, Navigate, Outlet, useNavigate, useLocation, useParams } from 'react-router-dom';
 import { supabase } from './lib/supabaseClient';
 import { useLanguage } from './i18n/LanguageContext';
 import { nationalities } from './i18n/translations';
@@ -43,6 +43,7 @@ function App() {
 
   // Leaderboard & Rank State
   const [rankings, setRankings] = useState([]);
+  const [rankingsLoaded, setRankingsLoaded] = useState(false);
   const [userRecord, setUserRecord] = useState(null);
 
   // Upload & OCR State
@@ -237,6 +238,8 @@ function App() {
     } catch (err) {
       console.error("Error fetching leaderboard:", err);
       return [];
+    } finally {
+      setRankingsLoaded(true);
     }
   };
 
@@ -486,6 +489,7 @@ function App() {
         <Route path="/admin" element={<AdminRoute loading={loading} user={user} hasProfile={hasProfile} isAdmin={isAdmin}><AdminConsoleView loadingAdminQueue={loadingAdminQueue} exportCSV={exportCSV} adminQueue={adminQueue} updateVerificationStatus={updateVerificationStatus} clearCorrectionNote={clearCorrectionNote} /></AdminRoute>} />
         <Route path="/privacy" element={<PrivacyView />} />
         <Route path="/terms" element={<TermsView />} />
+        <Route path="/r/:recordId" element={<SharedResultView rankings={rankings} rankingsLoaded={rankingsLoaded} user={user} userRecord={userRecord} handleLogin={handleLogin} t={t} />} />
       </Route>
       <Route path="/profile-setup" element={<OnboardingRoute loading={loading} user={user} hasProfile={hasProfile}><ProfileSetupView t={t} nickname={nickname} setNickname={setNickname} nationality={nationality} setNationality={setNationality} phoneNumber={phoneNumber} setPhoneNumber={setPhoneNumber} termsAgreed={termsAgreed} setTermsAgreed={setTermsAgreed} privacyAgreed={privacyAgreed} setPrivacyAgreed={setPrivacyAgreed} marketingConsent={marketingConsent} setMarketingConsent={setMarketingConsent} savingProfile={savingProfile} handleSaveProfile={handleSaveProfile} /></OnboardingRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />
@@ -1190,6 +1194,75 @@ function BalanceUploadView({
         {uploadError && <p className="error-message verify-feedback">{uploadError}</p>}
         {uploadSuccess && <p className="success-message verify-feedback">{t('success')}</p>}
       </div>
+    </div>
+  );
+}
+
+function SharedResultView({ rankings, rankingsLoaded, user, userRecord, handleLogin, t }) {
+  const { recordId } = useParams();
+  const { locale } = useLanguage();
+  const navigate = useNavigate();
+  const [shareToast, setShareToast] = React.useState(false);
+
+  if (!rankingsLoaded) {
+    return <div className="app-container loading-container"><div className="spinner"></div></div>;
+  }
+
+  const record = rankings.find((r) => r.id === recordId);
+  if (!record) {
+    return (
+      <div className="app-container shared-result-view shared-result-missing">
+        <p className="shared-not-found">{t('shared_not_found')}</p>
+        <button className="btn-primary btn-lg" onClick={() => navigate('/')}>{t('anonymous_rank_cta')}</button>
+      </div>
+    );
+  }
+
+  const insight = buildRankInsight({ userId: record.user_id, userRecord: record, rankings });
+  const report = normalizeRankReport(
+    record.result_report_json || buildFallbackRankReport(insight, locale),
+    insight,
+    locale
+  );
+  const canViewBalances = Boolean(userRecord && userRecord.status === 'verified');
+
+  const handleShare = async () => {
+    const url = buildShareUrl(window.location.origin, record.id);
+    const result = await shareResult({
+      url,
+      title: t('shared_result_headline').replace('{nickname}', record.nickname),
+      description: report.mainCopy || '',
+      imageUrl: `${window.location.origin}/logo.png`,
+      ctaLabel: t('anonymous_rank_cta'),
+      homeUrl: window.location.origin,
+    });
+    if (result === 'copied') {
+      setShareToast(true);
+      window.setTimeout(() => setShareToast(false), 1800);
+    }
+  };
+
+  return (
+    <div className="shared-result-view">
+      <div className="hero-section">
+        <h1 className={`headline-${locale}`}>
+          {t('shared_result_headline').replace('{nickname}', record.nickname)}
+        </h1>
+      </div>
+
+      <ResultCard insight={insight} report={report} t={t} variant="public" onShare={handleShare} />
+
+      <div className="leaderboard-wrapper">
+        <Leaderboard list={rankings} canViewBalances={canViewBalances} currentUserId={user?.id} />
+      </div>
+
+      <div className="shared-cta-wrap">
+        <button className="btn-primary btn-lg" onClick={user ? () => navigate('/dashboard') : handleLogin}>
+          {t('anonymous_rank_cta')}
+        </button>
+      </div>
+
+      {shareToast && <div className="share-toast">{t('copy_link_done')}</div>}
     </div>
   );
 }
