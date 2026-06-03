@@ -1,3 +1,12 @@
+alter database postgres
+  set timezone to 'Asia/Seoul';
+
+alter table public.profiles
+  alter column created_at set default now();
+
+alter table public.leaderboard
+  alter column updated_at set default now();
+
 alter table public.profiles
   add column if not exists created_at_kst timestamp without time zone,
   add column if not exists terms_agreed_at_kst timestamp without time zone,
@@ -6,6 +15,10 @@ alter table public.profiles
 alter table public.leaderboard
   add column if not exists updated_at_kst timestamp without time zone,
   add column if not exists result_report_generated_at_kst timestamp without time zone;
+
+alter table public.profiles
+  drop constraint if exists profiles_required_contact_fields_not_blank,
+  drop constraint if exists profiles_required_consents;
 
 update public.profiles
 set
@@ -19,6 +32,26 @@ set
     else privacy_agreed_at at time zone 'Asia/Seoul'
   end;
 
+alter table public.profiles
+  add constraint profiles_required_contact_fields_not_blank
+  check (
+    char_length(btrim(nickname)) > 0
+    and char_length(btrim(nationality)) > 0
+    and char_length(btrim(phone_number)) > 0
+  )
+  not valid,
+  add constraint profiles_required_consents
+  check (
+    is_dummy
+    or (
+      terms_agreed = true
+      and terms_agreed_at is not null
+      and privacy_agreed = true
+      and privacy_agreed_at is not null
+    )
+  )
+  not valid;
+
 update public.leaderboard
 set
   updated_at_kst = updated_at at time zone 'Asia/Seoul',
@@ -30,7 +63,6 @@ set
 create or replace function public.sync_profiles_kst_timestamps()
 returns trigger
 language plpgsql
-security definer
 set search_path = public
 as $$
 begin
@@ -60,7 +92,6 @@ execute function public.sync_profiles_kst_timestamps();
 create or replace function public.sync_leaderboard_kst_timestamps()
 returns trigger
 language plpgsql
-security definer
 set search_path = public
 as $$
 begin
