@@ -78,6 +78,9 @@ function App() {
     const previousLocale = locale;
     setLocale(nextLocale);
     if (previousLocale !== nextLocale) {
+      if (user?.id) {
+        setAnalyticsProfileId(user.id);
+      }
       trackUserAction(EVENTS.LANGUAGE_CHANGED, {
         from_locale: previousLocale,
         to_locale: nextLocale,
@@ -609,7 +612,7 @@ function App() {
         <Route path="/terms" element={<TermsView />} />
         <Route path="/r/:recordId" element={<SharedResultView rankings={rankings} rankingsLoaded={rankingsLoaded} user={user} userRecord={userRecord} handleLogin={handleLogin} t={t} />} />
       </Route>
-      <Route path="/profile-setup" element={<OnboardingRoute loading={loading} user={user} hasProfile={hasProfile}><ProfileSetupView t={t} nickname={nickname} setNickname={setNickname} nationality={nationality} setNationality={setNationality} phoneNumber={phoneNumber} setPhoneNumber={setPhoneNumber} termsAgreed={termsAgreed} setTermsAgreed={setTermsAgreed} privacyAgreed={privacyAgreed} setPrivacyAgreed={setPrivacyAgreed} marketingConsent={marketingConsent} setMarketingConsent={setMarketingConsent} savingProfile={savingProfile} handleSaveProfile={handleSaveProfile} /></OnboardingRoute>} />
+      <Route path="/profile-setup" element={<OnboardingRoute loading={loading} user={user} hasProfile={hasProfile}><ProfileSetupView t={t} profileId={user?.id} nickname={nickname} setNickname={setNickname} nationality={nationality} setNationality={setNationality} phoneNumber={phoneNumber} setPhoneNumber={setPhoneNumber} termsAgreed={termsAgreed} setTermsAgreed={setTermsAgreed} privacyAgreed={privacyAgreed} setPrivacyAgreed={setPrivacyAgreed} marketingConsent={marketingConsent} setMarketingConsent={setMarketingConsent} savingProfile={savingProfile} handleSaveProfile={handleSaveProfile} /></OnboardingRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
@@ -779,6 +782,7 @@ function LandingView({ user, rankings, handleLogin, t, navigate }) {
 
 function ProfileSetupView({
   t,
+  profileId,
   nickname,
   setNickname,
   nationality,
@@ -849,6 +853,9 @@ function ProfileSetupView({
     if (currentStepData.key === 'nationality' && nationality) {
       setLocale(nationality);
       if (locale !== nationality) {
+        if (profileId) {
+          setAnalyticsProfileId(profileId);
+        }
         trackUserAction(EVENTS.LANGUAGE_CHANGED, {
           from_locale: locale,
           to_locale: nationality,

@@ -82,6 +82,9 @@ test('Amplitude user id is assigned from Supabase profile id after profile signu
   const analyticsSource = readProjectFile('src/lib/analytics.js');
 
   assert.doesNotMatch(appSource, /setAnalyticsUser\(currentUser\)/);
+  assert.match(appSource, /setAnalyticsProfileId\(user\.id\)/);
+  assert.match(appSource, /profileId=\{user\?\.id\}/);
+  assert.match(appSource, /setAnalyticsProfileId\(profileId\)/);
   assert.match(appSource, /setAnalyticsProfileId\(data\.id\)/);
   assert.match(appSource, /setAnalyticsProfileId\(profilePayload\.id\)/);
   assert.match(appSource, /trackUserAction\(EVENTS\.PROFILE_SAVE_SUCCEEDED/);
