@@ -1,3 +1,5 @@
+import { sendAxiomEvent } from '../server/axiomIngest.js';
+
 const ALLOWED_OPERATIONAL_EVENTS = new Set([
   'Login Failed',
   'Profile Save Succeeded',
@@ -43,7 +45,9 @@ export default async function handler(req, res) {
 
   const timestamp = new Date();
   const payload = {
+    _time: timestamp.toISOString(),
     source: 'vercel_ops_log',
+    service: 'gachon-money-king',
     eventName,
     requestId: safeString(body?.requestId, 96),
     clientLoggedAtKst: safeString(body?.logged_at_kst, 40),
@@ -54,6 +58,7 @@ export default async function handler(req, res) {
   };
 
   console.log(JSON.stringify(payload));
+  await sendAxiomEvent(payload);
   res.status(204).end();
 }
 

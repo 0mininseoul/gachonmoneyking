@@ -4,6 +4,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { safeErrorCode } from '../src/lib/analyticsEvents.js';
+import { buildAxiomIngestRequest } from '../server/axiomIngest.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
@@ -109,6 +110,7 @@ test('Vercel ops log endpoint allowlists operational events and redacts unsafe v
   const apiSource = readProjectFile('api/ops-log.js');
   assert.match(apiSource, /ALLOWED_OPERATIONAL_EVENTS/);
   assert.match(apiSource, /console\.log\(JSON\.stringify/);
+  assert.match(apiSource, /sendAxiomEvent/);
   assert.match(apiSource, /requestId/);
   assert.match(apiSource, /sanitizeProperties/);
   assert.match(apiSource, /timestamp_kst/);
@@ -117,6 +119,44 @@ test('Vercel ops log endpoint allowlists operational events and redacts unsafe v
   const analyticsSource = readProjectFile('src/lib/analytics.js');
   assert.match(analyticsSource, /sendOperationalLog/);
   assert.match(analyticsSource, /\/api\/ops-log/);
+});
+
+test('Axiom ingest stays server-side and uses sanitized operational log payloads', () => {
+  const apiSource = readProjectFile('api/ops-log.js');
+  const axiomSource = readProjectFile('server/axiomIngest.js');
+  const analyticsSource = readProjectFile('src/lib/analytics.js');
+
+  assert.match(apiSource, /sendAxiomEvent\(payload\)/);
+  assert.match(apiSource, /service:\s*'gachon-money-king'/);
+  assert.match(apiSource, /_time:\s*timestamp\.toISOString\(\)/);
+  assert.match(axiomSource, /AXIOM_API_TOKEN/);
+  assert.match(axiomSource, /AXIOM_DATASET/);
+  assert.match(axiomSource, /https:\/\/api\.axiom\.co/);
+  assert.match(axiomSource, /Authorization:\s*`Bearer \$\{config\.token\}`/);
+  assert.match(axiomSource, /JSON\.stringify\(\[event\]\)/);
+  assert.doesNotMatch(analyticsSource, /AXIOM_|axiom/i);
+});
+
+test('Axiom ingest request builder uses server env and does not send when unconfigured', () => {
+  const request = buildAxiomIngestRequest(
+    { eventName: 'Balance Verification Failed', timestamp: '2026-06-03T00:00:00.000Z' },
+    {
+      AXIOM_API_TOKEN: 'test-token',
+      AXIOM_DATASET: 'gachon-money-king-prod',
+      AXIOM_API_URL: 'http://not-allowed.example.com',
+      AXIOM_INGEST_TIMEOUT_MS: '50',
+    }
+  );
+
+  assert.equal(request.url, 'https://api.axiom.co/v1/datasets/gachon-money-king-prod/ingest');
+  assert.equal(request.options.method, 'POST');
+  assert.equal(request.options.headers.Authorization, 'Bearer test-token');
+  assert.equal(request.options.headers['Content-Type'], 'application/json');
+  assert.equal(request.options.body, JSON.stringify([
+    { eventName: 'Balance Verification Failed', timestamp: '2026-06-03T00:00:00.000Z' },
+  ]));
+  assert.equal(request.timeoutMs, 250);
+  assert.equal(buildAxiomIngestRequest({}, { AXIOM_DATASET: 'gachon-money-king-prod' }), null);
 });
 
 test('balance verification pipeline is observable in Vercel logs', () => {
