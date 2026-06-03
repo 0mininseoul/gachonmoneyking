@@ -77,6 +77,19 @@ test('anonymous visitors are not reset on every unauthenticated app load', () =>
   assert.match(appSource, /const handleLogout = async \(\) => \{[\s\S]*clearAnalyticsUser\(\);/);
 });
 
+test('Amplitude user id is assigned from Supabase profile id after profile signup', () => {
+  const appSource = readProjectFile('src/App.jsx');
+  const analyticsSource = readProjectFile('src/lib/analytics.js');
+
+  assert.doesNotMatch(appSource, /setAnalyticsUser\(currentUser\)/);
+  assert.match(appSource, /setAnalyticsProfileId\(data\.id\)/);
+  assert.match(appSource, /setAnalyticsProfileId\(profilePayload\.id\)/);
+  assert.match(appSource, /trackUserAction\(EVENTS\.PROFILE_SAVE_SUCCEEDED/);
+  assert.match(analyticsSource, /export function setAnalyticsProfileId\(profileId\)/);
+  assert.match(analyticsSource, /amplitude\.setUserId\(normalizedProfileId\)/);
+  assert.doesNotMatch(analyticsSource, /amplitude\.setUserId\(user\.id\)/);
+});
+
 test('safe error codes do not preserve raw ids or paths from provider messages', () => {
   const code = safeErrorCode({
     message: 'Failed to download screenshot: users/123e4567-e89b-12d3-a456-426614174000/private.png',
@@ -101,6 +114,32 @@ test('Vercel ops log endpoint allowlists operational events and redacts unsafe v
   const analyticsSource = readProjectFile('src/lib/analytics.js');
   assert.match(analyticsSource, /sendOperationalLog/);
   assert.match(analyticsSource, /\/api\/ops-log/);
+});
+
+test('balance verification pipeline is observable in Vercel logs', () => {
+  const appSource = readProjectFile('src/App.jsx');
+  const taxonomySource = readProjectFile('src/lib/analyticsEvents.js');
+  const apiSource = readProjectFile('api/ops-log.js');
+  const functionSource = readProjectFile('supabase/functions/verify-balance/index.ts');
+
+  for (const eventName of [
+    'Balance Upload Succeeded',
+    'Balance Verification Response Received',
+    'Balance Verification Function Stage',
+  ]) {
+    assert.match(taxonomySource, new RegExp(`['"]${eventName}['"]`), `missing event ${eventName}`);
+    assert.match(apiSource, new RegExp(`['"]${eventName}['"]`), `ops-log allowlist missing ${eventName}`);
+  }
+
+  assert.match(appSource, /trackUserAction\(EVENTS\.BALANCE_UPLOAD_SUCCEEDED/);
+  assert.match(appSource, /trackUserAction\(EVENTS\.BALANCE_VERIFICATION_RESPONSE_RECEIVED/);
+  assert.match(functionSource, /VERCEL_OPS_LOG_ENDPOINT/);
+  assert.match(functionSource, /Balance Verification Function Stage/);
+  assert.match(functionSource, /sendVercelOpsLog/);
+  assert.match(functionSource, /vertex_balance_request_started/);
+  assert.match(functionSource, /vertex_balance_response_received/);
+  assert.match(functionSource, /vertex_rank_report_request_started/);
+  assert.match(functionSource, /vertex_rank_report_response_received/);
 });
 
 test('Amplitude Session Replay is configured with conservative privacy controls', () => {

@@ -10,6 +10,9 @@ const MODEL_NAME = Deno.env.get("VERTEX_AI_MODEL") || "gemini-2.5-flash";
 const VERTEX_SCOPE = "https://www.googleapis.com/auth/cloud-platform";
 const DEFAULT_TOKEN_URI = "https://oauth2.googleapis.com/token";
 const SUPPORTED_LOCALES = ["ko", "en", "vi", "zh", "mn", "uz", "ja"];
+const VERCEL_OPS_LOG_ENDPOINT = Deno.env.get("VERCEL_OPS_LOG_ENDPOINT") || "";
+const VERCEL_FUNCTION_STAGE_EVENT = "Balance Verification Function Stage";
+const OPS_LOG_TIMEOUT_MS = 1500;
 
 serve(async (req) => {
   // Handle CORS
@@ -33,7 +36,7 @@ serve(async (req) => {
       throw new Error("Missing filePath or userId");
     }
     const reportLocale = normalizeLocale(locale);
-    logFunctionEvent(requestId, 'verify_balance_started', {
+    await logFunctionEvent(requestId, 'verify_balance_started', {
       stage: 'request_received',
       locale: reportLocale,
     });
@@ -47,7 +50,7 @@ serve(async (req) => {
     if (downloadError || !fileData) {
       throw new Error(`Failed to download screenshot: ${downloadError?.message || 'No data'}`);
     }
-    logFunctionEvent(requestId, 'screenshot_downloaded', {
+    await logFunctionEvent(requestId, 'screenshot_downloaded', {
       stage: 'storage_downloaded',
       mime_type: fileData.type || 'unknown',
       size_bucket: sizeBucket(fileData.size),
@@ -64,7 +67,7 @@ serve(async (req) => {
 
     // 2. Prepare Vertex AI Gemini client
     const vertexClient = await createVertexClient();
-    logFunctionEvent(requestId, 'vertex_client_ready', {
+    await logFunctionEvent(requestId, 'vertex_client_ready', {
       stage: 'vertex_auth',
       model: MODEL_NAME,
     });
@@ -83,6 +86,10 @@ serve(async (req) => {
     `;
 
     const responseText = await generateContent(vertexClient, {
+      requestId,
+      requestStage: "vertex_balance_request_started",
+      responseStage: "vertex_balance_response_received",
+      requestKind: "balance",
       parts: [
         { text: promptText },
         {
@@ -99,7 +106,7 @@ serve(async (req) => {
     const parsedResult = JSON.parse(responseText.trim());
     const isVerified = parsedResult.is_bank_statement === true;
     const extractedBalance = Number(parsedResult.balance) || 0;
-    logFunctionEvent(requestId, 'vertex_balance_completed', {
+    await logFunctionEvent(requestId, 'vertex_balance_completed', {
       stage: 'balance_analysis',
       verified: isVerified,
     });
@@ -131,7 +138,7 @@ serve(async (req) => {
     if (upsertError) {
       throw new Error(`Failed to update leaderboard: ${upsertError.message}`);
     }
-    logFunctionEvent(requestId, 'leaderboard_upserted', {
+    await logFunctionEvent(requestId, 'leaderboard_upserted', {
       stage: 'database_upsert',
       verified: isVerified,
     });
@@ -164,10 +171,11 @@ serve(async (req) => {
           vertexClient,
           insight: rankInsight,
           locale: reportLocale,
+          requestId,
         });
         rankReport = normalizeRankReport(generatedReport, fallbackReport);
       } catch (_reportError) {
-        logFunctionEvent(requestId, 'rank_report_failed', {
+        await logFunctionEvent(requestId, 'rank_report_failed', {
           stage: 'rank_report',
           error_code: errorCode(_reportError),
         }, 'error');
@@ -181,12 +189,12 @@ serve(async (req) => {
           result_report_generated_at: new Date().toISOString(),
         })
         .eq('user_id', userId);
-      logFunctionEvent(requestId, 'rank_report_saved', {
+      await logFunctionEvent(requestId, 'rank_report_saved', {
         stage: 'rank_report',
       });
     }
 
-    logFunctionEvent(requestId, 'verify_balance_completed', {
+    await logFunctionEvent(requestId, 'verify_balance_completed', {
       stage: 'completed',
       verified: isVerified,
       duration_ms: Date.now() - startedAt,
@@ -206,7 +214,7 @@ serve(async (req) => {
     );
 
   } catch (err) {
-    logFunctionEvent(requestId, 'verify_balance_failed', {
+    await logFunctionEvent(requestId, 'verify_balance_failed', {
       stage: 'failed',
       error_code: errorCode(err),
       duration_ms: Date.now() - startedAt,
@@ -221,7 +229,7 @@ serve(async (req) => {
   }
 });
 
-function logFunctionEvent(
+async function logFunctionEvent(
   requestId: string,
   stage: string,
   properties: Record<string, unknown> = {},
@@ -238,13 +246,45 @@ function logFunctionEvent(
     timestamp: timestamp.toISOString(),
     timestamp_kst: formatKstTimestamp(timestamp),
     timezone: 'Asia/Seoul',
+    level,
   };
 
   if (level === 'error') {
     console.error(JSON.stringify(payload));
-    return;
+  } else {
+    console.info(JSON.stringify(payload));
   }
-  console.info(JSON.stringify(payload));
+  await sendVercelOpsLog(payload);
+}
+
+async function sendVercelOpsLog(payload: Record<string, unknown>) {
+  if (!VERCEL_OPS_LOG_ENDPOINT) return;
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), OPS_LOG_TIMEOUT_MS);
+  try {
+    await fetch(VERCEL_OPS_LOG_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      signal: controller.signal,
+      body: JSON.stringify({
+        eventName: VERCEL_FUNCTION_STAGE_EVENT,
+        requestId: typeof payload.requestId === "string" ? payload.requestId : "",
+        logged_at_kst: typeof payload.timestamp_kst === "string" ? payload.timestamp_kst : "",
+        properties: sanitizeLogProperties({
+          source: payload.source,
+          function_stage: payload.stage,
+          function_step: payload.step,
+          level: payload.level,
+          ...payload,
+        }),
+      }),
+    });
+  } catch {
+    // External logging must not change verification behavior.
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 function formatKstTimestamp(value = new Date()) {
@@ -443,10 +483,23 @@ async function createSignedJwt({ header, payload, privateKeyPem }: {
   return `${signingInput}.${base64UrlEncode(new Uint8Array(signature))}`;
 }
 
-async function generateContent(vertexClient: VertexClient, { parts, responseMimeType }: {
+async function generateContent(vertexClient: VertexClient, { parts, responseMimeType, requestId, requestStage, responseStage, requestKind }: {
   parts: Array<Record<string, unknown>>;
   responseMimeType: string;
+  requestId: string;
+  requestStage: string;
+  responseStage: string;
+  requestKind: string;
 }) {
+  const startedAt = Date.now();
+  await logFunctionEvent(requestId, requestStage, {
+    stage: 'vertex_generate_request',
+    model: MODEL_NAME,
+    request_kind: requestKind,
+    parts_count: parts.length,
+    inline_media_present: hasInlineMedia(parts),
+  });
+
   const response = await fetch(vertexClient.endpoint, {
     method: "POST",
     headers: {
@@ -465,6 +518,14 @@ async function generateContent(vertexClient: VertexClient, { parts, responseMime
       },
     }),
   });
+  await logFunctionEvent(requestId, responseStage, {
+    stage: 'vertex_generate_response',
+    model: MODEL_NAME,
+    request_kind: requestKind,
+    ok: response.ok,
+    status_code: response.status,
+    duration_ms: Date.now() - startedAt,
+  }, response.ok ? 'info' : 'error');
 
   if (!response.ok) {
     throw new Error(`Vertex AI Gemini returned error: ${await response.text()}`);
@@ -482,6 +543,10 @@ async function generateContent(vertexClient: VertexClient, { parts, responseMime
     throw new Error("Vertex AI Gemini returned an empty response");
   }
   return responseText;
+}
+
+function hasInlineMedia(parts: Array<Record<string, unknown>>) {
+  return parts.some((part) => Boolean(part.inlineData));
 }
 
 function pemToArrayBuffer(pem: string) {
@@ -553,10 +618,11 @@ function getBalanceZone(percentileTop: number, overallRank: number) {
   return "emergency";
 }
 
-async function generateRankReport({ vertexClient, insight, locale }: {
+async function generateRankReport({ vertexClient, insight, locale, requestId }: {
   vertexClient: VertexClient;
   insight: Record<string, unknown>;
   locale: string;
+  requestId: string;
 }) {
   const promptText = `
 You write humorous, spicy result copy for an anonymous campus bank-balance ranking service.
@@ -600,6 +666,10 @@ Return strict JSON:
 `;
 
   const responseText = await generateContent(vertexClient, {
+    requestId,
+    requestStage: "vertex_rank_report_request_started",
+    responseStage: "vertex_rank_report_response_received",
+    requestKind: "rank_report",
     parts: [{ text: promptText }],
     responseMimeType: "application/json",
   });

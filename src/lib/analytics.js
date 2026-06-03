@@ -117,9 +117,10 @@ export function trackUserAction(eventName, properties = {}, options = {}) {
   return tracked;
 }
 
-export function setAnalyticsUser(user) {
-  if (!user?.id || !initAnalytics()) return false;
-  amplitude.setUserId(user.id);
+export function setAnalyticsProfileId(profileId) {
+  const normalizedProfileId = String(profileId || '').trim();
+  if (!normalizedProfileId || !initAnalytics()) return false;
+  amplitude.setUserId(normalizedProfileId);
   return true;
 }
 

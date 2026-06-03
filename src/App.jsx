@@ -9,7 +9,7 @@ import { PrivacyView } from './components/PrivacyView';
 import { TermsView } from './components/TermsView';
 import {
   clearAnalyticsUser,
-  setAnalyticsUser,
+  setAnalyticsProfileId,
   trackPosterQrOpen,
   trackUserAction,
 } from './lib/analytics';
@@ -96,7 +96,6 @@ function App() {
       const currentUser = session?.user ?? null;
       setUser(currentUser);
       if (currentUser) {
-        setAnalyticsUser(currentUser);
         checkUserProfile(currentUser);
         checkAdminRole(currentUser);
       } else {
@@ -109,7 +108,6 @@ function App() {
       const currentUser = session?.user ?? null;
       setUser(currentUser);
       if (currentUser) {
-        setAnalyticsUser(currentUser);
         checkUserProfile(currentUser);
         checkAdminRole(currentUser);
       } else {
@@ -204,7 +202,8 @@ function App() {
         });
         setHasProfile(hasProf);
         if (hasProf) {
-          fetchUserLeaderboardRecord(currentUser.id);
+          setAnalyticsProfileId(data.id);
+          fetchUserLeaderboardRecord(data.id);
         }
 
         // Auto-sync email & avatar_url from Kakao user metadata if missing or updated
@@ -413,6 +412,7 @@ function App() {
         .upsert(profilePayload, { onConflict: 'id' });
 
       if (!error) {
+        setAnalyticsProfileId(profilePayload.id);
         trackUserAction(EVENTS.PROFILE_SAVE_SUCCEEDED, {
           request_id: requestId,
           nationality,
@@ -465,6 +465,12 @@ function App() {
         .upload(filePath, file, { upsert: true });
 
       if (uploadError) throw new Error(uploadError.message);
+      trackUserAction(EVENTS.BALANCE_UPLOAD_SUCCEEDED, {
+        request_id: requestId,
+        upload_extension: fileExtension(file.name),
+        upload_size_bucket: sizeBucket(file.size),
+        storage_object_present: Boolean(uploadData?.path),
+      }, { operational: true });
 
       failureStage = 'edge_function';
       trackUserAction(EVENTS.BALANCE_VERIFICATION_STARTED, {
@@ -474,8 +480,16 @@ function App() {
       const { data: edgeData, error: edgeError } = await supabase.functions.invoke('verify-balance', {
         body: { filePath: uploadData.path, userId: user.id, locale, requestId }
       });
+      trackUserAction(EVENTS.BALANCE_VERIFICATION_RESPONSE_RECEIVED, {
+        request_id: requestId,
+        locale,
+        edge_success: Boolean(edgeData?.success),
+        edge_verified: Boolean(edgeData?.verified),
+        edge_request_id_present: Boolean(edgeData?.requestId),
+        edge_error_present: Boolean(edgeError || edgeData?.error),
+      }, { operational: true });
 
-      if (edgeError || !edgeData.success) {
+      if (edgeError || !edgeData?.success) {
         throw new Error(edgeData?.error || edgeError?.message || "Failed to process screenshot balance");
       }
 
