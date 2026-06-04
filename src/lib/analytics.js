@@ -1,6 +1,6 @@
 import * as amplitude from '@amplitude/analytics-browser';
 import { sessionReplayPlugin } from '@amplitude/plugin-session-replay-browser';
-import { buildPosterQrEvent } from './qrAttribution';
+import { buildOnlineLinkEvent, buildPosterQrEvent } from './qrAttribution';
 import { OPERATIONAL_EVENTS } from './analyticsEvents';
 import { formatKstTimestamp, getKstEventProperties } from './kstTime';
 
@@ -138,6 +138,26 @@ export function trackPosterQrOpen({ url, locale } = {}) {
   if (!event) return false;
 
   const storageKey = `gmk.posterQrTracked.${event.properties.qr_id}.${event.properties.landing_url}`;
+  if (hasSessionMarker(storageKey)) return false;
+
+  const tracked = trackEvent(event.eventName, {
+    ...event.properties,
+    referrer: document.referrer || '',
+    viewport_width: window.innerWidth,
+    viewport_height: window.innerHeight,
+  });
+  if (tracked) setSessionMarker(storageKey);
+  return tracked;
+}
+
+export function trackOnlineLinkOpen({ url, locale } = {}) {
+  if (typeof window === 'undefined') return false;
+
+  const currentUrl = url || window.location.href;
+  const event = buildOnlineLinkEvent(currentUrl, locale);
+  if (!event) return false;
+
+  const storageKey = `gmk.onlineLinkTracked.${event.properties.link_id}.${event.properties.landing_url}`;
   if (hasSessionMarker(storageKey)) return false;
 
   const tracked = trackEvent(event.eventName, {

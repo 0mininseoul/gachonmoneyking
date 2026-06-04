@@ -10,6 +10,7 @@ import { TermsView } from './components/TermsView';
 import {
   clearAnalyticsUser,
   setAnalyticsProfileId,
+  trackOnlineLinkOpen,
   trackPosterQrOpen,
   trackUserAction,
 } from './lib/analytics';
@@ -91,6 +92,7 @@ function App() {
 
   useEffect(() => {
     trackPosterQrOpen({ locale, url: window.location.href });
+    trackOnlineLinkOpen({ locale, url: window.location.href });
   }, [locale, location.pathname, location.search]);
 
   useEffect(() => {

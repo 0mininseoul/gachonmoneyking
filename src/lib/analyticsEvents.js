@@ -1,5 +1,6 @@
 export const EVENTS = Object.freeze({
   POSTER_QR_OPENED: 'Poster QR Opened',
+  ONLINE_LINK_OPENED: 'Online Link Opened',
   LANGUAGE_CHANGED: 'Language Changed',
   NAVIGATION_CLICKED: 'Navigation Clicked',
   LOGIN_CLICKED: 'Login Clicked',

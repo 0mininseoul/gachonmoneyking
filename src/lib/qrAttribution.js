@@ -60,6 +60,46 @@ export function buildPosterQrEvent(urlLike, fallbackLocale = 'en') {
   };
 }
 
+export function buildOnlineLinkEvent(urlLike, fallbackLocale = 'en') {
+  const url = toUrl(urlLike);
+  if (!url) return null;
+
+  const utmSource = url.searchParams.get('utm_source') || '';
+  const utmMedium = url.searchParams.get('utm_medium') || '';
+  const utmCampaign = url.searchParams.get('utm_campaign') || '';
+  const utmContent = url.searchParams.get('utm_content') || '';
+
+  // Poster QR scans are tracked separately by buildPosterQrEvent; this builder
+  // covers online campaign links (e.g. Facebook group posts) so they land in the
+  // same by-language analytics with a matching `language` + `campaign` shape.
+  const isPosterQr =
+    utmMedium.toLowerCase() === 'qr' ||
+    url.searchParams.get('qr') === '1' ||
+    url.searchParams.has('qr_id');
+  const hasCampaignAttribution = Boolean(utmSource || utmMedium || utmCampaign);
+  if (isPosterQr || !hasCampaignAttribution) return null;
+
+  const language = normalizeLocale(url.searchParams.get('lang'), normalizeLocale(fallbackLocale));
+  const campaign = utmCampaign || DEFAULT_QR_CAMPAIGN;
+
+  return {
+    eventName: 'Online Link Opened',
+    properties: {
+      language,
+      campaign,
+      channel: utmMedium || 'other',
+      link_id: utmContent,
+      utm_source: utmSource,
+      utm_medium: utmMedium,
+      utm_campaign: campaign,
+      utm_content: utmContent,
+      utm_term: url.searchParams.get('utm_term') || '',
+      landing_path: url.pathname,
+      landing_url: url.toString(),
+    },
+  };
+}
+
 function toUrl(urlLike) {
   try {
     if (urlLike instanceof URL) return urlLike;
