@@ -16,6 +16,16 @@ const NEW_KEYS = [
   'correction_attach_image',
 ];
 
+const EXPECTED_BANNER_DATES = {
+  ko: '6/10(수)',
+  en: '6/10 (Wed)',
+  vi: '6/10 (Thứ Tư)',
+  zh: '6/10 (周三)',
+  mn: '6/10 (Лхагва)',
+  uz: '6/10 (Chorshanba)',
+  ja: '6/10(水)',
+};
+
 test('every locale defines all new keys', () => {
   for (const locale of LOCALES) {
     for (const key of NEW_KEYS) {
@@ -39,5 +49,13 @@ test('templated keys keep their placeholders', () => {
     assert.match(translations[locale].celebration_rank_summary, /\{rank\}/);
     assert.match(translations[locale].celebration_rank_summary, /\{percentile\}/);
     assert.match(translations[locale].shared_result_headline, /\{nickname\}/);
+  }
+});
+
+test('promo banner says the service runs until June 10 Wednesday', () => {
+  for (const locale of LOCALES) {
+    const value = translations[locale].banner_promo;
+    assert.match(value, new RegExp(EXPECTED_BANNER_DATES[locale].replace(/[()]/g, '\\$&')));
+    assert.doesNotMatch(value, /6\/8|월\)|Mon|Thứ Hai|周一|Даваа|Dushanba|月\)/);
   }
 });
