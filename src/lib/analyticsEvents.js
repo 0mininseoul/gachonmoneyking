@@ -37,6 +37,8 @@ export const EVENTS = Object.freeze({
   ADMIN_CSV_EXPORTED: 'Admin CSV Exported',
   ADMIN_VERIFICATION_UPDATED: 'Admin Verification Updated',
   ADMIN_CORRECTION_CLEARED: 'Admin Correction Cleared',
+  LOGIN_SHEET_OPENED: 'Login Sheet Opened',
+  REGISTRATION_COMPLETED: 'Registration Completed',
 });
 
 export const OPERATIONAL_EVENTS = new Set([

@@ -59,3 +59,23 @@ test('promo banner says the service runs until June 10 Wednesday', () => {
     assert.doesNotMatch(value, /6\/8|월\)|Mon|Thứ Hai|周一|Даваа|Dushanba|月\)/);
   }
 });
+
+const CONVERSION_KEYS = [
+  'reg_complete_title', 'reg_complete_desc', 'verify_optional_btn', 'verify_optional_hint',
+  'login_sheet_title', 'login_sheet_desc', 'login_provider_kakao', 'login_provider_google',
+  'login_sheet_privacy_note', 'participants_live_count', 'curiosity_you_row',
+];
+
+test('every locale defines all conversion-improvement keys', () => {
+  for (const locale of LOCALES) {
+    for (const key of CONVERSION_KEYS) {
+      assert.ok(translations[locale][key], `missing ${key} in ${locale}`);
+    }
+  }
+});
+
+test('participants_live_count keeps its {count} placeholder', () => {
+  for (const locale of LOCALES) {
+    assert.match(translations[locale].participants_live_count, /\{count\}/);
+  }
+});

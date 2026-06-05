@@ -32,6 +32,10 @@ build/
 .env.*.local
 .secrets/
 
+# OAuth client secrets (never commit — Supabase holds these server-side)
+client_secret_*.json
+*.apps.googleusercontent.com.json
+
 # Logs
 logs
 *.log
@@ -46,3 +50,4 @@ lerna-debug.log*
 supabase/.temp/
 .vercel
 .env*.local
+.gstack/

@@ -3,10 +3,17 @@ import { nationalities } from '../i18n/translations';
 import { useLanguage } from '../i18n/LanguageContext';
 import { trackUserAction } from '../lib/analytics';
 import { EVENTS } from '../lib/analyticsEvents';
+import { shouldRevealBalance, formatBalanceLabel } from '../lib/leaderboardDisplay';
+import { participantCounts } from '../lib/participation';
 
-export function Leaderboard({ list, canViewBalances = false, currentUserId }) {
+export function Leaderboard({ list, canViewBalances = false, currentUserId, revealTopN = 0 }) {
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState('all');
+
+  // Overall (global) rank by record id — from the full balance-desc list.
+  // Reveal is based on this, NEVER on per-tab activeRank.
+  const overallRankById = new Map(list.map((item, idx) => [item.id, idx + 1]));
+  const counts = participantCounts(list);
 
   const getFlag = (nationalityCode) => {
     const nat = nationalities.find(n => n.code === nationalityCode);
@@ -71,6 +78,11 @@ export function Leaderboard({ list, canViewBalances = false, currentUserId }) {
 
   return (
     <div className="leaderboard-container">
+      {counts.total > 0 && (
+        <div className="leaderboard-live-count">
+          {t('participants_live_count').replace('{count}', counts.total)}
+        </div>
+      )}
       <div className="leaderboard-tabs">
         {tabs.map(tab => (
           <button
@@ -112,7 +124,10 @@ export function Leaderboard({ list, canViewBalances = false, currentUserId }) {
               </div>
               <div className="col-balance">
                 <span className={canViewBalances ? 'balance-amount amp-mask' : 'balance-amount blurred amp-mask'}>
-                  {canViewBalances ? `${Number(userItem.balance).toLocaleString()} KRW` : '●●●,●●●,●●● KRW'}
+                  {formatBalanceLabel(
+                    userItem.balance,
+                    shouldRevealBalance({ canViewBalances, overallRank: overallRankById.get(userItem.id), revealTopN })
+                  )}
                 </span>
               </div>
             </div>
@@ -137,7 +152,10 @@ export function Leaderboard({ list, canViewBalances = false, currentUserId }) {
                 </div>
                 <div className="col-balance">
                   <span className={canViewBalances ? 'balance-amount amp-mask' : 'balance-amount blurred amp-mask'}>
-                    {canViewBalances ? `${Number(item.balance).toLocaleString()} KRW` : '●●●,●●●,●●● KRW'}
+                    {formatBalanceLabel(
+                      item.balance,
+                      shouldRevealBalance({ canViewBalances, overallRank: overallRankById.get(item.id), revealTopN })
+                    )}
                   </span>
                 </div>
               </div>

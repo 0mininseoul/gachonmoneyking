@@ -37,6 +37,7 @@ import {
 } from './lib/profilePayload';
 import { buildShareUrl, shareResult } from './lib/shareResult';
 import { formatKstDate, formatKstTimestamp } from './lib/kstTime';
+import { isSupportedProvider, buildOAuthOptions } from './lib/authProviders';
 
 function App() {
   const { locale, setLocale, t } = useLanguage();
@@ -67,6 +68,8 @@ function App() {
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [showRankCard, setShowRankCard] = useState(false);
+
+  const [loginSheetOpen, setLoginSheetOpen] = useState(false);
 
   // Admin access state
   const [isAdmin, setIsAdmin] = useState(false);
@@ -356,21 +359,25 @@ function App() {
     }
   };
 
-  const handleLogin = async () => {
-    trackUserAction(EVENTS.LOGIN_CLICKED, { provider: 'kakao' });
+  const handleLogin = () => {
+    trackUserAction(EVENTS.LOGIN_SHEET_OPENED);
+    setLoginSheetOpen(true);
+  };
+
+  const startOAuth = async (provider) => {
+    if (!isSupportedProvider(provider)) return;
+    trackUserAction(EVENTS.LOGIN_CLICKED, { provider });
     sessionStorage.setItem('just_logged_in', 'true');
     const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'kakao',
-      options: {
-        redirectTo: window.location.origin
-      }
+      provider,
+      options: buildOAuthOptions(window.location.origin),
     });
     if (error) {
       trackUserAction(EVENTS.LOGIN_FAILED, {
-        provider: 'kakao',
+        provider,
         error_code: safeErrorCode(error),
       }, { operational: true });
-      console.error("Error logging in via Kakao:", error);
+      console.error(`Error logging in via ${provider}:`, error);
     }
   };
 
@@ -423,9 +430,10 @@ function App() {
           nationality,
           marketing_consent: marketingConsent,
         }, { operational: true });
+        trackUserAction(EVENTS.REGISTRATION_COMPLETED, { nationality, marketing_consent: marketingConsent });
         setHasProfile(true);
         await checkUserProfile(user);
-        navigate('/verify-balance');
+        navigate('/dashboard');
       } else {
         trackUserAction(EVENTS.PROFILE_SAVE_FAILED, {
           request_id: requestId,
@@ -604,19 +612,27 @@ function App() {
   }
 
   return (
-    <Routes>
-      <Route element={<MainLayout isAdmin={isAdmin} locale={locale} setLocale={handleLanguageChange} user={user} handleLogout={handleLogout} handleLogin={handleLogin} navigate={navigate} location={location} t={t} />}>
-        <Route path="/" element={<PublicRoute loading={loading} user={user} hasProfile={hasProfile}><LandingView user={user} rankings={rankings} handleLogin={handleLogin} t={t} navigate={navigate} /></PublicRoute>} />
-        <Route path="/dashboard" element={<ProtectedRoute loading={loading} user={user} hasProfile={hasProfile}><DashboardView t={t} user={user} userRecord={userRecord} showRankCard={showRankCard} setShowRankCard={setShowRankCard} rankings={rankings} /></ProtectedRoute>} />
-        <Route path="/verify-balance" element={<ProtectedRoute loading={loading} user={user} hasProfile={hasProfile}><BalanceUploadView t={t} userRecord={userRecord} uploadError={uploadError} uploadSuccess={uploadSuccess} handleFileUpload={handleFileUpload} /></ProtectedRoute>} />
-        <Route path="/admin" element={<AdminRoute loading={loading} user={user} hasProfile={hasProfile} isAdmin={isAdmin}><AdminConsoleView loadingAdminQueue={loadingAdminQueue} exportCSV={exportCSV} adminQueue={adminQueue} updateVerificationStatus={updateVerificationStatus} clearCorrectionNote={clearCorrectionNote} /></AdminRoute>} />
-        <Route path="/privacy" element={<PrivacyView />} />
-        <Route path="/terms" element={<TermsView />} />
-        <Route path="/r/:recordId" element={<SharedResultView rankings={rankings} rankingsLoaded={rankingsLoaded} user={user} userRecord={userRecord} handleLogin={handleLogin} t={t} />} />
-      </Route>
-      <Route path="/profile-setup" element={<OnboardingRoute loading={loading} user={user} hasProfile={hasProfile}><ProfileSetupView t={t} profileId={user?.id} nickname={nickname} setNickname={setNickname} nationality={nationality} setNationality={setNationality} phoneNumber={phoneNumber} setPhoneNumber={setPhoneNumber} termsAgreed={termsAgreed} setTermsAgreed={setTermsAgreed} privacyAgreed={privacyAgreed} setPrivacyAgreed={setPrivacyAgreed} marketingConsent={marketingConsent} setMarketingConsent={setMarketingConsent} savingProfile={savingProfile} handleSaveProfile={handleSaveProfile} /></OnboardingRoute>} />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <>
+      <Routes>
+        <Route element={<MainLayout isAdmin={isAdmin} locale={locale} setLocale={handleLanguageChange} user={user} handleLogout={handleLogout} handleLogin={handleLogin} navigate={navigate} location={location} t={t} />}>
+          <Route path="/" element={<PublicRoute loading={loading} user={user} hasProfile={hasProfile}><LandingView user={user} rankings={rankings} handleLogin={handleLogin} t={t} navigate={navigate} /></PublicRoute>} />
+          <Route path="/dashboard" element={<ProtectedRoute loading={loading} user={user} hasProfile={hasProfile}><DashboardView t={t} user={user} userRecord={userRecord} showRankCard={showRankCard} setShowRankCard={setShowRankCard} rankings={rankings} /></ProtectedRoute>} />
+          <Route path="/verify-balance" element={<ProtectedRoute loading={loading} user={user} hasProfile={hasProfile}><BalanceUploadView t={t} userRecord={userRecord} uploadError={uploadError} uploadSuccess={uploadSuccess} handleFileUpload={handleFileUpload} /></ProtectedRoute>} />
+          <Route path="/admin" element={<AdminRoute loading={loading} user={user} hasProfile={hasProfile} isAdmin={isAdmin}><AdminConsoleView loadingAdminQueue={loadingAdminQueue} exportCSV={exportCSV} adminQueue={adminQueue} updateVerificationStatus={updateVerificationStatus} clearCorrectionNote={clearCorrectionNote} /></AdminRoute>} />
+          <Route path="/privacy" element={<PrivacyView />} />
+          <Route path="/terms" element={<TermsView />} />
+          <Route path="/r/:recordId" element={<SharedResultView rankings={rankings} rankingsLoaded={rankingsLoaded} user={user} userRecord={userRecord} handleLogin={handleLogin} t={t} />} />
+        </Route>
+        <Route path="/profile-setup" element={<OnboardingRoute loading={loading} user={user} hasProfile={hasProfile}><ProfileSetupView t={t} profileId={user?.id} nickname={nickname} setNickname={setNickname} nationality={nationality} setNationality={setNationality} phoneNumber={phoneNumber} setPhoneNumber={setPhoneNumber} termsAgreed={termsAgreed} setTermsAgreed={setTermsAgreed} privacyAgreed={privacyAgreed} setPrivacyAgreed={setPrivacyAgreed} marketingConsent={marketingConsent} setMarketingConsent={setMarketingConsent} savingProfile={savingProfile} handleSaveProfile={handleSaveProfile} /></OnboardingRoute>} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+      <LoginSheet
+        open={loginSheetOpen}
+        onClose={() => setLoginSheetOpen(false)}
+        onSelect={(provider) => { setLoginSheetOpen(false); startOAuth(provider); }}
+        t={t}
+      />
+    </>
   );
 }
 
@@ -746,6 +762,26 @@ function MainLayout({ isAdmin, locale, setLocale, user, handleLogout, handleLogi
   );
 }
 
+function LoginSheet({ open, onClose, onSelect, t }) {
+  if (!open) return null;
+  return (
+    <div className="overlay-celebration" onClick={onClose}>
+      <div className="login-sheet linear-card" onClick={(e) => e.stopPropagation()}>
+        <button className="close-overlay" onClick={onClose}>×</button>
+        <h3>{t('login_sheet_title')}</h3>
+        <p>{t('login_sheet_desc')}</p>
+        <button className="btn-primary btn-lg login-provider-btn" onClick={() => onSelect('kakao')}>
+          {t('login_provider_kakao')}
+        </button>
+        <button className="btn-secondary btn-lg login-provider-btn" onClick={() => onSelect('google')}>
+          {t('login_provider_google')}
+        </button>
+        <p className="login-sheet-privacy">{t('login_sheet_privacy_note')}</p>
+      </div>
+    </div>
+  );
+}
+
 function LandingView({ user, rankings, handleLogin, t, navigate }) {
   const { locale } = useLanguage();
   return (
@@ -770,13 +806,14 @@ function LandingView({ user, rankings, handleLogin, t, navigate }) {
       ) : (
         <div className="auth-nudge-banner linear-card">
           <p className="banner-notice">{t('non_logged_in_notice')}</p>
+          <p className="curiosity-you-row">{t('curiosity_you_row')}</p>
           <button onClick={handleLogin} className="btn-primary btn-lg banner-login-btn">
             {t('anonymous_rank_cta')}
           </button>
         </div>
       )}
       <div className="leaderboard-wrapper">
-        <Leaderboard list={rankings} canViewBalances={false} currentUserId={user?.id} />
+        <Leaderboard list={rankings} canViewBalances={false} currentUserId={user?.id} revealTopN={3} />
       </div>
     </>
   );
@@ -1236,17 +1273,20 @@ function DashboardView({
         />
       ) : (
         !isVerified && (
-          <div className="dashboard-verify-prompt">
+          <div className="registration-complete-card linear-card">
+            <h2 className="reg-complete-title">{t('reg_complete_title')}</h2>
+            <p className="reg-complete-desc">{t('reg_complete_desc')}</p>
             <button
               type="button"
               className="btn-primary btn-lg"
               onClick={() => {
-                trackUserAction(EVENTS.DASHBOARD_VERIFY_CLICKED, { source: 'dashboard_prompt' });
+                trackUserAction(EVENTS.DASHBOARD_VERIFY_CLICKED, { source: 'registration_complete_card' });
                 navigate('/verify-balance');
               }}
             >
-              {t('go_verify_balance_btn')}
+              {t('verify_optional_btn')}
             </button>
+            <p className="verify-optional-hint">{t('verify_optional_hint')}</p>
           </div>
         )
       )}
