@@ -430,9 +430,10 @@ function App() {
           nationality,
           marketing_consent: marketingConsent,
         }, { operational: true });
+        trackUserAction(EVENTS.REGISTRATION_COMPLETED, { nationality, marketing_consent: marketingConsent });
         setHasProfile(true);
         await checkUserProfile(user);
-        navigate('/verify-balance');
+        navigate('/dashboard');
       } else {
         trackUserAction(EVENTS.PROFILE_SAVE_FAILED, {
           request_id: requestId,
@@ -1272,17 +1273,20 @@ function DashboardView({
         />
       ) : (
         !isVerified && (
-          <div className="dashboard-verify-prompt">
+          <div className="registration-complete-card linear-card">
+            <h2 className="reg-complete-title">{t('reg_complete_title')}</h2>
+            <p className="reg-complete-desc">{t('reg_complete_desc')}</p>
             <button
               type="button"
               className="btn-primary btn-lg"
               onClick={() => {
-                trackUserAction(EVENTS.DASHBOARD_VERIFY_CLICKED, { source: 'dashboard_prompt' });
+                trackUserAction(EVENTS.DASHBOARD_VERIFY_CLICKED, { source: 'registration_complete_card' });
                 navigate('/verify-balance');
               }}
             >
-              {t('go_verify_balance_btn')}
+              {t('verify_optional_btn')}
             </button>
+            <p className="verify-optional-hint">{t('verify_optional_hint')}</p>
           </div>
         )
       )}
