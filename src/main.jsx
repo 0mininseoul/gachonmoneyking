@@ -4,6 +4,7 @@ import App from './App.jsx'
 import './index.css'
 import { LanguageProvider } from './i18n/LanguageContext.jsx'
 import { BrowserRouter } from 'react-router-dom'
+import { Analytics } from '@vercel/analytics/react'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -11,6 +12,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <LanguageProvider>
         <App />
       </LanguageProvider>
+      <Analytics />
     </BrowserRouter>
   </React.StrictMode>,
 )
