@@ -107,7 +107,18 @@ export const translations = {
     go_verify_balance_btn: "잔고 인증하러 가기",
     verify_step_label: "잔고 인증",
     verify_page_subtitle: "스크린샷 하나로 내 익명 순위, 상위 퍼센트, 공유용 지갑 리포트를 바로 엽니다.",
-    verify_upload_hint: "업로드 후 분석이 끝나면 대시보드로 돌아갑니다."
+    verify_upload_hint: "업로드 후 분석이 끝나면 대시보드로 돌아갑니다.",
+    reg_complete_title: "🎉 참여 완료!",
+    reg_complete_desc: "경품 추첨 응모가 완료됐어요. 잔고 인증은 선택이에요.",
+    verify_optional_btn: "잔고 인증하고 순위 보기 (선택)",
+    verify_optional_hint: "나중에 해도 추첨에는 영향 없어요.",
+    login_sheet_title: "30초면 끝나요",
+    login_sheet_desc: "카카오 또는 구글 계정으로 로그인하세요.",
+    login_provider_kakao: "카카오로 계속",
+    login_provider_google: "Google로 계속",
+    login_sheet_privacy_note: "잔고·연락처는 경품 추첨 용도로만 쓰여요.",
+    participants_live_count: "🔥 지금 {count}명 참여 중",
+    curiosity_you_row: "당신은 몇 위? 지금 확인"
   },
   en: {
     title: "What is my asset rank at Gachon?",
@@ -217,7 +228,18 @@ export const translations = {
     go_verify_balance_btn: "Verify balance",
     verify_step_label: "Balance verification",
     verify_page_subtitle: "One screenshot unlocks your anonymous rank, percentile, and shareable wallet report.",
-    verify_upload_hint: "After analysis, you will return to the dashboard."
+    verify_upload_hint: "After analysis, you will return to the dashboard.",
+    reg_complete_title: "🎉 You're in!",
+    reg_complete_desc: "You're entered in the prize draw. Balance verification is optional.",
+    verify_optional_btn: "Verify balance & see my rank (optional)",
+    verify_optional_hint: "Doing it later won't affect the draw.",
+    login_sheet_title: "Takes 30 seconds",
+    login_sheet_desc: "Log in with your Kakao or Google account.",
+    login_provider_kakao: "Continue with Kakao",
+    login_provider_google: "Continue with Google",
+    login_sheet_privacy_note: "Balance & contact are used only for the prize draw.",
+    participants_live_count: "🔥 {count} students competing now",
+    curiosity_you_row: "What's your rank? Check now"
   },
   vi: {
     title: "Tôi xếp thứ mấy về tài sản ở ĐH Gachon?",
@@ -327,7 +349,18 @@ export const translations = {
     go_verify_balance_btn: "Xác minh số dư",
     verify_step_label: "Xác minh số dư",
     verify_page_subtitle: "Một ảnh chụp sẽ mở hạng ẩn danh, phần trăm và báo cáo ví để chia sẻ.",
-    verify_upload_hint: "Sau khi phân tích xong, bạn sẽ quay lại bảng điều khiển."
+    verify_upload_hint: "Sau khi phân tích xong, bạn sẽ quay lại bảng điều khiển.",
+    reg_complete_title: "🎉 Hoàn tất tham gia!",
+    reg_complete_desc: "Bạn đã tham gia rút thăm trúng thưởng. Xác minh số dư là tùy chọn.",
+    verify_optional_btn: "Xác minh số dư & xem hạng của tôi (tùy chọn)",
+    verify_optional_hint: "Làm sau cũng không ảnh hưởng đến rút thăm.",
+    login_sheet_title: "Chỉ mất 30 giây",
+    login_sheet_desc: "Đăng nhập bằng tài khoản Kakao hoặc Google.",
+    login_provider_kakao: "Tiếp tục với Kakao",
+    login_provider_google: "Tiếp tục với Google",
+    login_sheet_privacy_note: "Số dư & liên hệ chỉ dùng cho việc rút thăm.",
+    participants_live_count: "🔥 {count} sinh viên đang tham gia",
+    curiosity_you_row: "Bạn hạng mấy? Kiểm tra ngay"
   },
   zh: {
     title: "我在嘉泉大学的资产排名第几？",
@@ -437,7 +470,18 @@ export const translations = {
     go_verify_balance_btn: "去认证余额",
     verify_step_label: "余额认证",
     verify_page_subtitle: "一张截图即可解锁匿名排名、百分位和可分享的钱包报告。",
-    verify_upload_hint: "分析完成后会返回仪表盘。"
+    verify_upload_hint: "分析完成后会返回仪表盘。",
+    reg_complete_title: "🎉 参与完成！",
+    reg_complete_desc: "您已进入抽奖。余额验证为可选项。",
+    verify_optional_btn: "验证余额并查看排名（可选）",
+    verify_optional_hint: "稍后再做也不影响抽奖。",
+    login_sheet_title: "仅需 30 秒",
+    login_sheet_desc: "使用 Kakao 或 Google 账号登录。",
+    login_provider_kakao: "使用 Kakao 继续",
+    login_provider_google: "使用 Google 继续",
+    login_sheet_privacy_note: "余额和联系方式仅用于抽奖。",
+    participants_live_count: "🔥 已有 {count} 名同学参与",
+    curiosity_you_row: "你排第几？立即查看"
   },
   mn: {
     title: "Би Гачонд хөрөнгийн зэрэглэлээрээ хэддүгээрт орох вэ?",
@@ -547,7 +591,18 @@ export const translations = {
     go_verify_balance_btn: "Үлдэгдэл баталгаажуулах",
     verify_step_label: "Үлдэгдэл баталгаажуулалт",
     verify_page_subtitle: "Нэг дэлгэцийн зураг нууц зэрэглэл, хувь, хуваалцах хэтэвчийн тайланг нээнэ.",
-    verify_upload_hint: "Шинжилгээ дуусмагц самбар руу буцна."
+    verify_upload_hint: "Шинжилгээ дуусмагц самбар руу буцна.",
+    reg_complete_title: "🎉 Оролцоо дууслаа!",
+    reg_complete_desc: "Та сугалаанд бүртгэгдлээ. Үлдэгдэл баталгаажуулалт сонголттой.",
+    verify_optional_btn: "Үлдэгдлээ баталгаажуулж зэргээ харах (сонголттой)",
+    verify_optional_hint: "Дараа хийсэн ч сугалаанд нөлөөлөхгүй.",
+    login_sheet_title: "Ердөө 30 секунд",
+    login_sheet_desc: "Kakao эсвэл Google бүртгэлээр нэвтэрнэ үү.",
+    login_provider_kakao: "Kakao-гаар үргэлжлүүлэх",
+    login_provider_google: "Google-ээр үргэлжлүүлэх",
+    login_sheet_privacy_note: "Үлдэгдэл, холбоо барих мэдээллийг зөвхөн сугалаанд ашиглана.",
+    participants_live_count: "🔥 Одоо {count} оюутан оролцож байна",
+    curiosity_you_row: "Та хэддүгээрт вэ? Одоо шалга"
   },
   uz: {
     title: "Gachonda aktivlarim bo'yicha nechanchi o'rindaman?",
@@ -657,7 +712,18 @@ export const translations = {
     go_verify_balance_btn: "Balansni tasdiqlash",
     verify_step_label: "Balans tasdiqlash",
     verify_page_subtitle: "Bitta skrinshot anonim reyting, foizlik o'rin va ulashiladigan hamyon hisobotini ochadi.",
-    verify_upload_hint: "Tahlil tugagach, dashboardga qaytasiz."
+    verify_upload_hint: "Tahlil tugagach, dashboardga qaytasiz.",
+    reg_complete_title: "🎉 Ishtirok yakunlandi!",
+    reg_complete_desc: "Siz yutuq oʻyiniga kiritildingiz. Balansni tasdiqlash ixtiyoriy.",
+    verify_optional_btn: "Balansni tasdiqlab, oʻrnimni koʻrish (ixtiyoriy)",
+    verify_optional_hint: "Keyinroq qilsangiz ham oʻyinga taʼsir qilmaydi.",
+    login_sheet_title: "Atigi 30 soniya",
+    login_sheet_desc: "Kakao yoki Google hisobi bilan kiring.",
+    login_provider_kakao: "Kakao bilan davom etish",
+    login_provider_google: "Google bilan davom etish",
+    login_sheet_privacy_note: "Balans va aloqa faqat yutuq oʻyini uchun ishlatiladi.",
+    participants_live_count: "🔥 Hozir {count} talaba ishtirok etmoqda",
+    curiosity_you_row: "Oʻrningiz nechinchi? Hozir tekshiring"
   },
   ja: {
     title: "私は嘉泉大学で資産順位何位だろう？",
@@ -767,7 +833,18 @@ export const translations = {
     go_verify_balance_btn: "残高を認証する",
     verify_step_label: "残高認証",
     verify_page_subtitle: "スクリーンショット1枚で匿名順位、パーセンタイル、共有用ウォレットレポートが開きます。",
-    verify_upload_hint: "分析が終わるとダッシュボードに戻ります。"
+    verify_upload_hint: "分析が終わるとダッシュボードに戻ります。",
+    reg_complete_title: "🎉 参加完了！",
+    reg_complete_desc: "抽選にエントリーされました。残高認証は任意です。",
+    verify_optional_btn: "残高を認証して順位を見る（任意）",
+    verify_optional_hint: "後で行っても抽選には影響しません。",
+    login_sheet_title: "30秒で完了",
+    login_sheet_desc: "KakaoまたはGoogleアカウントでログイン。",
+    login_provider_kakao: "Kakaoで続ける",
+    login_provider_google: "Googleで続ける",
+    login_sheet_privacy_note: "残高・連絡先は抽選のみに使用します。",
+    participants_live_count: "🔥 現在 {count} 人が参加中",
+    curiosity_you_row: "あなたは何位？今すぐ確認"
   },
 };
 
