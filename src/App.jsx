@@ -770,13 +770,14 @@ function LandingView({ user, rankings, handleLogin, t, navigate }) {
       ) : (
         <div className="auth-nudge-banner linear-card">
           <p className="banner-notice">{t('non_logged_in_notice')}</p>
+          <p className="curiosity-you-row">{t('curiosity_you_row')}</p>
           <button onClick={handleLogin} className="btn-primary btn-lg banner-login-btn">
             {t('anonymous_rank_cta')}
           </button>
         </div>
       )}
       <div className="leaderboard-wrapper">
-        <Leaderboard list={rankings} canViewBalances={false} currentUserId={user?.id} />
+        <Leaderboard list={rankings} canViewBalances={false} currentUserId={user?.id} revealTopN={3} />
       </div>
     </>
   );
