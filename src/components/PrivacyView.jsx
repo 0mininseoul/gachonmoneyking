@@ -40,7 +40,7 @@ export function PrivacyView() {
             <ul style={{ paddingLeft: '20px', marginBottom: '16px', listStyleType: 'disc' }}>
               <li><strong>회원 관리:</strong> 가천대학교 유학생 본인 확인 및 중복 가입 방지</li>
               <li><strong>리더보드 집계:</strong> 잔고 스크린샷 검증을 통한 자산 순위(랭킹) 부여</li>
-              <li><strong>이벤트 운영:</strong> 우수 자산가 대상 상품 발송, 추첨 이벤트(편의점 기프티콘 등) 당첨자 고지 및 리더보드 수상 안내 SMS 발송</li>
+              <li><strong>서비스 안내:</strong> 계정 확인, 잔고 인증 처리 현황 안내, 리더보드 이용 관련 공지 발송</li>
               <li><strong>서비스 개선:</strong> 다국어 이용 통계 분석 및 고객 고충 처리</li>
             </ul>
 
@@ -51,7 +51,7 @@ export function PrivacyView() {
               이용자의 개인정보는 원칙적으로 개인정보의 수집 및 이용 목적이 달성되면 지체 없이 파기합니다. 단, 다음의 경우 예외로 합니다.
             </p>
             <ul style={{ paddingLeft: '20px', marginBottom: '16px', listStyleType: 'disc' }}>
-              <li><strong>이벤트 및 순위 집계:</strong> 리더보드 이벤트 운영 종료 시까지 보유</li>
+              <li><strong>순위 집계:</strong> 리더보드 서비스 운영 기간 동안 보유</li>
               <li><strong>이용자 탈퇴:</strong> 탈퇴 요청 접수 시 지체 없이 파기</li>
             </ul>
 
@@ -131,7 +131,7 @@ export function PrivacyView() {
             <ul style={{ paddingLeft: '20px', marginBottom: '16px', listStyleType: 'disc' }}>
               <li><strong>Member Management:</strong> Identity verification of Gachon University international students and prevention of duplicate registrations</li>
               <li><strong>Leaderboard Ranking:</strong> Review and verification of bank screenshots to grant asset ranking</li>
-              <li><strong>Event Operation:</strong> Prize shipment for top asset holders, winner announcement of drawing events (e.g., convenience store coupons), and SMS notices for leaderboard awards</li>
+              <li><strong>Service Notices:</strong> Account checks, balance verification status updates, and leaderboard usage notices</li>
               <li><strong>Service Improvement:</strong> Statistical analysis of multilingual usage and customer complaint resolution</li>
             </ul>
 
@@ -142,7 +142,7 @@ export function PrivacyView() {
               In principle, users' personal information is destroyed without delay once the purpose of collection and use is achieved. However, the following cases are exceptions.
             </p>
             <ul style={{ paddingLeft: '20px', marginBottom: '16px', listStyleType: 'disc' }}>
-              <li><strong>Event and Ranking Aggregation:</strong> Retained until the end of the leaderboard event operation</li>
+              <li><strong>Ranking Aggregation:</strong> Retained during leaderboard service operation</li>
               <li><strong>User Withdrawal:</strong> Destroyed without delay upon receipt of account deletion request</li>
             </ul>
 

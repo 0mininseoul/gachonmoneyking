@@ -16,16 +16,6 @@ const NEW_KEYS = [
   'correction_attach_image',
 ];
 
-const EXPECTED_BANNER_DATES = {
-  ko: '6/10(수)',
-  en: '6/10 (Wed)',
-  vi: '6/10 (Thứ Tư)',
-  zh: '6/10 (周三)',
-  mn: '6/10 (Лхагва)',
-  uz: '6/10 (Chorshanba)',
-  ja: '6/10(水)',
-};
-
 test('every locale defines all new keys', () => {
   for (const locale of LOCALES) {
     for (const key of NEW_KEYS) {
@@ -52,14 +42,6 @@ test('templated keys keep their placeholders', () => {
   }
 });
 
-test('promo banner says the service runs until June 10 Wednesday', () => {
-  for (const locale of LOCALES) {
-    const value = translations[locale].banner_promo;
-    assert.match(value, new RegExp(EXPECTED_BANNER_DATES[locale].replace(/[()]/g, '\\$&')));
-    assert.doesNotMatch(value, /6\/8|월\)|Mon|Thứ Hai|周一|Даваа|Dushanba|月\)/);
-  }
-});
-
 const CONVERSION_KEYS = [
   'reg_complete_title', 'reg_complete_desc', 'verify_optional_btn', 'verify_optional_hint',
   'login_sheet_title', 'login_sheet_desc', 'login_provider_kakao', 'login_provider_google',
@@ -77,5 +59,27 @@ test('every locale defines all conversion-improvement keys', () => {
 test('participants_live_count keeps its {count} placeholder', () => {
   for (const locale of LOCALES) {
     assert.match(translations[locale].participants_live_count, /\{count\}/);
+  }
+});
+
+test('site-facing copy does not mention event rewards or raffles', () => {
+  const banned = /이벤트|경품|상품권|추첨|기프티콘|시상|수상|prize|raffle|winner|award|voucher|drawing|coupon|giveaway|抽奖|礼券|trúng thưởng|сугалаа|шагнал|yutuq|qur'a|抽選|賞品/i;
+  const keys = [
+    'nudge',
+    'phone_number_hint',
+    'upload_trust_reward',
+    'reg_complete_title',
+    'reg_complete_desc',
+    'verify_optional_btn',
+    'verify_optional_hint',
+    'login_sheet_privacy_note',
+    'participants_live_count',
+  ];
+
+  for (const locale of LOCALES) {
+    assert.equal(Object.hasOwn(translations[locale], 'banner_promo'), false);
+    for (const key of keys) {
+      assert.doesNotMatch(translations[locale][key], banned, `${locale}.${key} still has event copy`);
+    }
   }
 });

@@ -73,7 +73,7 @@ export function buildFallbackRankReport(insight, locale = 'en') {
       ? `${rankLine} 숫자가 아주 화려하진 않아도, 적어도 통장이 조용히 퇴장한 상태는 아닙니다.`
       : `${rankLine} Not spectacular, but your wallet has not left the chat.`,
     gapComment: isKo
-      ? `다음 순위까지 필요한 금액은 ${nextGapLine}입니다. 이 정도면 큰돈 같기도 하고, 갑자기 편의점 장바구니가 수상해 보이기도 합니다.`
+      ? `다음 순위까지 필요한 금액은 ${nextGapLine}입니다. 이 정도면 큰돈 같기도 하고, 생활비 계산기가 갑자기 진지해지기도 합니다.`
       : `Gap to the next rank: ${nextGapLine}. Small enough to annoy you, large enough to be real money.`,
     nationalityComment: isKo
       ? `같은 국적 안에서는 ${insight.nationalTotal}명 중 ${insight.nationalRank}등입니다. 표본이 작아도 순위는 순위라서 기분은 낼 수 있습니다.`

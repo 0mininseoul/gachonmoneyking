@@ -107,7 +107,7 @@ test('builds profile payload with required phone number and without gender', () 
 test('profile phone and agreement copy exists for every locale', () => {
   assert.equal(
     translations.ko.phone_number_hint,
-    '상품 당첨 및 리더보드 수상 안내 등의 목적으로 수집됩니다.'
+    '계정 확인 및 서비스 안내를 위해 사용됩니다.'
   );
 
   for (const [locale, copy] of Object.entries(translations)) {

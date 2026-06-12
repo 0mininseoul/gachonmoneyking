@@ -38,7 +38,7 @@ export function TermsView() {
             </h2>
             <p style={{ marginBottom: '16px' }}>
               1. 이용계약은 이용자가 본 약관 및 개인정보처리방침에 동의한 후 카카오 계정을 통한 소셜 로그인을 완료하거나 회원가입 절차를 진행함으로써 성립됩니다.<br />
-              2. 이용자는 카카오 로그인 후 프로필 설정 단계에서 닉네임, 국적, 전화번호를 필수 항목으로 제공하여야 정상적인 리더보드 랭킹 참여 및 혜택 수령이 가능합니다.
+              2. 이용자는 카카오 로그인 후 프로필 설정 단계에서 닉네임, 국적, 전화번호를 필수 항목으로 제공하여야 정상적인 리더보드 랭킹 이용이 가능합니다.
             </p>
 
             <h2 style={{ fontSize: '1.25rem', color: 'var(--color-ink)', marginTop: '24px', marginBottom: '12px', fontWeight: 500 }}>
@@ -60,15 +60,15 @@ export function TermsView() {
             <ul style={{ paddingLeft: '20px', marginBottom: '16px', listStyleType: 'disc' }}>
               <li>리더보드 랭킹에서 즉시 제외 및 등록된 자산 정보 무효화</li>
               <li>서비스 이용 정지 및 카카오 로그인 연동 강제 해제</li>
-              <li>이벤트 경품 당첨 자격 취소 및 기 지급된 경품 회수</li>
+              <li>등록된 결과 및 공유 링크 삭제</li>
             </ul>
 
             <h2 style={{ fontSize: '1.25rem', color: 'var(--color-ink)', marginTop: '24px', marginBottom: '12px', fontWeight: 500 }}>
-              제 6 조 (이벤트 운영 및 상품 발송)
+              제 6 조 (서비스 운영 및 안내)
             </h2>
             <p style={{ marginBottom: '16px' }}>
-              1. 리더보드 활성화를 위한 이벤트의 당첨자 선정 기준(순위권 및 추첨 20명 등)은 서비스 화면에 고지된 규정을 따릅니다.<br />
-              2. 당첨자에게 경품(편의점 기프티콘 등)을 발송하거나 리더보드 수상 안내 문자를 보내기 위해 프로필 설정에서 수집된 전화번호를 사용하며, 이를 거부하거나 번호가 불명확한 경우 당첨 또는 수상 안내가 제한될 수 있습니다.
+              1. 서비스 운영자는 리더보드 운영, 잔고 인증 결과 안내, 고객 문의 처리에 필요한 범위에서 이용자에게 서비스 관련 안내를 제공할 수 있습니다.<br />
+              2. 프로필 설정에서 수집된 전화번호는 계정 확인, 서비스 관련 공지, 리더보드 이용 안내 등 필요한 연락에만 사용됩니다.
             </p>
 
             <h2 style={{ fontSize: '1.25rem', color: 'var(--color-ink)', marginTop: '24px', marginBottom: '12px', fontWeight: 500 }}>
@@ -120,7 +120,7 @@ export function TermsView() {
             </h2>
             <p style={{ marginBottom: '16px' }}>
               1. The contract of use is established when a user agrees to these Terms and the Privacy Policy and completes social login through a Kakao account or proceeds with the sign-up form.<br />
-              2. After Kakao login, users must provide nickname, nationality, and phone number during profile setup to participate in the leaderboard ranking and receive benefits.
+              2. After Kakao login, users must provide nickname, nationality, and phone number during profile setup to use the leaderboard ranking normally.
             </p>
 
             <h2 style={{ fontSize: '1.25rem', color: 'var(--color-ink)', marginTop: '24px', marginBottom: '12px', fontWeight: 500 }}>
@@ -142,15 +142,15 @@ export function TermsView() {
             <ul style={{ paddingLeft: '20px', marginBottom: '16px', listStyleType: 'disc' }}>
               <li>Immediate exclusion from the leaderboard ranking and invalidation of registered assets</li>
               <li>Service suspension and forced disconnection of Kakao login</li>
-              <li>Cancellation of drawing eligibility and recovery of already delivered prizes</li>
+              <li>Deletion of registered results and shared links</li>
             </ul>
 
             <h2 style={{ fontSize: '1.25rem', color: 'var(--color-ink)', marginTop: '24px', marginBottom: '12px', fontWeight: 500 }}>
-              Article 6 (Event Operations and Prize Shipment)
+              Article 6 (Service Operations and Notices)
             </h2>
             <p style={{ marginBottom: '16px' }}>
-              1. Criteria for selecting event winners (e.g., top ranks and 20 raffle winners) follow the rules announced on the service screens.<br />
-              2. The phone number collected during profile setup is used to send prizes (e.g., mobile coupons) and leaderboard award SMS notices. If the number is invalid or delivery is refused, prize or award notification may be limited.
+              1. The service operator may provide service-related notices to users as needed for leaderboard operation, balance verification results, and customer support.<br />
+              2. The phone number collected during profile setup is used only for necessary contact such as account checks, service notices, and leaderboard usage notices.
             </p>
 
             <h2 style={{ fontSize: '1.25rem', color: 'var(--color-ink)', marginTop: '24px', marginBottom: '12px', fontWeight: 500 }}>
